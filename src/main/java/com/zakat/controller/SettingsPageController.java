@@ -16,4 +16,9 @@ public class SettingsPageController {
     public String zakatQualities(Model model) {
         return "zakat-quality";
     }
+
+    @GetMapping("/settings/users")
+    public String settingsUsers(Model model) {
+        return "settings-users";
+    }
 }

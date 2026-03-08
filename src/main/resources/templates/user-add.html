@@ -14,12 +14,12 @@
         <div class="container-fluid">
             <div class="row mb-2">
                 <div class="col-sm-6">
-                    <h1>General Form</h1>
+                    <h1>User Management</h1>
                 </div>
                 <div class="col-sm-6">
                     <ol class="breadcrumb float-sm-right">
                         <li class="breadcrumb-item"><a href="#">Home</a></li>
-                        <li class="breadcrumb-item active">General Form</li>
+                        <li class="breadcrumb-item active" th:text="${user.id} == null ? 'Tambah User' : 'Edit User'"></li>
                     </ol>
                 </div>
             </div>
@@ -29,17 +29,18 @@
     <!-- Main content -->
     <section class="content">
         <div class="container-fluid">
+            <div th:if="${successMessage}" class="alert alert-success" th:text="${successMessage}"></div>
             <div class="row">
                 <!-- left column -->
                 <div class="col-md-12">
                     <!-- general form elements -->
                     <div class="card card-primary">
                         <div class="card-header">
-                            <h3 class="card-title">Quick Example</h3>
+                            <h3 class="card-title" th:text="${user.id} == null ? 'Tambah User' : 'Edit User'"></h3>
                         </div>
                         <!-- /.card-header -->
                         <!-- form start -->
-                        <form role="form" method="post" th:action="@{/user/add}" th:object="${user}">
+                        <form role="form" method="post" th:action="${user.id} == null ? @{/user/add} : @{/user/edit/{id}(id=${user.id})}" th:object="${user}">
                             <input th:field="*{id}" type="hidden"/>
                             <div class="card-body">
                                 <div class="form-group">
@@ -53,31 +54,30 @@
                                            type="text" th:field="*{username}" required>
                                 </div>
                                 <div class="form-group">
-                                    <label for="password">Password</label>
+                                    <label for="password">Password <span th:if="${user.id} != null" class="text-muted">(kosong = tidak diubah)</span></label>
                                     <input class="form-control" id="password" placeholder="Enter Password"
-                                           type="password" th:field="*{password}">
+                                           type="password" th:field="*{password}" th:required="${user.id} == null">
                                 </div>
                                 <div class="form-group">
-                                    <label for="exampleInputFile">File input</label>
-                                    <div class="input-group">
-                                        <div class="custom-file">
-                                            <input class="custom-file-input" id="exampleInputFile" type="file">
-                                            <label class="custom-file-label" for="exampleInputFile">Choose file</label>
-                                        </div>
-                                        <div class="input-group-append">
-                                            <span class="input-group-text" id="">Upload</span>
-                                        </div>
-                                    </div>
+                                    <label for="role">Role</label>
+                                    <select class="form-control" id="role" th:field="*{role}" required>
+                                        <option value="" disabled th:if="${user.id} == null" selected>Pilih role...</option>
+                                        <option th:each="r : ${roles}" th:value="${r.name()}" th:text="${r.name()}"></option>
+                                    </select>
                                 </div>
-                                <div class="form-check">
-                                    <input class="form-check-input" id="exampleCheck1" type="checkbox">
-                                    <label class="form-check-label" for="exampleCheck1">Check me out</label>
+                                <div class="form-group" th:if="${user.id} != null">
+                                    <label for="active">Active</label>
+                                    <select class="form-control" id="active" th:field="*{active}">
+                                        <option th:value="true" th:text="'Active'"></option>
+                                        <option th:value="false" th:text="'Inactive'"></option>
+                                    </select>
                                 </div>
                             </div>
                             <!-- /.card-body -->
 
                             <div class="card-footer">
-                                <button class="btn btn-primary" type="submit">Submit</button>
+                                <button class="btn btn-primary" type="submit">Simpan</button>
+                                <a class="btn btn-secondary ml-2" href="/settings/users">Batal</a>
                             </div>
                         </form>
                     </div>

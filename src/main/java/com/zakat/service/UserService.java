@@ -4,6 +4,7 @@ import com.zakat.entity.User;
 import com.zakat.repository.UserRepository;
 import com.zakat.service.dto.UserCreateRequest;
 import com.zakat.service.dto.UserUpdateRequest;
+import com.zakat.enums.UserRole;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -37,6 +38,11 @@ public class UserService {
 
     @Transactional
     public User create(@Valid UserCreateRequest request) {
+        // disallow creating ADMIN via this API/UI
+        if (request.role() == UserRole.ADMIN) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Tidak boleh membuat user ADMIN melalui API ini");
+        }
+
         if (userRepository.existsByUsernameIgnoreCase(request.username())) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Username sudah dipakai");
         }
@@ -70,6 +76,9 @@ public class UserService {
             user.setPassword(passwordEncoder.encode(request.password()));
         }
         if (request.role() != null) {
+            if (request.role() == UserRole.ADMIN) {
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Tidak boleh mengubah role menjadi ADMIN melalui API ini");
+            }
             user.setRole(request.role());
         }
         if (request.active() != null) {

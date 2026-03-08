@@ -7,7 +7,7 @@ import jakarta.validation.constraints.NotNull;
 
 public record UserCreateRequest(
         @NotBlank String username,
-        @NotBlank @Email String email,
+        @NotBlank @Email(message = "Format email tidak valid") String email,
         @NotBlank String password,
         @NotNull UserRole role
 ) {

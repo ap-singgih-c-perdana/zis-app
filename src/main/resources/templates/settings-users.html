@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html layout:decorate="~{shared/layout}"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Kelola User</title>
+</head>
+<body>
+<div layout:fragment="content">
+    <div class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-6">
+                    <h1 class="m-0 text-dark">Kelola User</h1>
+                </div>
+                <div class="col-sm-6">
+                    <ol class="breadcrumb float-sm-right">
+                        <li class="breadcrumb-item"><a href="/">Home</a></li>
+                        <li class="breadcrumb-item active">Pengaturan</li>
+                        <li class="breadcrumb-item active">Kelola User</li>
+                    </ol>
+                </div>
+            </div>
+            <!-- Page-level messages (success / error) shown directly under title -->
+            <div class="row">
+                <div class="col-12">
+                    <div class="alert alert-success d-none" id="alertSuccess"></div>
+                    <div class="alert alert-danger d-none" id="alertError"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <section class="content">
+        <div class="container-fluid">
+
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Daftar User (kecuali Admin)</h3>
+                    <div class="card-tools">
+                        <a class="btn btn-primary btn-sm" href="/user/add">Tambah User</a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <table class="table table-striped" id="userTable">
+                        <thead>
+                        <tr>
+                            <th>Username</th>
+                            <th>Email</th>
+                            <th>Role</th>
+                            <th>Active</th>
+                            <th>Aksi</th>
+                        </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </section>
+
+</div>
+
+<th:block layout:fragment="script">
+    <script>
+        (function () {
+            const $alertSuccess = $('#alertSuccess');
+            const $alertError = $('#alertError');
+            const $tbody = $('#userTable tbody');
+
+            function showError(msg) {
+                $alertSuccess.addClass('d-none');
+                $alertError.removeClass('d-none').text(msg || 'Terjadi kesalahan');
+            }
+            function showSuccess(msg) {
+                $alertError.addClass('d-none');
+                $alertSuccess.removeClass('d-none').text(msg || 'Berhasil');
+                setTimeout(()=> $alertSuccess.addClass('d-none'), 3000);
+            }
+
+            async function loadUsers() {
+                try {
+                    const res = await fetch('/api/users', {headers: {Accept: 'application/json'}});
+                    if (!res.ok) throw new Error('Gagal memuat users');
+                    const list = await res.json();
+                    // render only non-ADMIN users that are active
+                    render(list.filter(u => u.role !== 'ADMIN' && u.active === true));
+                } catch (e) { showError(String(e.message || e)); }
+            }
+
+            function render(list) {
+                $tbody.empty();
+                for (const u of list) {
+                    const tr = $('<tr></tr>');
+                    tr.append(`<td>${u.username}</td>`);
+                    tr.append(`<td>${u.email}</td>`);
+                    tr.append(`<td>${u.role}</td>`);
+                    tr.append(`<td>${u.active ? 'Yes' : 'No'}</td>`);
+                    const actions = $('<td></td>');
+                    const btnEdit = $(`<a class="btn btn-sm btn-outline-primary mr-1" href="/user/edit/${u.id}">Edit</a>`);
+                    const btnDel = $(`<button class="btn btn-sm btn-outline-danger">Hapus</button>`);
+                    btnDel.on('click', () => removeUser(u.id));
+                    actions.append(btnEdit).append(btnDel);
+                    tr.append(actions);
+                    $tbody.append(tr);
+                }
+            }
+
+            async function removeUser(id) {
+                if (!confirm('Hapus user ini?')) return;
+                try {
+                    const res = await fetch('/api/users/' + encodeURIComponent(id), {method: 'DELETE'});
+                    if (!res.ok) throw new Error('Gagal menghapus user');
+                    showSuccess('User dinonaktifkan');
+                    await loadUsers();
+                } catch (e) { showError(String(e.message || e)); }
+            }
+
+            // single handler: individual delete buttons are wired in render() to call removeUser(id)
+
+             // init
+             loadUsers();
+        })();
+    </script>
+</th:block>
+</body>
+</html>
