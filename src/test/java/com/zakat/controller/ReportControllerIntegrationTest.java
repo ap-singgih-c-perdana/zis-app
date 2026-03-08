@@ -3,7 +3,7 @@ package com.zakat.controller;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.zakat.entity.ZakatPayment;
-import com.zakat.enums.ZakatType;
+import com.zakat.enums.ZisType;
 import com.zakat.repository.ZakatPaymentRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -53,7 +53,7 @@ class ReportControllerIntegrationTest {
         ZakatPayment fitrahUang = new ZakatPayment();
         fitrahUang.setJumlahJiwa(4);
         fitrahUang.setAlamat("A");
-        fitrahUang.setZakatType(ZakatType.ZAKAT_FITRAH_UANG);
+        fitrahUang.setZakatType(ZisType.ZAKAT_FITRAH_UANG);
         fitrahUang.setJumlahUang(new BigDecimal("180000"));
         fitrahUang.setCreatedAt(now);
         zakatPaymentRepository.save(fitrahUang);
@@ -61,7 +61,7 @@ class ReportControllerIntegrationTest {
         ZakatPayment fitrahBeras = new ZakatPayment();
         fitrahBeras.setJumlahJiwa(60);
         fitrahBeras.setAlamat("B");
-        fitrahBeras.setZakatType(ZakatType.ZAKAT_FITRAH_BERAS);
+        fitrahBeras.setZakatType(ZisType.ZAKAT_FITRAH_BERAS);
         fitrahBeras.setBeratBerasKg(new BigDecimal("149.5"));
         fitrahBeras.setCreatedAt(now);
         zakatPaymentRepository.save(fitrahBeras);
@@ -69,7 +69,7 @@ class ReportControllerIntegrationTest {
         ZakatPayment mal = new ZakatPayment();
         mal.setJumlahJiwa(1);
         mal.setAlamat("C");
-        mal.setZakatType(ZakatType.ZAKAT_MAL);
+        mal.setZakatType(ZisType.ZAKAT_MAL);
         mal.setJumlahUang(new BigDecimal("3512500"));
         mal.setCreatedAt(now);
         zakatPaymentRepository.save(mal);
@@ -77,7 +77,7 @@ class ReportControllerIntegrationTest {
         ZakatPayment infaq = new ZakatPayment();
         infaq.setJumlahJiwa(1);
         infaq.setAlamat("D");
-        infaq.setZakatType(ZakatType.INFAQ_SEDEKAH);
+        infaq.setZakatType(ZisType.INFAQ_SEDEKAH);
         infaq.setJumlahUang(new BigDecimal("100000"));
         infaq.setCreatedAt(now);
         zakatPaymentRepository.save(infaq);

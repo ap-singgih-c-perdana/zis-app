@@ -1,6 +1,6 @@
 package com.zakat.service.dto;
 
-import com.zakat.enums.ZakatType;
+import com.zakat.enums.ZisType;
 
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -13,7 +13,7 @@ public record KwitansiReportResponse(
         String receiptNumber,
         Instant createdAt,
         LocalDate tanggal,
-        ZakatType zakatType,
+        ZisType zakatType,
         String zakatTypeLabel,
         Integer jumlahJiwa,
         String alamat,
@@ -32,4 +32,3 @@ public record KwitansiReportResponse(
     ) {
     }
 }
-

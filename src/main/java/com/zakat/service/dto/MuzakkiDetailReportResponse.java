@@ -1,6 +1,6 @@
 package com.zakat.service.dto;
 
-import com.zakat.enums.ZakatType;
+import com.zakat.enums.ZisType;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -19,7 +19,8 @@ public record MuzakkiDetailReportResponse(
             int no,
             LocalDate tanggal,
             String namaMuzakki,
-            ZakatType zakatType,
+            ZisType zakatType,
+            String zakatTypeLabel,
             BigDecimal nominalRp,
             BigDecimal berasKg,
             Integer jiwa

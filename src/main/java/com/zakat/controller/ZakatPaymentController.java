@@ -100,6 +100,7 @@ public class ZakatPaymentController {
                 payment.isCanceled(),
                 payment.getCreatedAt(),
                 payment.getZakatType(),
+                payment.getZakatType() == null ? null : payment.getZakatType().getLabel(),
                 payment.getJumlahJiwa(),
                 payment.getAlamat(),
                 payment.getBeratBerasKg(),

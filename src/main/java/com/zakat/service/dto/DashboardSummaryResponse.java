@@ -1,6 +1,6 @@
 package com.zakat.service.dto;
 
-import com.zakat.enums.ZakatType;
+import com.zakat.enums.ZisType;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -16,7 +16,7 @@ public record DashboardSummaryResponse(
         List<ByType> byType
 ) {
     public record ByType(
-            ZakatType zakatType,
+            ZisType zakatType,
             long transaksi,
             BigDecimal totalUang,
             BigDecimal totalBerasKg,
@@ -24,4 +24,3 @@ public record DashboardSummaryResponse(
     ) {
     }
 }
-

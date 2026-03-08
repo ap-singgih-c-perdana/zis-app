@@ -1,7 +1,7 @@
 package com.zakat.service;
 
 import com.zakat.entity.ZakatQuality;
-import com.zakat.enums.ZakatType;
+import com.zakat.enums.ZisType;
 import com.zakat.repository.ZakatQualityRepository;
 import com.zakat.service.dto.ZakatQualityUpsertRequest;
 import jakarta.validation.Valid;
@@ -64,18 +64,18 @@ public class ZakatQualityService {
     }
 
     private static void validateByType(ZakatQualityUpsertRequest request) {
-        ZakatType type = request.zakatType();
+        ZisType type = request.zakatType();
         BigDecimal berat = request.beratPerJiwaKg();
         Long nominal = request.nominalPerJiwa();
 
-        if (type == ZakatType.ZAKAT_FITRAH_BERAS) {
+        if (type == ZisType.ZAKAT_FITRAH_BERAS) {
             if (berat == null) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "beratPerJiwaKg wajib diisi untuk ZAKAT_FITRAH_BERAS");
             }
             if (nominal != null) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "nominalPerJiwa harus null untuk ZAKAT_FITRAH_BERAS");
             }
-        } else if (type == ZakatType.ZAKAT_FITRAH_UANG) {
+        } else if (type == ZisType.ZAKAT_FITRAH_UANG) {
             if (nominal == null) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "nominalPerJiwa wajib diisi untuk ZAKAT_FITRAH_UANG");
             }
@@ -85,4 +85,3 @@ public class ZakatQualityService {
         }
     }
 }
-

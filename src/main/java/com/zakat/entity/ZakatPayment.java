@@ -12,7 +12,7 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.Column;
 
-import com.zakat.enums.ZakatType;
+import com.zakat.enums.ZisType;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -38,6 +38,7 @@ public class ZakatPayment {
 
     private Integer jumlahJiwa;
 
+    @Column(columnDefinition = "text")
     private String alamat;
 
     private BigDecimal beratBerasKg;
@@ -45,7 +46,7 @@ public class ZakatPayment {
     private BigDecimal jumlahUang;
 
     @Enumerated(EnumType.STRING)
-    private ZakatType zakatType;
+    private ZisType zakatType;
 
     @CreationTimestamp
     private Instant createdAt;
@@ -58,6 +59,7 @@ public class ZakatPayment {
 
     private Instant canceledAt;
 
+    @Column(columnDefinition = "text")
     private String cancelReason;
 
     private String canceledBy;

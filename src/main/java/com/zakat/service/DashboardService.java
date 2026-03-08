@@ -1,6 +1,6 @@
 package com.zakat.service;
 
-import com.zakat.enums.ZakatType;
+import com.zakat.enums.ZisType;
 import com.zakat.repository.ZakatPaymentRepository;
 import com.zakat.service.dto.DashboardSummaryResponse;
 import lombok.RequiredArgsConstructor;
@@ -35,7 +35,7 @@ public class DashboardService {
         ZakatPaymentRepository.DashboardTotalsRow totals = zakatPaymentRepository.dashboardTotals(
                 fromInclusive,
                 toExclusive,
-                List.of(ZakatType.ZAKAT_FITRAH_BERAS, ZakatType.ZAKAT_FITRAH_UANG)
+                List.of(ZisType.ZAKAT_FITRAH_BERAS, ZisType.ZAKAT_FITRAH_UANG)
         );
 
         List<DashboardSummaryResponse.ByType> byType = zakatPaymentRepository.dashboardByType(fromInclusive, toExclusive).stream()
@@ -59,4 +59,3 @@ public class DashboardService {
         );
     }
 }
-

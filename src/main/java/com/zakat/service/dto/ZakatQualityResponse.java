@@ -1,6 +1,6 @@
 package com.zakat.service.dto;
 
-import com.zakat.enums.ZakatType;
+import com.zakat.enums.ZisType;
 
 import java.math.BigDecimal;
 import java.util.UUID;
@@ -8,10 +8,9 @@ import java.util.UUID;
 public record ZakatQualityResponse(
         UUID id,
         String name,
-        ZakatType zakatType,
+        ZisType zakatType,
         boolean active,
         BigDecimal beratPerJiwaKg,
         Long nominalPerJiwa
 ) {
 }
-

@@ -4,7 +4,7 @@ import com.zakat.entity.MuzakkiPerson;
 import com.zakat.entity.ZakatPayment;
 import com.zakat.entity.ZakatQuality;
 import com.zakat.entity.ReceiptSequence;
-import com.zakat.enums.ZakatType;
+import com.zakat.enums.ZisType;
 import com.zakat.repository.MuzakkiPersonRepository;
 import com.zakat.repository.ZakatPaymentRepository;
 import com.zakat.repository.ZakatQualityRepository;
@@ -27,6 +27,7 @@ import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -38,6 +39,7 @@ import java.util.stream.Collectors;
 public class ZakatPaymentService {
 
     private static final ZoneId DEFAULT_ZONE = ZoneId.of("Asia/Jakarta");
+    private static final Instant MAX_INSTANT = Instant.parse("9999-12-31T23:59:59.999999999Z");
 
     private final ZakatPaymentRepository zakatPaymentRepository;
     private final ZakatQualityRepository zakatQualityRepository;
@@ -52,12 +54,17 @@ public class ZakatPaymentService {
             boolean includeCanceled,
             Pageable pageable
     ) {
-        Instant fromInclusive = fromDate == null ? null : fromDate.atStartOfDay(DEFAULT_ZONE).toInstant();
-        Instant toExclusive = toDate == null ? null : toDate.plusDays(1).atStartOfDay(DEFAULT_ZONE).toInstant();
+        Instant fromInclusive = (fromDate == null)
+                ? Instant.EPOCH
+                : fromDate.atStartOfDay(DEFAULT_ZONE).toInstant();
+        Instant toExclusive = (toDate == null)
+                ? MAX_INSTANT
+                : toDate.plusDays(1).atStartOfDay(DEFAULT_ZONE).toInstant();
 
-        String normalizedQ = (q == null || q.isBlank()) ? null : q.trim();
+        String normalizedQ = (q == null || q.isBlank()) ? null : q.trim().toLowerCase();
+        String qLike = normalizedQ == null ? "%" : "%" + normalizedQ + "%";
 
-        Page<ZakatPayment> page = zakatPaymentRepository.search(fromInclusive, toExclusive, normalizedQ, includeCanceled, pageable);
+        Page<ZakatPayment> page = zakatPaymentRepository.search(fromInclusive, toExclusive, qLike, includeCanceled, pageable);
         if (page.isEmpty()) {
             return Page.empty(pageable);
         }
@@ -73,6 +80,9 @@ public class ZakatPaymentService {
         List<ZakatPaymentListItemResponse> content = page.getContent().stream()
                 .map(payment -> {
                     List<String> names = namesByPaymentId.getOrDefault(payment.getId(), List.of());
+                    names = names.stream()
+                            .sorted(String.CASE_INSENSITIVE_ORDER)
+                            .toList();
                     int count = names.size();
                     String preview = String.join(", ", names.stream().limit(previewLimit).toList());
                     if (count > previewLimit) {
@@ -83,6 +93,7 @@ public class ZakatPaymentService {
                             payment.getReceiptNumber(),
                             payment.getCreatedAt(),
                             payment.getZakatType(),
+                            payment.getZakatType() == null ? null : payment.getZakatType().getLabel(),
                             payment.getBeratBerasKg(),
                             payment.getJumlahUang(),
                             count,
@@ -102,7 +113,7 @@ public class ZakatPaymentService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Jumlah muzakki harus sama dengan jumlahJiwa");
         }
 
-        ZakatType zakatType = request.zakatType();
+        ZisType zakatType = request.zakatType();
 
         ZakatQuality zakatQuality = null;
         if (request.zakatQualityId() != null) {
@@ -123,7 +134,7 @@ public class ZakatPaymentService {
         payment.setZakatType(zakatType);
         payment.setZakatQuality(zakatQuality);
 
-        if (zakatType == ZakatType.ZAKAT_FITRAH_BERAS) {
+        if (zakatType == ZisType.ZAKAT_FITRAH_BERAS) {
             BigDecimal beratBerasKg = request.beratBerasKg();
             if (beratBerasKg == null && zakatQuality != null && zakatQuality.getBeratPerJiwaKg() != null) {
                 beratBerasKg = zakatQuality.getBeratPerJiwaKg().multiply(BigDecimal.valueOf(request.jumlahJiwa()));
@@ -133,7 +144,7 @@ public class ZakatPaymentService {
             }
             payment.setBeratBerasKg(beratBerasKg);
             payment.setJumlahUang(null);
-        } else if (zakatType == ZakatType.ZAKAT_FITRAH_UANG) {
+        } else if (zakatType == ZisType.ZAKAT_FITRAH_UANG) {
             BigDecimal jumlahUang = request.jumlahUang();
             if (jumlahUang == null && zakatQuality != null && zakatQuality.getNominalPerJiwa() != null) {
                 jumlahUang = BigDecimal.valueOf(zakatQuality.getNominalPerJiwa())
@@ -154,7 +165,7 @@ public class ZakatPaymentService {
 
         List<MuzakkiPerson> muzakkiList = request.muzakkiNames().stream()
                 .map(nama -> MuzakkiPerson.builder().nama(nama).payment(payment).build())
-                .toList();
+                .collect(Collectors.toCollection(ArrayList::new));
         payment.setMuzakkiList(muzakkiList);
 
         return zakatPaymentRepository.save(payment);
@@ -187,11 +198,17 @@ public class ZakatPaymentService {
 
         List<MuzakkiPerson> muzakkiList = request.muzakkiNames().stream()
                 .map(nama -> MuzakkiPerson.builder().nama(nama).payment(payment).build())
-                .toList();
-        payment.setMuzakkiList(muzakkiList);
+                .collect(Collectors.toCollection(ArrayList::new));
 
-        ZakatType zakatType = payment.getZakatType();
-        if (zakatType == ZakatType.ZAKAT_FITRAH_BERAS || zakatType == ZakatType.ZAKAT_FITRAH_UANG) {
+        if (payment.getMuzakkiList() == null) {
+            payment.setMuzakkiList(muzakkiList);
+        } else {
+            payment.getMuzakkiList().clear();
+            payment.getMuzakkiList().addAll(muzakkiList);
+        }
+
+        ZisType zakatType = payment.getZakatType();
+        if (zakatType == ZisType.ZAKAT_FITRAH_BERAS || zakatType == ZisType.ZAKAT_FITRAH_UANG) {
             if (request.zakatQualityId() != null) {
                 ZakatQuality quality = zakatQualityRepository.findById(request.zakatQualityId())
                         .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Zakat quality tidak ditemukan"));
@@ -209,7 +226,7 @@ public class ZakatPaymentService {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "zakatQualityId wajib diisi untuk zakat fitrah");
             }
 
-            if (zakatType == ZakatType.ZAKAT_FITRAH_BERAS) {
+            if (zakatType == ZisType.ZAKAT_FITRAH_BERAS) {
                 if (selectedQuality.getBeratPerJiwaKg() == null) {
                     throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Zakat quality tidak memiliki beratPerJiwaKg");
                 }

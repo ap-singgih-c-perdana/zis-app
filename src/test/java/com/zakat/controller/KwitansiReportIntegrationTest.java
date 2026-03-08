@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.zakat.entity.MuzakkiPerson;
 import com.zakat.entity.ZakatPayment;
-import com.zakat.enums.ZakatType;
+import com.zakat.enums.ZisType;
 import com.zakat.repository.ZakatPaymentRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -57,7 +57,7 @@ class KwitansiReportIntegrationTest {
         ZakatPayment payment = new ZakatPayment();
         payment.setJumlahJiwa(4);
         payment.setAlamat("Jl. Mawar No. 1");
-        payment.setZakatType(ZakatType.ZAKAT_FITRAH_UANG);
+        payment.setZakatType(ZisType.ZAKAT_FITRAH_UANG);
         payment.setJumlahUang(new BigDecimal("180000"));
         payment.setCreatedAt(now);
         payment.setReceiptYear(today.getYear());

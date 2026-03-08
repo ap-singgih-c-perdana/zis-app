@@ -3,7 +3,7 @@ package com.zakat.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.zakat.entity.ZakatPayment;
 import com.zakat.entity.ZakatQuality;
-import com.zakat.enums.ZakatType;
+import com.zakat.enums.ZisType;
 import com.zakat.repository.ZakatPaymentRepository;
 import com.zakat.repository.ZakatQualityRepository;
 import jakarta.persistence.EntityManager;
@@ -62,7 +62,7 @@ class ZakatPaymentControllerIntegrationTest {
     void post_createsZakatPayment_andCalculatesBeratBerasFromQuality() throws Exception {
         ZakatQuality quality = zakatQualityRepository.save(ZakatQuality.builder()
                 .name("Beras Premium")
-                .zakatType(ZakatType.ZAKAT_FITRAH_BERAS)
+                .zakatType(ZisType.ZAKAT_FITRAH_BERAS)
                 .beratPerJiwaKg(new BigDecimal("2.5"))
                 .build());
 
@@ -154,7 +154,7 @@ class ZakatPaymentControllerIntegrationTest {
     void get_filtersByKeyword_matchesAlamatOrNama() throws Exception {
         ZakatQuality quality = zakatQualityRepository.save(ZakatQuality.builder()
                 .name("Standar 2.5 Kg")
-                .zakatType(ZakatType.ZAKAT_FITRAH_BERAS)
+                .zakatType(ZisType.ZAKAT_FITRAH_BERAS)
                 .beratPerJiwaKg(new BigDecimal("2.5"))
                 .build());
 
@@ -206,7 +206,7 @@ class ZakatPaymentControllerIntegrationTest {
     void cancel_marksCanceled_andExcludedFromRekap() throws Exception {
         ZakatQuality quality = zakatQualityRepository.save(ZakatQuality.builder()
                 .name("Standar 2.5 Kg")
-                .zakatType(ZakatType.ZAKAT_FITRAH_BERAS)
+                .zakatType(ZisType.ZAKAT_FITRAH_BERAS)
                 .beratPerJiwaKg(new BigDecimal("2.5"))
                 .build());
 

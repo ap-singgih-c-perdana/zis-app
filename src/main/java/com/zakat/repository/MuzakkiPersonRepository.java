@@ -1,7 +1,7 @@
 package com.zakat.repository;
 
 import com.zakat.entity.MuzakkiPerson;
-import com.zakat.enums.ZakatType;
+import com.zakat.enums.ZisType;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -38,7 +38,7 @@ public interface MuzakkiPersonRepository extends JpaRepository<MuzakkiPerson, UU
 
         String getNama();
 
-        ZakatType getZakatType();
+        ZisType getZakatType();
 
         BigDecimal getJumlahUang();
 

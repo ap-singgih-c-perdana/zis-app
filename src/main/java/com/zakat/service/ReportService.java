@@ -1,7 +1,7 @@
 package com.zakat.service;
 
 import com.zakat.entity.InstitutionProfile;
-import com.zakat.enums.ZakatType;
+import com.zakat.enums.ZisType;
 import com.zakat.repository.ZakatPaymentRepository;
 import com.zakat.repository.MuzakkiPersonRepository;
 import com.zakat.service.dto.InstitutionProfileResponse;
@@ -48,24 +48,24 @@ public class ReportService {
 
         List<ZakatPaymentRepository.RekapRow> rows = zakatPaymentRepository.rekapByType(fromInclusive, toExclusive);
 
-        Map<ZakatType, BigDecimal> uangByType = new EnumMap<>(ZakatType.class);
-        Map<ZakatType, BigDecimal> berasByType = new EnumMap<>(ZakatType.class);
+        Map<ZisType, BigDecimal> uangByType = new EnumMap<>(ZisType.class);
+        Map<ZisType, BigDecimal> berasByType = new EnumMap<>(ZisType.class);
         for (ZakatPaymentRepository.RekapRow row : rows) {
             uangByType.put(row.getZakatType(), defaultZero(row.getTotalUang()));
             berasByType.put(row.getZakatType(), defaultZero(row.getTotalBerasKg()));
         }
 
-        BigDecimal zakatFitrahUang = uangByType.getOrDefault(ZakatType.ZAKAT_FITRAH_UANG, BigDecimal.ZERO);
-        BigDecimal zakatMal = uangByType.getOrDefault(ZakatType.ZAKAT_MAL, BigDecimal.ZERO);
-        BigDecimal infaqSedekah = uangByType.getOrDefault(ZakatType.INFAQ_SEDEKAH, BigDecimal.ZERO);
+        BigDecimal zakatFitrahUang = uangByType.getOrDefault(ZisType.ZAKAT_FITRAH_UANG, BigDecimal.ZERO);
+        BigDecimal zakatMal = uangByType.getOrDefault(ZisType.ZAKAT_MAL, BigDecimal.ZERO);
+        BigDecimal infaqSedekah = uangByType.getOrDefault(ZisType.INFAQ_SEDEKAH, BigDecimal.ZERO);
         BigDecimal totalUangMasuk = zakatFitrahUang.add(zakatMal).add(infaqSedekah);
 
-        BigDecimal zakatFitrahBerasKg = berasByType.getOrDefault(ZakatType.ZAKAT_FITRAH_BERAS, BigDecimal.ZERO);
+        BigDecimal zakatFitrahBerasKg = berasByType.getOrDefault(ZisType.ZAKAT_FITRAH_BERAS, BigDecimal.ZERO);
 
         long totalMuzakkiFitrahJiwa = zakatPaymentRepository.sumJiwaFitrah(
                 fromInclusive,
                 toExclusive,
-                List.of(ZakatType.ZAKAT_FITRAH_BERAS, ZakatType.ZAKAT_FITRAH_UANG)
+                List.of(ZisType.ZAKAT_FITRAH_BERAS, ZisType.ZAKAT_FITRAH_UANG)
         );
 
         InstitutionProfile profile = institutionProfileService.get();
@@ -194,7 +194,7 @@ public class ReportService {
                 createdAt,
                 tanggal,
                 payment.getZakatType(),
-                zakatTypeLabel(payment.getZakatType()),
+                payment.getZakatType() == null ? null : payment.getZakatType().getLabel(),
                 payment.getJumlahJiwa(),
                 payment.getAlamat(),
                 payment.getJumlahUang(),
@@ -204,6 +204,50 @@ public class ReportService {
                 muzakkiNames,
                 profileResponse
         );
+    }
+
+    public String muzakkiDetailCsv(MuzakkiDetailReportResponse report) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("Periode,").append(csv(report.fromDate())).append(",").append(csv(report.toDate())).append("\n");
+
+        if (report.institutionProfile() != null) {
+            var p = report.institutionProfile();
+            sb.append("Instansi,").append(csv(p.namaInstansi())).append("\n");
+            sb.append("Kota/Kabupaten,").append(csv(p.kotaKabupaten())).append("\n");
+            sb.append("Alamat,").append(csv(p.alamatLengkap())).append("\n");
+            sb.append("\n");
+        }
+
+        sb.append("No,Tanggal,Nama Muzakki,Jenis,Nominal (Rp),Beras (Kg),Jiwa\n");
+        for (MuzakkiDetailReportResponse.Row r : report.rows()) {
+            sb.append(r.no()).append(",");
+            sb.append(csv(r.tanggal())).append(",");
+            sb.append(csv(r.namaMuzakki())).append(",");
+            sb.append(csv(r.zakatTypeLabel() == null ? r.zakatType() : r.zakatTypeLabel())).append(",");
+            sb.append(r.nominalRp() == null ? "" : r.nominalRp()).append(",");
+            sb.append(r.berasKg() == null ? "" : r.berasKg()).append(",");
+            sb.append(r.jiwa() == null ? "" : r.jiwa());
+            sb.append("\n");
+        }
+
+        sb.append("\n");
+        sb.append("TOTAL,,,\n");
+        sb.append("totalNominalRp,").append(report.totalNominalRp()).append("\n");
+        sb.append("totalBerasKg,").append(report.totalBerasKg()).append("\n");
+        sb.append("totalJiwa,").append(report.totalJiwa()).append("\n");
+        return sb.toString();
+    }
+
+    private static String csv(Object v) {
+        if (v == null) {
+            return "";
+        }
+        String s = String.valueOf(v);
+        boolean mustQuote = s.contains(",") || s.contains("\"") || s.contains("\n") || s.contains("\r");
+        if (!mustQuote) {
+            return s;
+        }
+        return "\"" + s.replace("\"", "\"\"") + "\"";
     }
 
     private static List<MuzakkiDetailReportResponse.Row> mapMuzakkiRows(
@@ -216,6 +260,7 @@ public class ReportService {
                         LocalDate.ofInstant(r.getCreatedAt(), DEFAULT_ZONE),
                         r.getNama(),
                         r.getZakatType(),
+                        r.getZakatType() == null ? null : r.getZakatType().getLabel(),
                         r.getJumlahUang(),
                         r.getBeratBerasKg(),
                         r.getJumlahJiwa()
@@ -227,15 +272,5 @@ public class ReportService {
         return value == null ? BigDecimal.ZERO : value;
     }
 
-    private static String zakatTypeLabel(ZakatType type) {
-        if (type == null) {
-            return null;
-        }
-        return switch (type) {
-            case ZAKAT_FITRAH_UANG -> "Fitrah Uang";
-            case ZAKAT_FITRAH_BERAS -> "Fitrah Beras";
-            case ZAKAT_MAL -> "Zakat Mal";
-            case INFAQ_SEDEKAH -> "Infaq/Sedekah";
-        };
-    }
+    // label sekarang di enum ZisType
 }

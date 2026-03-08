@@ -3,7 +3,7 @@ package com.zakat.controller;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.zakat.entity.ZakatQuality;
-import com.zakat.enums.ZakatType;
+import com.zakat.enums.ZisType;
 import com.zakat.repository.ZakatQualityRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -49,17 +49,17 @@ class ZakatQualityControllerIntegrationTest {
     void getByType_returnsOnlyMatchingOptions() throws Exception {
         zakatQualityRepository.save(ZakatQuality.builder()
                 .name("Standar 2.5 Kg")
-                .zakatType(ZakatType.ZAKAT_FITRAH_BERAS)
+                .zakatType(ZisType.ZAKAT_FITRAH_BERAS)
                 .beratPerJiwaKg(new BigDecimal("2.5"))
                 .build());
         zakatQualityRepository.save(ZakatQuality.builder()
                 .name("SK Bupati (Standar)")
-                .zakatType(ZakatType.ZAKAT_FITRAH_UANG)
+                .zakatType(ZisType.ZAKAT_FITRAH_UANG)
                 .nominalPerJiwa(45000L)
                 .build());
         zakatQualityRepository.save(ZakatQuality.builder()
                 .name("Inactive Option")
-                .zakatType(ZakatType.ZAKAT_FITRAH_BERAS)
+                .zakatType(ZisType.ZAKAT_FITRAH_BERAS)
                 .beratPerJiwaKg(new BigDecimal("3.0"))
                 .active(false)
                 .build());

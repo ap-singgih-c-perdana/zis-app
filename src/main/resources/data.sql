@@ -20,3 +20,14 @@ insert into zakat_quality (id, name, zakat_type, berat_per_jiwa_kg, nominal_per_
 values
     ('8d3dd908-a6a2-400c-bdf5-820cd0fa3815', 'SK Bupati (Standar)', 'ZAKAT_FITRAH_UANG', null, 45000, true),
     ('daace2c4-2a21-4901-8cc6-505f19379f87', 'Beras Premium',       'ZAKAT_FITRAH_UANG', null, 55000, true);
+
+alter table zakat_payment
+    add column if not exists canceled boolean;
+
+update zakat_payment set canceled = false where canceled is null;
+
+alter table zakat_payment
+    alter column canceled set not null;
+
+alter table zakat_payment
+    alter column canceled set default false;

@@ -288,7 +288,7 @@
                     }
 
                     $receiptNumber.val(currentPayment.receiptNumber || "");
-                    $zakatType.val(currentPayment.zakatType || "");
+                    $zakatType.val(currentPayment.zakatTypeLabel || currentPayment.zakatType || "");
                     $alamat.val(currentPayment.alamat || "");
 
                     if (currentPayment.createdAt) {
@@ -395,4 +395,3 @@
 
 </body>
 </html>
-

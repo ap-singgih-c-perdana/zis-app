@@ -2,7 +2,7 @@ package com.zakat.repository;
 
 
 import com.zakat.entity.ZakatPayment;
-import com.zakat.enums.ZakatType;
+import com.zakat.enums.ZisType;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.domain.Page;
@@ -23,33 +23,31 @@ public interface ZakatPaymentRepository extends JpaRepository<ZakatPayment, UUID
                     select distinct p
                     from ZakatPayment p
                     left join p.muzakkiList m
-                    where (:fromInclusive is null or p.createdAt >= :fromInclusive)
-                      and (:toExclusive is null or p.createdAt < :toExclusive)
+                    where p.createdAt >= :fromInclusive
+                      and p.createdAt < :toExclusive
                       and (:includeCanceled = true or p.canceled = false)
                       and (
-                            :q is null
-                            or lower(p.alamat) like lower(concat('%', :q, '%'))
-                            or lower(m.nama) like lower(concat('%', :q, '%'))
+                            lower(p.alamat) like :qLike
+                            or lower(m.nama) like :qLike
                           )
                     """,
             countQuery = """
                     select count(distinct p.id)
                     from ZakatPayment p
                     left join p.muzakkiList m
-                    where (:fromInclusive is null or p.createdAt >= :fromInclusive)
-                      and (:toExclusive is null or p.createdAt < :toExclusive)
+                    where p.createdAt >= :fromInclusive
+                      and p.createdAt < :toExclusive
                       and (:includeCanceled = true or p.canceled = false)
                       and (
-                            :q is null
-                            or lower(p.alamat) like lower(concat('%', :q, '%'))
-                            or lower(m.nama) like lower(concat('%', :q, '%'))
+                            lower(p.alamat) like :qLike
+                            or lower(m.nama) like :qLike
                           )
                     """
     )
     Page<ZakatPayment> search(
             @Param("fromInclusive") Instant fromInclusive,
             @Param("toExclusive") Instant toExclusive,
-            @Param("q") String q,
+            @Param("qLike") String qLike,
             @Param("includeCanceled") boolean includeCanceled,
             Pageable pageable
     );
@@ -77,11 +75,11 @@ public interface ZakatPaymentRepository extends JpaRepository<ZakatPayment, UUID
     DashboardTotalsRow dashboardTotals(
             @Param("fromInclusive") Instant fromInclusive,
             @Param("toExclusive") Instant toExclusive,
-            @Param("fitrahTypes") List<ZakatType> fitrahTypes
+            @Param("fitrahTypes") List<ZisType> fitrahTypes
     );
 
     interface DashboardByTypeRow {
-        ZakatType getZakatType();
+        ZisType getZakatType();
 
         long getTransaksi();
 
@@ -110,7 +108,7 @@ public interface ZakatPaymentRepository extends JpaRepository<ZakatPayment, UUID
     );
 
     interface RekapRow {
-        ZakatType getZakatType();
+        ZisType getZakatType();
 
         BigDecimal getTotalUang();
 
@@ -146,7 +144,7 @@ public interface ZakatPaymentRepository extends JpaRepository<ZakatPayment, UUID
     long sumJiwaFitrah(
             @Param("fromInclusive") Instant fromInclusive,
             @Param("toExclusive") Instant toExclusive,
-            @Param("fitrahTypes") List<ZakatType> fitrahTypes
+            @Param("fitrahTypes") List<ZisType> fitrahTypes
     );
 
     @EntityGraph(attributePaths = {"zakatQuality"})

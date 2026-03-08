@@ -174,7 +174,7 @@
                             <tr class="${item.canceled ? "text-muted" : ""}">
                                 <td>${receipt} ${canceledBadge}</td>
                                 <td>${formatInstant(item.createdAt)}</td>
-                                <td>${escapeHtml(item.zakatType || "-")}</td>
+                                <td>${escapeHtml(item.zakatTypeLabel || item.zakatType || "-")}</td>
                                 <td>${alamat}</td>
                                 <td>${formatNominal(item)}</td>
                                 <td>${item.muzakkiCount ?? 0}</td>

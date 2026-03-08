@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.UuidGenerator;
 
-import com.zakat.enums.ZakatType;
+import com.zakat.enums.ZisType;
 
 import java.math.BigDecimal;
 import java.util.UUID;
@@ -36,7 +36,7 @@ public class ZakatQuality {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private ZakatType zakatType;
+    private ZisType zakatType;
 
     @Builder.Default
     @Column(nullable = false)

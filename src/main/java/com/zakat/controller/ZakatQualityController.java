@@ -1,7 +1,7 @@
 package com.zakat.controller;
 
 import com.zakat.entity.ZakatQuality;
-import com.zakat.enums.ZakatType;
+import com.zakat.enums.ZisType;
 import com.zakat.service.dto.ZakatQualityOptionResponse;
 import com.zakat.service.dto.ZakatQualityResponse;
 import com.zakat.service.dto.ZakatQualityUpsertRequest;
@@ -32,7 +32,7 @@ public class ZakatQualityController {
     private final ZakatQualityService zakatQualityService;
 
     @GetMapping
-    public List<ZakatQualityOptionResponse> getByType(@RequestParam ZakatType zakatType) {
+    public List<ZakatQualityOptionResponse> getByType(@RequestParam ZisType zakatType) {
         return zakatQualityRepository.findByZakatTypeAndActiveTrueOrderByNameAsc(zakatType).stream()
                 .map(ZakatQualityController::toResponse)
                 .toList();

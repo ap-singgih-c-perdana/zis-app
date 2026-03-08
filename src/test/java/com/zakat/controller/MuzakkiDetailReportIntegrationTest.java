@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.zakat.entity.MuzakkiPerson;
 import com.zakat.entity.ZakatPayment;
-import com.zakat.enums.ZakatType;
+import com.zakat.enums.ZisType;
 import com.zakat.repository.ZakatPaymentRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -56,7 +56,7 @@ class MuzakkiDetailReportIntegrationTest {
         ZakatPayment p1 = new ZakatPayment();
         p1.setJumlahJiwa(4);
         p1.setAlamat("A");
-        p1.setZakatType(ZakatType.ZAKAT_FITRAH_UANG);
+        p1.setZakatType(ZisType.ZAKAT_FITRAH_UANG);
         p1.setJumlahUang(new BigDecimal("180000"));
         p1.setCreatedAt(now);
         p1.setMuzakkiList(List.of(
@@ -67,7 +67,7 @@ class MuzakkiDetailReportIntegrationTest {
         ZakatPayment p2 = new ZakatPayment();
         p2.setJumlahJiwa(5);
         p2.setAlamat("B");
-        p2.setZakatType(ZakatType.ZAKAT_FITRAH_BERAS);
+        p2.setZakatType(ZisType.ZAKAT_FITRAH_BERAS);
         p2.setBeratBerasKg(new BigDecimal("12.50"));
         p2.setCreatedAt(now);
         p2.setMuzakkiList(List.of(
