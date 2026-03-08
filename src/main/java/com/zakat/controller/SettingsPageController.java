@@ -11,4 +11,9 @@ public class SettingsPageController {
     public String institutionProfile(Model model) {
         return "institution-profile";
     }
+
+    @GetMapping("/settings/zakat-qualities")
+    public String zakatQualities(Model model) {
+        return "zakat-quality";
+    }
 }

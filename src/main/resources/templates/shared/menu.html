@@ -114,19 +114,7 @@
                     </ul>
                 </li>
 
-                <li class="nav-item">
-                    <a class="nav-link" href="/contact">
-                        <i class="nav-icon fas fa-th"></i>
-                        <p>Contact</p>
-                    </a>
-                </li>
-
-                <li class="nav-item">
-                    <a class="nav-link" href="/about">
-                        <i class="nav-icon fas fa-th"></i>
-                        <p>About</p>
-                    </a>
-                </li>
+                <!-- Contact and About menu removed per request -->
 
                 <li class="nav-item has-treeview" sec:authorize="hasRole('ADMIN')">
                     <a class="nav-link" href="#">
@@ -141,6 +129,12 @@
                             <a class="nav-link" href="/settings/institution-profile">
                                 <i class="far fa-circle nav-icon"></i>
                                 <p>Profile Instansi/Masjid</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/settings/zakat-qualities">
+                                <i class="far fa-circle nav-icon"></i>
+                                <p>Kelola Zakat Quality</p>
                             </a>
                         </li>
                     </ul>

@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html layout:decorate="~{shared/layout}"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Kelola Zakat Quality</title>
+</head>
+<body>
+
+<div layout:fragment="content">
+    <div class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-6">
+                    <h1 class="m-0 text-dark">Kelola Zakat Quality</h1>
+                </div>
+                <div class="col-sm-6">
+                    <ol class="breadcrumb float-sm-right">
+                        <li class="breadcrumb-item"><a href="/">Home</a></li>
+                        <li class="breadcrumb-item active">Pengaturan</li>
+                        <li class="breadcrumb-item active">Kelola Zakat Quality</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <section class="content">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header bg-warning">
+                            <h3 class="card-title">Opsi Zakat Fitrah (Beras)</h3>
+                        </div>
+                        <div class="card-body" id="berasList"></div>
+                        <div class="card-footer">
+                            <div class="form-group">
+                                <input class="form-control" id="berasLabel" placeholder="Label (Misal: Standar)" type="text">
+                            </div>
+                            <div class="form-group">
+                                <input class="form-control" id="berasBerat" placeholder="Berat (Kg)" type="number" step="0.1">
+                            </div>
+                            <button class="btn btn-warning" id="btnAddBeras">+ Tambah Opsi Beras</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header bg-success">
+                            <h3 class="card-title">Opsi Zakat Fitrah (Uang)</h3>
+                        </div>
+                        <div class="card-body" id="uangList"></div>
+                        <div class="card-footer">
+                            <div class="form-group">
+                                <input class="form-control" id="uangLabel" placeholder="Label (Misal: Premium)" type="text">
+                            </div>
+                            <div class="form-group">
+                                <input class="form-control" id="uangNominal" placeholder="Nominal (Rp)" type="number" step="1">
+                            </div>
+                            <button class="btn btn-success" id="btnAddUang">+ Tambah Opsi Uang</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+
+<th:block layout:fragment="script">
+    <script>
+        (function () {
+            const BRAS = 'ZAKAT_FITRAH_BERAS';
+            const UANG = 'ZAKAT_FITRAH_UANG';
+
+            const $berasList = $('#berasList');
+            const $uangList = $('#uangList');
+            const $berasLabel = $('#berasLabel');
+            const $berasBerat = $('#berasBerat');
+            const $uangLabel = $('#uangLabel');
+            const $uangNominal = $('#uangNominal');
+            const $btnAddBeras = $('#btnAddBeras');
+            const $btnAddUang = $('#btnAddUang');
+
+            function formatNumber(n) {
+                try {
+                    return new Intl.NumberFormat('id-ID').format(Number(n));
+                } catch (e) { return n; }
+            }
+
+            function renderList(container, list, type) {
+                container.empty();
+                if (!list || !list.length) {
+                    container.append('<div class="text-muted">Belum ada opsi aktif.</div>');
+                    return;
+                }
+                for (const it of list) {
+                    const div = $("<div class='d-flex align-items-center justify-content-between mb-2'></div>");
+                    const left = $(`<div><strong>${it.name}</strong><div class='text-muted small'>${type === BRAS ? (it.beratPerJiwaKg + ' Kg') : ('Rp ' + formatNumber(it.nominalPerJiwa))}</div></div>`);
+                    const btn = $(`<button class='btn btn-sm btn-outline-danger' data-id='${it.id}' title='Nonaktifkan'><i class='fas fa-trash'></i></button>`);
+                    btn.on('click', async function () {
+                        const id = $(this).data('id');
+                        if (!confirm('Nonaktifkan opsi ini?')) return;
+                        try {
+                            const res = await fetch('/api/zakat-qualities/' + encodeURIComponent(id), {method: 'DELETE'});
+                            if (!res.ok) throw new Error('Gagal menonaktifkan');
+                            // reload both lists
+                            await loadAll();
+                        } catch (e) {
+                            alert(String(e.message || e));
+                        }
+                    });
+                    div.append(left).append(btn);
+                    container.append(div);
+                }
+            }
+
+            async function loadByType(type) {
+                const res = await fetch('/api/zakat-qualities?zakatType=' + encodeURIComponent(type), {headers: {Accept: 'application/json'}});
+                if (!res.ok) throw new Error('Gagal memuat opsi');
+                return await res.json();
+            }
+
+            async function loadAll() {
+                try {
+                    const beras = await loadByType(BRAS);
+                    const uang = await loadByType(UANG);
+                    renderList($berasList, beras, BRAS);
+                    renderList($uangList, uang, UANG);
+                } catch (e) {
+                    console.error(e);
+                    alert(String(e.message || e));
+                }
+            }
+
+            async function createBeras() {
+                const name = ($berasLabel.val() || '').trim();
+                const berat = Number($berasBerat.val());
+                if (!name) return alert('Label wajib diisi');
+                if (!berat || berat <= 0) return alert('Berat harus lebih besar dari 0');
+                $btnAddBeras.prop('disabled', true);
+                try {
+                    const payload = { name: name, zakatType: BRAS, beratPerJiwaKg: String(berat) };
+                    const res = await fetch('/api/zakat-qualities', {
+                        method: 'POST', headers: {'Content-Type': 'application/json', Accept: 'application/json'}, body: JSON.stringify(payload)
+                    });
+                    if (!res.ok) throw new Error('Gagal menambah opsi');
+                    $berasLabel.val(''); $berasBerat.val('');
+                    await loadAll();
+                } catch (e) {
+                    alert(String(e.message || e));
+                } finally { $btnAddBeras.prop('disabled', false); }
+            }
+
+            async function createUang() {
+                const name = ($uangLabel.val() || '').trim();
+                const nominal = Number($uangNominal.val());
+                if (!name) return alert('Label wajib diisi');
+                if (!nominal || nominal <= 0) return alert('Nominal harus lebih besar dari 0');
+                $btnAddUang.prop('disabled', true);
+                try {
+                    const payload = { name: name, zakatType: UANG, nominalPerJiwa: Number(nominal) };
+                    const res = await fetch('/api/zakat-qualities', {
+                        method: 'POST', headers: {'Content-Type': 'application/json', Accept: 'application/json'}, body: JSON.stringify(payload)
+                    });
+                    if (!res.ok) throw new Error('Gagal menambah opsi');
+                    $uangLabel.val(''); $uangNominal.val('');
+                    await loadAll();
+                } catch (e) {
+                    alert(String(e.message || e));
+                } finally { $btnAddUang.prop('disabled', false); }
+            }
+
+            $btnAddBeras.on('click', createBeras);
+            $btnAddUang.on('click', createUang);
+
+            // init
+            loadAll();
+        })();
+    </script>
+</th:block>
+
+</body>
+</html>
