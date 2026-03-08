@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <title>Kwitansi Pembayaran</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" th:href="@{~/webjars/AdminLTE/3.2.0/dist/css/adminlte.min.css}" />
+    <style>
+        body { background: #fff; }
+        .receipt { max-width: 720px; margin: 20px auto; padding: 20px; border: 1px solid #ddd; }
+        .receipt .header { text-align: center; margin-bottom: 12px; }
+        .receipt h2 { margin:0; }
+        .receipt .meta { margin-bottom: 12px; }
+        .receipt .items { margin-top: 8px; }
+        .no-print { display:none; }
+        @media print {
+            .receipt { border: none; }
+        }
+    </style>
+</head>
+<body>
+<div class="receipt" id="receipt">
+    <div class="header">
+        <img src="/img/dashboard.png" alt="logo" style="height:48px;" onerror="this.style.display='none'" />
+        <h2>Kwitansi Pembayaran Zakat</h2>
+        <div id="receiptNumber" class="text-muted"></div>
+    </div>
+
+    <div class="meta">
+        <div><strong>Tanggal:</strong> <span id="createdAt">-</span></div>
+        <div><strong>Nama Pembayar:</strong> <span id="payerName">-</span></div>
+        <div><strong>No. HP Pembayar:</strong> <span id="payerPhone">-</span></div>
+        <div><strong>Nama Muzakki:</strong> <span id="namaMuzakki">-</span></div>
+        <div><strong>Jenis:</strong> <span id="zakatType">-</span></div>
+        <div><strong>Alamat:</strong> <span id="alamat">-</span></div>
+    </div>
+
+    <div class="items">
+        <table class="table table-borderless table-sm">
+            <tbody id="itemsBody">
+            </tbody>
+        </table>
+
+        <div class="text-right mt-3">
+            <h5>Total: <span id="totalDisplay">-</span></h5>
+        </div>
+    </div>
+
+    <div class="mt-4">
+        <div>Terima kasih atas pembayaran Anda.</div>
+    </div>
+
+    <div class="mt-4 no-print">
+        <button class="btn btn-primary" id="btnPrintNow">Print</button>
+    </div>
+</div>
+
+<script>
+    (function (){
+        const paymentId = window.location.pathname.split('/').filter(Boolean).slice(-2)[0];
+        function formatNumber(n){
+            const num = Number(n ?? 0);
+            return num ? new Intl.NumberFormat('id-ID').format(num) : '0';
+        }
+        function formatDate(d){
+            if(!d) return '-';
+            try{ return new Intl.DateTimeFormat('id-ID', {dateStyle:'medium', timeStyle:'short'}).format(new Date(d)); }catch(e){return d}
+        }
+        async function load(){
+            const res = await fetch(`/api/zakat-payments/${encodeURIComponent(paymentId)}`, {headers:{'Accept':'application/json'}});
+            if(!res.ok){ document.getElementById('receipt').innerText = 'Gagal memuat data kwitansi'; return; }
+            const p = await res.json();
+            document.getElementById('receiptNumber').innerText = p.receiptNumber || '';
+            document.getElementById('createdAt').innerText = formatDate(p.createdAt);
+            document.getElementById('namaMuzakki').innerText = (Array.isArray(p.muzakkiNames) ? p.muzakkiNames.join(', ') : '-') || '-';
+            document.getElementById('zakatType').innerText = p.zakatTypeLabel || p.zakatType || '-';
+            document.getElementById('alamat').innerText = p.alamat || '-';
+            document.getElementById('payerName').innerText = p.payerName || '-';
+            document.getElementById('payerPhone').innerText = p.payerPhone || '-';
+
+            const $items = document.getElementById('itemsBody');
+            $items.innerHTML = '';
+            if(p.zakatType && (p.zakatType.startsWith('ZAKAT_FITRAH'))){
+                const q = p.zakatQuality || {};
+                const per = q.beratPerJiwaKg || q.nominalPerJiwa || 0;
+                const jiwa = (Array.isArray(p.muzakkiNames) ? p.muzakkiNames.length : (p.jumlahJiwa || 1));
+                const total = per * jiwa;
+                $items.innerHTML = `<tr><td>Per jiwa</td><td class="text-right">${q.beratPerJiwaKg ? formatNumber(q.beratPerJiwaKg)+' Kg' : 'Rp '+formatNumber(q.nominalPerJiwa)}</td></tr>
+                                    <tr><td>Jumlah Jiwa</td><td class="text-right">${jiwa}</td></tr>
+                                    <tr><td>Total</td><td class="text-right">${q.beratPerJiwaKg ? formatNumber(total)+' Kg' : 'Rp '+formatNumber(total)}</td></tr>`;
+                document.getElementById('totalDisplay').innerText = q.beratPerJiwaKg ? formatNumber(total)+' Kg' : 'Rp '+formatNumber(total);
+            } else {
+                const nominal = Number(p.jumlahUang || 0);
+                $items.innerHTML = `<tr><td>Jumlah Uang</td><td class="text-right">Rp ${formatNumber(nominal)}</td></tr>`;
+                document.getElementById('totalDisplay').innerText = 'Rp ' + formatNumber(nominal);
+            }
+
+            // auto print for convenience
+            setTimeout(()=>{
+                // do not auto print in hidden contexts
+                if (!window.matchMedia('(display-mode: standalone)').matches) {
+                    window.print();
+                }
+            }, 300);
+        }
+        document.getElementById('btnPrintNow').addEventListener('click', function(){ window.print(); });
+        load();
+    })();
+</script>
+</body>
+</html>

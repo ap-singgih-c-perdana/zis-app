@@ -52,8 +52,20 @@
                         </div>
                         <div class="col-md-4">
                             <div class="form-group">
-                                <label for="zakatType">Jenis Zakat</label>
-                                <input class="form-control" id="zakatType" readonly type="text">
+                                <label for="payerName">Nama Pembayar</label>
+                                <input class="form-control" id="payerName" type="text">
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="payerPhone">No. HP Pembayar</label>
+                                <input class="form-control" id="payerPhone" type="tel">
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <div class="form-group">
+                                <label for="alamat">Alamat</label>
+                                <textarea class="form-control" id="alamat" rows="2"></textarea>
                             </div>
                         </div>
                     </div>
@@ -119,21 +131,12 @@
             </div>
 
             <div class="card">
-                <div class="card-header">
-                    <h3 class="card-title">Alamat</h3>
-                </div>
-                <div class="card-body">
-                    <div class="form-group">
-                        <label for="alamat">Alamat</label>
-                        <textarea class="form-control" id="alamat" rows="3"></textarea>
-                    </div>
-                </div>
-            </div>
-
-            <div class="card">
                 <div class="card-body">
                     <button class="btn btn-primary" id="btnSave" type="button">
                         <i class="fas fa-save"></i> Simpan Perubahan
+                    </button>
+                    <button class="btn btn-success ml-2" id="btnPrintReceipt" type="button">
+                        <i class="fas fa-print"></i> Print Kwitansi
                     </button>
                     <a class="btn btn-default" href="/zakat-payments/list">Kembali</a>
                 </div>
@@ -166,6 +169,8 @@
             const $previewTotal = $("#previewTotal");
             const $muzakkiContainer = $("#muzakkiContainer");
             const $alamat = $("#alamat");
+            const $payerName = $("#payerName");
+            const $payerPhone = $("#payerPhone");
             const $btnSave = $("#btnSave");
 
             let currentPayment = null;
@@ -290,6 +295,8 @@
                     $receiptNumber.val(currentPayment.receiptNumber || "");
                     $zakatType.val(currentPayment.zakatTypeLabel || currentPayment.zakatType || "");
                     $alamat.val(currentPayment.alamat || "");
+                    $payerName.val(currentPayment.payerName || "");
+                    $payerPhone.val(currentPayment.payerPhone || "");
 
                     if (currentPayment.createdAt) {
                         const d = new Date(currentPayment.createdAt);
@@ -328,6 +335,10 @@
                     alamat: alamat,
                     muzakkiNames: names
                 };
+
+                // include payer info in update
+                payload.payerName = $payerName.val()?.trim() || null;
+                payload.payerPhone = $payerPhone.val()?.trim() || null;
 
                 if (isFitrahType(currentPayment.zakatType)) {
                     const qualityId = $zakatQualityId.val();
@@ -387,6 +398,12 @@
             });
             $zakatQualityId.on("change", updatePreview);
             $btnSave.on("click", submit);
+            const $btnPrintReceipt = $("#btnPrintReceipt");
+            $btnPrintReceipt.on("click", function () {
+                if (!currentPayment || !currentPayment.id) return showError('Data payment belum tersedia');
+                const url = `/zakat-payments/${encodeURIComponent(currentPayment.id)}/receipt`;
+                window.open(url, '_blank', 'noopener');
+            });
 
             loadPayment();
         })();

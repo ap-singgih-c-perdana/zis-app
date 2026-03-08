@@ -73,10 +73,12 @@ public class ZakatPaymentController {
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to,
             @RequestParam(required = false) String q,
+            @RequestParam(required = false) String payerName,
+            @RequestParam(required = false) String payerPhone,
             @RequestParam(defaultValue = "false") boolean includeCanceled,
             @PageableDefault(sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
     ) {
-        return zakatPaymentService.search(from, to, q, includeCanceled, pageable);
+        return zakatPaymentService.search(from, to, q, payerName, payerPhone, includeCanceled, pageable);
     }
 
     private static ZakatPaymentResponse toResponse(ZakatPayment payment) {
@@ -103,6 +105,8 @@ public class ZakatPaymentController {
                 payment.getZakatType() == null ? null : payment.getZakatType().getLabel(),
                 payment.getJumlahJiwa(),
                 payment.getAlamat(),
+                payment.getPayerName(),
+                payment.getPayerPhone(),
                 payment.getBeratBerasKg(),
                 payment.getJumlahUang(),
                 qualitySummary,

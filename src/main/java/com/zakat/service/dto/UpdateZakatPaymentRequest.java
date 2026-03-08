@@ -11,9 +11,10 @@ import java.util.UUID;
 
 public record UpdateZakatPaymentRequest(
         @NotBlank String alamat,
+        String payerName,
+        String payerPhone,
         UUID zakatQualityId,
         @Positive BigDecimal jumlahUang,
         @NotNull @NotEmpty List<@NotBlank String> muzakkiNames
 ) {
 }
-

@@ -71,6 +71,20 @@
                         </div>
                     </div>
                     <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="filterPayerName">Nama Pembayar</label>
+                                <input class="form-control" id="filterPayerName" placeholder="Nama pembayar..." type="text">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="filterPayerPhone">No. HP Pembayar</label>
+                                <input class="form-control" id="filterPayerPhone" placeholder="08..." type="text">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
                         <div class="col-md-12">
                             <button class="btn btn-primary" id="btnApply" type="button">Terapkan</button>
                             <button class="btn btn-default" id="btnReset" type="button">Reset</button>
@@ -84,6 +98,8 @@
                             <th>Kwitansi</th>
                             <th>Created</th>
                             <th>Zakat Type</th>
+                            <th>Pembayar</th>
+                            <th>No. HP</th>
                             <th>Alamat</th>
                             <th>Nominal</th>
                             <th>Muzakki</th>
@@ -93,7 +109,7 @@
                         </thead>
                         <tbody id="paymentRows">
                         <tr>
-                            <td colspan="8" class="text-center text-muted">Memuat...</td>
+                            <td colspan="10" class="text-center text-muted">Memuat...</td>
                         </tr>
                         </tbody>
                     </table>
@@ -126,6 +142,8 @@
             const $filterTo = $("#filterTo");
             const $filterQ = $("#filterQ");
             const $filterIncludeCanceled = $("#filterIncludeCanceled");
+            const $filterPayerName = $("#filterPayerName");
+            const $filterPayerPhone = $("#filterPayerPhone");
 
             let page = 0;
             const size = 20;
@@ -156,12 +174,14 @@
                 const content = data && data.content ? data.content : [];
                 $rows.empty();
                 if (!content.length) {
-                    $rows.append(`<tr><td colspan="8" class="text-center text-muted">Tidak ada data</td></tr>`);
+                    $rows.append(`<tr><td colspan="10" class="text-center text-muted">Tidak ada data</td></tr>`);
                 } else {
                     for (const item of content) {
                         const canceledBadge = item.canceled ? `<span class="badge badge-secondary">BATAL</span>` : ``;
                         const receipt = item.receiptNumber ? `<code>${escapeHtml(item.receiptNumber)}</code>` : "-";
                         const alamat = item.alamat ? escapeHtml(item.alamat) : "-";
+                        const payer = item.payerName ? escapeHtml(item.payerName) : "-";
+                        const payerPhone = item.payerPhone ? escapeHtml(item.payerPhone) : "-";
                         const actionHtml = (!CAN_MUTATE || item.canceled)
                             ? `<span class="text-muted">-</span>`
                             : `
@@ -178,6 +198,8 @@
                                 <td>${receipt} ${canceledBadge}</td>
                                 <td>${formatInstant(item.createdAt)}</td>
                                 <td>${escapeHtml(item.zakatTypeLabel || item.zakatType || "-")}</td>
+                                <td>${payer}</td>
+                                <td>${payerPhone}</td>
                                 <td>${alamat}</td>
                                 <td>${formatNominal(item)}</td>
                                 <td>${item.muzakkiCount ?? 0}</td>
@@ -204,11 +226,15 @@
                 const from = $filterFrom.val();
                 const to = $filterTo.val();
                 const q = ($filterQ.val() || "").trim();
+                const payerName = ($filterPayerName.val() || "").trim();
+                const payerPhone = ($filterPayerPhone.val() || "").trim();
                 const includeCanceled = $filterIncludeCanceled.is(":checked");
 
                 if (from) params.set("from", from);
                 if (to) params.set("to", to);
                 if (q) params.set("q", q);
+                if (payerName) params.set("payerName", payerName);
+                if (payerPhone) params.set("payerPhone", payerPhone);
                 if (includeCanceled) params.set("includeCanceled", "true");
 
                 return params.toString();
@@ -222,7 +248,7 @@
                     const data = await res.json();
                     render(data);
                 } catch (e) {
-                    $rows.empty().append(`<tr><td colspan="8" class="text-center text-danger">${String(e.message || e)}</td></tr>`);
+                    $rows.empty().append(`<tr><td colspan="10" class="text-center text-danger">${String(e.message || e)}</td></tr>`);
                 } finally {
                     $btnRefresh.prop("disabled", false);
                 }
@@ -275,6 +301,8 @@
                 $filterFrom.val(iso);
                 $filterTo.val(iso);
                 $filterQ.val("");
+                $filterPayerName.val("");
+                $filterPayerPhone.val("");
                 $filterIncludeCanceled.prop("checked", false);
                 page = 0;
                 load();
@@ -291,6 +319,8 @@
             const iso = today.toISOString().slice(0, 10);
             $filterFrom.val(iso);
             $filterTo.val(iso);
+            $filterPayerName.val("");
+            $filterPayerPhone.val("");
 
             load();
         })();

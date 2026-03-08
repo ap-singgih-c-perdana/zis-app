@@ -16,6 +16,8 @@ public record ZakatPaymentResponse(
         String zakatTypeLabel,
         Integer jumlahJiwa,
         String alamat,
+        String payerName,
+        String payerPhone,
         BigDecimal beratBerasKg,
         BigDecimal jumlahUang,
         ZakatQualitySummary zakatQuality,

@@ -43,6 +43,25 @@
                                 <input class="form-control" id="createdAt" readonly type="text">
                             </div>
                         </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="payerName">Nama Pembayar</label>
+                                <input class="form-control" id="payerName" type="text" placeholder="Nama pembayar (opsional)">
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="payerPhone">No. HP Pembayar</label>
+                                <input class="form-control" id="payerPhone" type="tel" placeholder="08xxxxxxxxxx">
+                            </div>
+                        </div>
+                        <!-- moved Alamat here so it appears above Jenis Zakat -->
+                        <div class="col-12">
+                            <div class="form-group">
+                                <label for="alamat">Alamat *</label>
+                                <textarea class="form-control" id="alamat" placeholder="Contoh: Jl. Mawar No. 10, RT 02/RW 01" rows="2"></textarea>
+                            </div>
+                        </div>
                         <div class="col-md-8">
                             <div class="form-group">
                                 <label for="zakatType">Jenis Zakat *</label>
@@ -119,18 +138,6 @@
             </div>
 
             <div class="card">
-                <div class="card-header">
-                    <h3 class="card-title">Alamat</h3>
-                </div>
-                <div class="card-body">
-                    <div class="form-group">
-                        <label for="alamat">Alamat *</label>
-                        <textarea class="form-control" id="alamat" placeholder="Contoh: Jl. Mawar No. 10, RT 02/RW 01" rows="3"></textarea>
-                    </div>
-                </div>
-            </div>
-
-            <div class="card">
                 <div class="card-body">
                     <button class="btn btn-primary" id="btnSave" type="button">
                         <i class="fas fa-save"></i> Simpan Pembayaran
@@ -165,6 +172,8 @@
             const $previewTotal = $("#previewTotal");
             const $muzakkiContainer = $("#muzakkiContainer");
             const $alamat = $("#alamat");
+            const $payerName = $("#payerName");
+            const $payerPhone = $("#payerPhone");
             const $btnSave = $("#btnSave");
             const $btnReset = $("#btnReset");
 
@@ -311,6 +320,8 @@
                 const payload = {
                     jumlahJiwa: jiwa,
                     alamat: alamat,
+                    payerName: $payerName.val()?.trim() || null,
+                    payerPhone: $payerPhone.val()?.trim() || null,
                     zakatType: zakatType,
                     muzakkiNames: names
                 };
@@ -365,12 +376,16 @@
                 $groupQuality.addClass("d-none");
                 $groupNominal.addClass("d-none");
                 $previewBox.addClass("d-none");
+                $payerName.val("");
+                $payerPhone.val("");
             }
 
             // init
             const now = new Date();
             $createdAt.val(new Intl.DateTimeFormat("id-ID", {dateStyle: "medium", timeStyle: "short"}).format(now));
             renderMuzakkiInputs(1);
+            $payerName.val("");
+            $payerPhone.val("");
 
             $btnJiwaMinus.on("click", function () {
                 const v = clampJiwa();

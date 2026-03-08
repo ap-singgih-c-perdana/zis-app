@@ -14,6 +14,8 @@ import java.util.UUID;
 public record CreateZakatPaymentRequest(
         @NotNull @Positive Integer jumlahJiwa,
         @NotBlank String alamat,
+        String payerName,
+        String payerPhone,
         @NotNull ZisType zakatType,
         UUID zakatQualityId,
         @Positive BigDecimal beratBerasKg,

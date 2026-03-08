@@ -21,4 +21,10 @@ public class ZakatPaymentPageController {
     public String editPayment(@PathVariable String id) {
         return "zakat-payment-edit";
     }
+
+    // New mapping: receipt/kwitansi page for a payment id
+    @GetMapping("/zakat-payments/{id}/receipt")
+    public String receipt(@PathVariable String id) {
+        return "zakat-payment-receipt";
+    }
 }

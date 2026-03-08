@@ -29,7 +29,11 @@ public interface ZakatPaymentRepository extends JpaRepository<ZakatPayment, UUID
                       and (
                             lower(p.alamat) like :qLike
                             or lower(m.nama) like :qLike
+                            or lower(p.payerName) like :qLike
+                            or lower(coalesce(p.payerPhone, '')) like :qLike
                           )
+                      and (:payerLike is null or lower(p.payerName) like :payerLike)
+                      and (:phoneLike is null or lower(coalesce(p.payerPhone, '')) like :phoneLike)
                     """,
             countQuery = """
                     select count(distinct p.id)
@@ -41,13 +45,19 @@ public interface ZakatPaymentRepository extends JpaRepository<ZakatPayment, UUID
                       and (
                             lower(p.alamat) like :qLike
                             or lower(m.nama) like :qLike
+                            or lower(p.payerName) like :qLike
+                            or lower(coalesce(p.payerPhone, '')) like :qLike
                           )
-                    """
+                      and (:payerLike is null or lower(p.payerName) like :payerLike)
+                      and (:phoneLike is null or lower(coalesce(p.payerPhone, '')) like :phoneLike)
+                   """
     )
     Page<ZakatPayment> search(
             @Param("fromInclusive") Instant fromInclusive,
             @Param("toExclusive") Instant toExclusive,
             @Param("qLike") String qLike,
+            @Param("payerLike") String payerLike,
+            @Param("phoneLike") String phoneLike,
             @Param("includeCanceled") boolean includeCanceled,
             Pageable pageable
     );

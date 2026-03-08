@@ -17,6 +17,8 @@ public record ZakatPaymentListItemResponse(
         int muzakkiCount,
         String muzakkiPreview,
         String alamat,
+        String payerName,
+        String payerPhone,
         boolean canceled
 ) {
 }

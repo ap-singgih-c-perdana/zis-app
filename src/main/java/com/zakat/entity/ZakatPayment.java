@@ -41,6 +41,10 @@ public class ZakatPayment {
     @Column(columnDefinition = "text")
     private String alamat;
 
+    private String payerName;
+
+    private String payerPhone;
+
     private BigDecimal beratBerasKg;
 
     private BigDecimal jumlahUang;

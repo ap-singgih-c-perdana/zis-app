@@ -39,6 +39,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class ZakatPaymentService {
 
+    private static final int PREVIEW_LIMIT = 3;
     private static final ZoneId DEFAULT_ZONE = ZoneId.of("Asia/Jakarta");
     private static final Instant MAX_INSTANT = Instant.parse("9999-12-31T23:59:59.999999999Z");
 
@@ -52,6 +53,8 @@ public class ZakatPaymentService {
             LocalDate fromDate,
             LocalDate toDate,
             String q,
+            String payerName,
+            String payerPhone,
             boolean includeCanceled,
             Pageable pageable
     ) {
@@ -64,8 +67,10 @@ public class ZakatPaymentService {
 
         String normalizedQ = (q == null || q.isBlank()) ? null : q.trim().toLowerCase();
         String qLike = normalizedQ == null ? "%" : "%" + normalizedQ + "%";
+        String payerLike = (payerName == null || payerName.isBlank()) ? null : ("%" + payerName.trim().toLowerCase() + "%");
+        String phoneLike = (payerPhone == null || payerPhone.isBlank()) ? null : ("%" + payerPhone.trim().toLowerCase() + "%");
 
-        Page<ZakatPayment> page = zakatPaymentRepository.search(fromInclusive, toExclusive, qLike, includeCanceled, pageable);
+        Page<ZakatPayment> page = zakatPaymentRepository.search(fromInclusive, toExclusive, qLike, payerLike, phoneLike, includeCanceled, pageable);
         if (page.isEmpty()) {
             return Page.empty(pageable);
         }
@@ -77,7 +82,7 @@ public class ZakatPaymentService {
                         Collectors.mapping(MuzakkiPersonRepository.MuzakkiNameRow::getNama, Collectors.toList())
                 ));
 
-        int previewLimit = 30;
+
         List<ZakatPaymentListItemResponse> content = page.getContent().stream()
                 .map(payment -> {
                     List<String> names = namesByPaymentId.getOrDefault(payment.getId(), List.of());
@@ -85,9 +90,9 @@ public class ZakatPaymentService {
                             .sorted(String.CASE_INSENSITIVE_ORDER)
                             .toList();
                     int count = names.size();
-                    String preview = String.join(", ", names.stream().limit(previewLimit).toList());
-                    if (count > previewLimit) {
-                        preview = preview + ", +" + (count - previewLimit);
+                    String preview = String.join(", ", names.stream().limit(PREVIEW_LIMIT).toList());
+                    if (count > PREVIEW_LIMIT) {
+                        preview = preview + ", +" + (count - PREVIEW_LIMIT);
                     }
                     return new ZakatPaymentListItemResponse(
                             payment.getId(),
@@ -100,6 +105,8 @@ public class ZakatPaymentService {
                             count,
                             preview,
                             payment.getAlamat(),
+                            payment.getPayerName(),
+                            payment.getPayerPhone(),
                             payment.isCanceled()
                     );
                 })
@@ -130,6 +137,9 @@ public class ZakatPaymentService {
 
         ZakatPayment payment = new ZakatPayment();
         assignReceiptNumber(payment);
+        // payer info
+        payment.setPayerName(request.payerName());
+        payment.setPayerPhone(request.payerPhone());
         payment.setJumlahJiwa(request.jumlahJiwa());
         payment.setAlamat(request.alamat());
         payment.setZakatType(zakatType);
@@ -200,7 +210,6 @@ public class ZakatPaymentService {
         List<MuzakkiPerson> muzakkiList = request.muzakkiNames().stream()
                 .map(nama -> MuzakkiPerson.builder().nama(nama).payment(payment).build())
                 .collect(Collectors.toCollection(ArrayList::new));
-
         if (payment.getMuzakkiList() == null) {
             payment.setMuzakkiList(muzakkiList);
         } else {
@@ -248,6 +257,10 @@ public class ZakatPaymentService {
             payment.setJumlahUang(request.jumlahUang());
             payment.setBeratBerasKg(null);
         }
+
+        // update payer info when editing
+        payment.setPayerName(request.payerName());
+        payment.setPayerPhone(request.payerPhone());
 
         return zakatPaymentRepository.save(payment);
     }
