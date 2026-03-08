@@ -86,17 +86,36 @@
                             <thead>
                             <tr>
                                 <th style="width: 50px">No</th>
-                                <th style="width: 110px">Tanggal</th>
-                                <th>Nama Muzakki</th>
+                                <th style="width: 140px">
+                                    Tanggal
+                                    <button class="btn btn-xs btn-link p-0 ml-1 sort-btn" data-key="tanggal" type="button" title="Urutkan">
+                                        <i class="fas fa-sort"></i>
+                                    </button>
+                                </th>
+                                <th>
+                                    Nama Muzakki
+                                    <button class="btn btn-xs btn-link p-0 ml-1 sort-btn" data-key="namaMuzakki" type="button" title="Urutkan">
+                                        <i class="fas fa-sort"></i>
+                                    </button>
+                                </th>
                                 <th style="width: 150px">Jenis</th>
-                                <th style="width: 140px" class="text-right">Nominal (Rp)</th>
-                                <th style="width: 120px" class="text-right">Beras (Kg)</th>
-                                <th style="width: 80px" class="text-right">Jiwa</th>
+                                <th style="width: 180px" class="text-right">
+                                    Nominal (Rp)
+                                    <button class="btn btn-xs btn-link p-0 ml-1 sort-btn" data-key="nominalRp" type="button" title="Urutkan">
+                                        <i class="fas fa-sort"></i>
+                                    </button>
+                                </th>
+                                <th style="width: 160px" class="text-right">
+                                    Beras (Kg)
+                                    <button class="btn btn-xs btn-link p-0 ml-1 sort-btn" data-key="berasKg" type="button" title="Urutkan">
+                                        <i class="fas fa-sort"></i>
+                                    </button>
+                                </th>
                             </tr>
                             </thead>
                             <tbody id="rows">
                             <tr>
-                                <td colspan="7" class="text-center text-muted">Memuat...</td>
+                                <td colspan="6" class="text-center text-muted">Memuat...</td>
                             </tr>
                             </tbody>
                         </table>
@@ -135,6 +154,9 @@
             const $instansiAlamat = $("#instansiAlamat");
             const $instansiKota = $("#instansiKota");
 
+            const sortState = { key: "tanggal", dir: "asc" };
+            let currentRows = [];
+
             function todayIso() {
                 return new Date().toISOString().slice(0, 10);
             }
@@ -158,6 +180,81 @@
                     .replaceAll("'", "&#039;");
             }
 
+            function setSort(key, dir) {
+                sortState.key = key;
+                sortState.dir = dir;
+                $(".sort-btn").removeClass("text-primary").each(function () {
+                    $(this).find("i").attr("class", "fas fa-sort");
+                });
+
+                const $btn = $(`.sort-btn[data-key="${key}"]`);
+                $btn.addClass("text-primary");
+                const iconClass = (() => {
+                    if (key === "tanggal") return dir === "asc" ? "fas fa-sort-amount-up-alt" : "fas fa-sort-amount-down";
+                    if (key === "namaMuzakki") return dir === "asc" ? "fas fa-sort-alpha-down" : "fas fa-sort-alpha-up";
+                    // nominal/beras
+                    return dir === "asc" ? "fas fa-sort-numeric-down" : "fas fa-sort-numeric-up";
+                })();
+                $btn.find("i").attr("class", iconClass);
+                renderRows();
+            }
+
+            function compareNullable(a, b, cmp) {
+                const aNull = a === null || a === undefined;
+                const bNull = b === null || b === undefined;
+                if (aNull && bNull) return 0;
+                if (aNull) return 1; // null selalu di bawah
+                if (bNull) return -1;
+                return cmp(a, b);
+            }
+
+            function renderRows() {
+                const list = Array.isArray(currentRows) ? [...currentRows] : [];
+
+                const dirMul = sortState.dir === "desc" ? -1 : 1;
+                const key = sortState.key;
+
+                list.sort((ra, rb) => {
+                    if (key === "tanggal") {
+                        return compareNullable(ra.tanggal, rb.tanggal, (a, b) => String(a).localeCompare(String(b))) * dirMul;
+                    }
+                    if (key === "namaMuzakki") {
+                        const a = (ra.namaMuzakki ?? "").toString().toLowerCase();
+                        const b = (rb.namaMuzakki ?? "").toString().toLowerCase();
+                        return compareNullable(a, b, (x, y) => x.localeCompare(y)) * dirMul;
+                    }
+                    if (key === "nominalRp") {
+                        const a = ra.nominalRp == null ? null : Number(ra.nominalRp);
+                        const b = rb.nominalRp == null ? null : Number(rb.nominalRp);
+                        return compareNullable(a, b, (x, y) => x - y) * dirMul;
+                    }
+                    if (key === "berasKg") {
+                        const a = ra.berasKg == null ? null : Number(ra.berasKg);
+                        const b = rb.berasKg == null ? null : Number(rb.berasKg);
+                        return compareNullable(a, b, (x, y) => x - y) * dirMul;
+                    }
+                    return 0;
+                });
+
+                $rows.empty();
+                if (!list.length) {
+                    $rows.append(`<tr><td colspan="6" class="text-center text-muted">Tidak ada data</td></tr>`);
+                    return;
+                }
+                for (const r of list) {
+                    $rows.append(`
+                        <tr>
+                            <td>${r.no ?? ""}</td>
+                            <td>${escapeHtml(r.tanggal ?? "")}</td>
+                            <td>${escapeHtml(r.namaMuzakki ?? "")}</td>
+                            <td>${escapeHtml(r.zakatTypeLabel || r.zakatType || "")}</td>
+                            <td class="text-right">${r.nominalRp == null ? "-" : rupiah(r.nominalRp)}</td>
+                            <td class="text-right">${r.berasKg == null ? "-" : kg(r.berasKg)}</td>
+                        </tr>
+                    `);
+                }
+            }
+
             function buildCsvUrl() {
                 const from = $from.val();
                 const to = $to.val();
@@ -170,38 +267,20 @@
                 if (!from || !to) return;
 
                 $periodeLabel.text(`Periode: ${from} s/d ${to}`);
-                $rows.empty().append(`<tr><td colspan="7" class="text-center text-muted">Memuat...</td></tr>`);
+                $rows.empty().append(`<tr><td colspan="6" class="text-center text-muted">Memuat...</td></tr>`);
 
                 const res = await fetch(`/api/reports/muzakki-detail?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}`, {
                     headers: {"Accept": "application/json"}
                 });
                 if (!res.ok) {
                     const t = await res.text();
-                    $rows.empty().append(`<tr><td colspan="7" class="text-center text-danger">${escapeHtml(t || `Gagal load (${res.status})`)}</td></tr>`);
+                    $rows.empty().append(`<tr><td colspan="6" class="text-center text-danger">${escapeHtml(t || `Gagal load (${res.status})`)}</td></tr>`);
                     return;
                 }
 
                 const data = await res.json();
-                const list = Array.isArray(data.rows) ? data.rows : [];
-
-                $rows.empty();
-                if (!list.length) {
-                    $rows.append(`<tr><td colspan="7" class="text-center text-muted">Tidak ada data</td></tr>`);
-                } else {
-                    for (const r of list) {
-                        $rows.append(`
-                            <tr>
-                                <td>${r.no ?? ""}</td>
-                                <td>${escapeHtml(r.tanggal ?? "")}</td>
-                                <td>${escapeHtml(r.namaMuzakki ?? "")}</td>
-                                <td>${escapeHtml(r.zakatTypeLabel || r.zakatType || "")}</td>
-                                <td class="text-right">${r.nominalRp == null ? "-" : rupiah(r.nominalRp)}</td>
-                                <td class="text-right">${r.berasKg == null ? "-" : kg(r.berasKg)}</td>
-                                <td class="text-right">${r.jiwa ?? ""}</td>
-                            </tr>
-                        `);
-                    }
-                }
+                currentRows = Array.isArray(data.rows) ? data.rows : [];
+                renderRows();
 
                 $sumNominal.text(rupiah(data.totalNominalRp ?? 0));
                 $sumBeras.text(kg(data.totalBerasKg ?? 0));
@@ -232,9 +311,20 @@
                 window.print();
             });
 
+            $(document).on("click", ".sort-btn", function () {
+                const key = $(this).data("key");
+                if (!key) return;
+                const k = String(key);
+                const nextDir = (sortState.key === k)
+                    ? (sortState.dir === "asc" ? "desc" : "asc")
+                    : "asc";
+                setSort(k, nextDir);
+            });
+
             const iso = todayIso();
             $from.val(iso);
             $to.val(iso);
+            setSort("tanggal", "asc");
             load();
         })();
     </script>

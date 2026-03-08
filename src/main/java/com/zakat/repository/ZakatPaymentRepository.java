@@ -52,6 +52,13 @@ public interface ZakatPaymentRepository extends JpaRepository<ZakatPayment, UUID
             Pageable pageable
     );
 
+    @Query("""
+            select coalesce(max(p.receiptSequence), 0)
+            from ZakatPayment p
+            where p.receiptYear = :year
+            """)
+    long maxReceiptSequenceForYear(@Param("year") Integer year);
+
     interface DashboardTotalsRow {
         long getTotalTransaksi();
 

@@ -60,7 +60,7 @@ public interface MuzakkiPersonRepository extends JpaRepository<MuzakkiPerson, UU
             where p.createdAt >= :fromInclusive
               and p.createdAt < :toExclusive
               and p.canceled = false
-            order by p.createdAt asc, m.nama asc
+            order by p.createdAt asc, lower(coalesce(m.nama, '')) asc
             """)
     List<MuzakkiReportRow> findReportRows(
             @Param("fromInclusive") Instant fromInclusive,

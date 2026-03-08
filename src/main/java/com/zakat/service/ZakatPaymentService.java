@@ -17,6 +17,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -278,9 +279,22 @@ public class ZakatPaymentService {
         int year = LocalDate.now(DEFAULT_ZONE).getYear();
 
         ReceiptSequence sequence = receiptSequenceRepository.findForUpdate(year)
-                .orElseGet(() -> receiptSequenceRepository.saveAndFlush(new ReceiptSequence(year, 0L)));
+                .orElseGet(() -> {
+                    long maxExisting = zakatPaymentRepository.maxReceiptSequenceForYear(year);
+                    try {
+                        return receiptSequenceRepository.saveAndFlush(new ReceiptSequence(year, maxExisting));
+                    } catch (DataIntegrityViolationException e) {
+                        // Race condition: sequence already created by another transaction
+                        return receiptSequenceRepository.findForUpdate(year)
+                                .orElseThrow(() -> e);
+                    }
+                });
 
-        long next = sequence.getLastIssued() + 1;
+        long maxExisting = zakatPaymentRepository.maxReceiptSequenceForYear(year);
+        long base = Math.max(sequence.getLastIssued(), maxExisting);
+        sequence.setLastIssued(base);
+
+        long next = base + 1;
         sequence.setLastIssued(next);
         receiptSequenceRepository.save(sequence);
 

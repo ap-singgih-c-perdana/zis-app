@@ -22,8 +22,7 @@ public record MuzakkiDetailReportResponse(
             ZisType zakatType,
             String zakatTypeLabel,
             BigDecimal nominalRp,
-            BigDecimal berasKg,
-            Integer jiwa
+            BigDecimal berasKg
     ) {
     }
 }

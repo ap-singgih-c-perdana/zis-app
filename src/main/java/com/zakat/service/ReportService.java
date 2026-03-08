@@ -15,6 +15,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -22,6 +23,7 @@ import java.util.EnumMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 
 @Service
@@ -115,17 +117,17 @@ public class ReportService {
 
         BigDecimal totalNominalRp = firstRowByPaymentId.values().stream()
                 .map(MuzakkiPersonRepository.MuzakkiReportRow::getJumlahUang)
-                .filter(v -> v != null)
+                .filter(Objects::nonNull)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
         BigDecimal totalBerasKg = firstRowByPaymentId.values().stream()
                 .map(MuzakkiPersonRepository.MuzakkiReportRow::getBeratBerasKg)
-                .filter(v -> v != null)
+                .filter(Objects::nonNull)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
         long totalJiwa = firstRowByPaymentId.values().stream()
                 .map(MuzakkiPersonRepository.MuzakkiReportRow::getJumlahJiwa)
-                .filter(v -> v != null)
+                .filter(Objects::nonNull)
                 .mapToLong(Integer::longValue)
                 .sum();
 
@@ -218,15 +220,14 @@ public class ReportService {
             sb.append("\n");
         }
 
-        sb.append("No,Tanggal,Nama Muzakki,Jenis,Nominal (Rp),Beras (Kg),Jiwa\n");
+        sb.append("No,Tanggal,Nama Muzakki,Jenis,Nominal (Rp),Beras (Kg)\n");
         for (MuzakkiDetailReportResponse.Row r : report.rows()) {
             sb.append(r.no()).append(",");
             sb.append(csv(r.tanggal())).append(",");
             sb.append(csv(r.namaMuzakki())).append(",");
             sb.append(csv(r.zakatTypeLabel() == null ? r.zakatType() : r.zakatTypeLabel())).append(",");
             sb.append(r.nominalRp() == null ? "" : r.nominalRp()).append(",");
-            sb.append(r.berasKg() == null ? "" : r.berasKg()).append(",");
-            sb.append(r.jiwa() == null ? "" : r.jiwa());
+            sb.append(r.berasKg() == null ? "" : r.berasKg());
             sb.append("\n");
         }
 
@@ -255,17 +256,31 @@ public class ReportService {
     ) {
         int[] counter = {0};
         return rows.stream()
-                .map(r -> new MuzakkiDetailReportResponse.Row(
-                        ++counter[0],
-                        LocalDate.ofInstant(r.getCreatedAt(), DEFAULT_ZONE),
-                        r.getNama(),
-                        r.getZakatType(),
-                        r.getZakatType() == null ? null : r.getZakatType().getLabel(),
-                        r.getJumlahUang(),
-                        r.getBeratBerasKg(),
-                        r.getJumlahJiwa()
-                ))
+                .map(r -> {
+                    BigDecimal nominalPerOrang = perOrang(r.getJumlahUang(), r.getJumlahJiwa(), 0);
+                    BigDecimal berasPerOrang = perOrang(r.getBeratBerasKg(), r.getJumlahJiwa(), 2);
+
+                    return new MuzakkiDetailReportResponse.Row(
+                            ++counter[0],
+                            LocalDate.ofInstant(r.getCreatedAt(), DEFAULT_ZONE),
+                            r.getNama(),
+                            r.getZakatType(),
+                            r.getZakatType() == null ? null : r.getZakatType().getLabel(),
+                            nominalPerOrang,
+                            berasPerOrang
+                    );
+                })
                 .toList();
+    }
+
+    private static BigDecimal perOrang(BigDecimal total, Integer jumlahJiwa, int scale) {
+        if (total == null) {
+            return null;
+        }
+        if (jumlahJiwa == null || jumlahJiwa <= 0) {
+            return total;
+        }
+        return total.divide(BigDecimal.valueOf(jumlahJiwa), scale, RoundingMode.HALF_UP);
     }
 
     private static BigDecimal defaultZero(BigDecimal value) {
