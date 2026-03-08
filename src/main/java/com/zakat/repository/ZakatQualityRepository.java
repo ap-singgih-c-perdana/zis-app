@@ -9,4 +9,6 @@ import java.util.UUID;
 
 public interface ZakatQualityRepository extends JpaRepository<ZakatQuality, UUID> {
     List<ZakatQuality> findByZakatTypeAndActiveTrueOrderByNameAsc(ZisType zakatType);
+
+    long countByZakatTypeAndActiveTrue(ZisType zakatType);
 }

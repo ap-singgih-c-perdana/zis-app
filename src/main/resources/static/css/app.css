@@ -1,0 +1,47 @@
+@media print {
+  @page {
+    margin: 12mm;
+  }
+
+  .main-header,
+  .main-sidebar,
+  .main-footer,
+  .control-sidebar,
+  .content-header,
+  .navbar,
+  .btn,
+  .no-print,
+  .breadcrumb,
+  .card-tools,
+  .pagination {
+    display: none !important;
+  }
+
+  body,
+  .wrapper,
+  .content-wrapper {
+    background: #fff !important;
+  }
+
+  .content-wrapper {
+    margin-left: 0 !important;
+    padding: 0 !important;
+  }
+
+  .content {
+    padding: 0 !important;
+  }
+
+  .card {
+    box-shadow: none !important;
+  }
+
+  .table-responsive {
+    overflow: visible !important;
+  }
+
+  a[href]:after {
+    content: "" !important;
+  }
+}
+

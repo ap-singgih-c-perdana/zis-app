@@ -159,4 +159,19 @@ public interface ZakatPaymentRepository extends JpaRepository<ZakatPayment, UUID
 
     @EntityGraph(attributePaths = {"zakatQuality", "muzakkiList"})
     Optional<ZakatPayment> findWithQualityAndMuzakkiById(UUID id);
+
+    @EntityGraph(attributePaths = {"muzakkiList"})
+    @Query("""
+            select p
+            from ZakatPayment p
+            where p.createdAt >= :fromInclusive
+              and p.createdAt < :toExclusive
+              and p.canceled = false
+            order by p.createdAt desc
+            """)
+    List<ZakatPayment> findRecent(
+            @Param("fromInclusive") Instant fromInclusive,
+            @Param("toExclusive") Instant toExclusive,
+            Pageable pageable
+    );
 }

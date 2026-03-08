@@ -93,5 +93,12 @@ class DashboardControllerIntegrationTest {
         assertThat(json.get("totalJiwaFitrah").asLong()).isEqualTo(64L);
         assertThat(json.get("byType").isArray()).isTrue();
         assertThat(json.get("byType").size()).isGreaterThanOrEqualTo(2);
+
+        assertThat(json.get("receiptInfo").isObject()).isTrue();
+        assertThat(json.get("receiptInfo").get("nextReceiptNumber").asText()).startsWith("KW/");
+
+        assertThat(json.get("activeQualities").isArray()).isTrue();
+        assertThat(json.get("recentPayments").isArray()).isTrue();
+        assertThat(json.get("recentPayments").size()).isEqualTo(3);
     }
 }

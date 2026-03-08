@@ -6,9 +6,53 @@
     <meta charset="UTF-8">
     <title>Rekap ZIS</title>
     <style>
+        .report-letterhead {
+            font-family: "Times New Roman", Times, serif;
+        }
+        .report-letterhead .instansi-name {
+            letter-spacing: 1px;
+            font-size: 28px;
+            font-weight: 700;
+            text-transform: uppercase;
+            margin-bottom: 4px;
+        }
+        .report-letterhead .instansi-address {
+            font-size: 16px;
+            margin-bottom: 6px;
+        }
+        .report-letterhead .instansi-subtitle {
+            font-size: 14px;
+            font-weight: 700;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+        }
+        .report-letterhead .line-double {
+            border-top: 2px solid #777;
+            border-bottom: 1px solid #bbb;
+            height: 4px;
+            margin: 8px 0 18px;
+        }
+        .report-title {
+            font-family: "Times New Roman", Times, serif;
+            text-transform: uppercase;
+            font-weight: 700;
+            font-size: 18px;
+            letter-spacing: 0.5px;
+            margin-bottom: 4px;
+        }
+        .report-title-underline {
+            display: inline-block;
+            border-bottom: 2px solid #444;
+            padding-bottom: 2px;
+        }
+        .report-section-title {
+            margin-top: 40px;
+        }
         @media print {
             .no-print { display: none !important; }
+            .main-header, .main-sidebar, .main-footer, .control-sidebar { display: none !important; }
             .content-wrapper { background: #fff !important; }
+            .content-wrapper { margin-left: 0 !important; }
             .card { box-shadow: none !important; border: none !important; }
         }
     </style>
@@ -66,8 +110,19 @@
 
             <div class="card">
                 <div class="card-body">
-                    <div class="text-center mb-3">
-                        <h4 class="mb-0"><strong>REKAPITULASI PENERIMAAN ZIS</strong></h4>
+                    <div id="instansiHeader" class="d-none report-letterhead">
+                        <div class="text-center">
+                            <div class="instansi-name" id="instansiNama">-</div>
+                            <div class="instansi-address" id="instansiAlamat">-</div>
+                            <div class="instansi-subtitle">PANITIA AMIL ZAKAT, INFAQ, DAN SHODAQOH</div>
+                        </div>
+                        <div class="line-double"></div>
+                    </div>
+
+                    <div class="text-center mb-3 report-section-title">
+                        <h4 class="mb-0 report-title">
+                            <span class="report-title-underline">REKAPITULASI PENERIMAAN ZIS</span>
+                        </h4>
                         <div class="text-muted" id="periodeLabel">Periode: -</div>
                     </div>
 
@@ -108,23 +163,18 @@
 
                     <hr>
 
-                    <div id="instansiBox" class="d-none">
+                    <div id="ttdBox" class="d-none">
                         <div class="row">
-                            <div class="col-md-6">
-                                <div><strong id="instansiNama">-</strong></div>
-                                <div id="instansiAlamat" class="text-muted">-</div>
-                                <div id="instansiKota" class="text-muted">-</div>
-                            </div>
-                            <div class="col-md-6 text-right">
+                            <div class="col-md-12 text-right">
                                 <div class="mb-4" id="tanggalTtd">-</div>
                                 <div class="row">
-                                    <div class="col-6">
+                                    <div class="col-6 text-center">
                                         <div>Mengetahui,</div>
                                         <div>Ketua Panitia</div>
                                         <div style="height: 60px"></div>
                                         <div><strong id="namaKetua">-</strong></div>
                                     </div>
-                                    <div class="col-6">
+                                    <div class="col-6 text-center">
                                         <div>&nbsp;</div>
                                         <div>Bendahara</div>
                                         <div style="height: 60px"></div>
@@ -158,10 +208,10 @@
             const $valTotalUang = $("#valTotalUang");
             const $valTotalJiwa = $("#valTotalJiwa");
 
-            const $instansiBox = $("#instansiBox");
+            const $instansiHeader = $("#instansiHeader");
+            const $ttdBox = $("#ttdBox");
             const $instansiNama = $("#instansiNama");
             const $instansiAlamat = $("#instansiAlamat");
-            const $instansiKota = $("#instansiKota");
             const $tanggalTtd = $("#tanggalTtd");
             const $namaKetua = $("#namaKetua");
             const $namaBendahara = $("#namaBendahara");
@@ -180,12 +230,20 @@
                 return new Date().toISOString().slice(0, 10);
             }
 
+            function formatIsoDateDisplay(iso) {
+                if (!iso) return "-";
+                const parts = String(iso).split("-");
+                if (parts.length !== 3) return iso;
+                const [yyyy, mm, dd] = parts;
+                return `${dd}/${mm}/${yyyy}`;
+            }
+
             async function load() {
                 const from = $from.val();
                 const to = $to.val();
                 if (!from || !to) return;
 
-                $periodeLabel.text(`Periode: ${from} s/d ${to}`);
+                $periodeLabel.text(`Periode: ${formatIsoDateDisplay(from)} s/d ${formatIsoDateDisplay(to)}`);
 
                 const res = await fetch(`/api/reports/rekap-zis?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}`, {
                     headers: {"Accept": "application/json"}
@@ -206,17 +264,20 @@
 
                 const prof = data.institutionProfile;
                 if (prof) {
-                    $instansiBox.removeClass("d-none");
+                    $instansiHeader.removeClass("d-none");
+                    $ttdBox.removeClass("d-none");
                     $instansiNama.text(prof.namaInstansi || "-");
-                    $instansiAlamat.text(prof.alamatLengkap || "-");
-                    $instansiKota.text(prof.kotaKabupaten || "-");
+                    const alamat = prof.alamatLengkap || "-";
+                    const kota = prof.kotaKabupaten ? `, ${prof.kotaKabupaten}` : "";
+                    $instansiAlamat.text(`${alamat}${kota}`);
 
                     const ttd = new Intl.DateTimeFormat("id-ID", {dateStyle: "long"}).format(new Date());
                     $tanggalTtd.text(`${prof.kotaKabupaten || "-"}, ${ttd}`);
                     $namaKetua.text(prof.namaKetua || "-");
                     $namaBendahara.text(prof.namaBendahara || "-");
                 } else {
-                    $instansiBox.addClass("d-none");
+                    $instansiHeader.addClass("d-none");
+                    $ttdBox.addClass("d-none");
                 }
             }
 
@@ -241,4 +302,3 @@
 
 </body>
 </html>
-

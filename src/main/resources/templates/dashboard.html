@@ -1,111 +1,455 @@
 <!DOCTYPE html>
 <html layout:decorate="~{shared/layout}"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
       xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <title>Dashboard</title>
-
 </head>
 <body>
 
 <div layout:fragment="content">
-
-
-    <!-- Content Header (Page header) -->
     <div class="content-header">
         <div class="container-fluid">
             <div class="row mb-2">
                 <div class="col-sm-6">
                     <h1 class="m-0 text-dark">Dashboard</h1>
-                </div><!-- /.col -->
+                </div>
                 <div class="col-sm-6">
                     <ol class="breadcrumb float-sm-right">
-                        <li class="breadcrumb-item"><a href="#">Home</a></li>
-                        <li class="breadcrumb-item active">Dashboard v1</li>
+                        <li class="breadcrumb-item"><a href="/">Home</a></li>
+                        <li class="breadcrumb-item active">Dashboard</li>
                     </ol>
-                </div><!-- /.col -->
-            </div><!-- /.row -->
-        </div><!-- /.container-fluid -->
+                </div>
+            </div>
+        </div>
     </div>
-    <!-- /.content-header -->
 
-    <!-- Main content -->
     <section class="content">
         <div class="container-fluid">
-            <!-- Small boxes (Stat box) -->
+
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Periode</h3>
+                    <div class="card-tools">
+                        <button class="btn btn-tool" data-card-widget="collapse" type="button">
+                            <i class="fas fa-minus"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label for="filterFrom">Dari</label>
+                                <input class="form-control" id="filterFrom" type="date">
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label for="filterTo">Sampai</label>
+                                <input class="form-control" id="filterTo" type="date">
+                            </div>
+                        </div>
+                        <div class="col-md-6 d-flex align-items-end flex-wrap">
+                            <button class="btn btn-primary mr-2 mb-2" id="btnApply" type="button">Tampilkan</button>
+                            <button class="btn btn-default mr-2 mb-2" id="btnReset" type="button">Reset</button>
+
+                            <div class="btn-group mr-2 mb-2" role="group" aria-label="Periode cepat">
+                                <button class="btn btn-outline-secondary" id="btnToday" type="button">Hari ini</button>
+                                <button class="btn btn-outline-secondary" id="btnThisWeek" type="button">Minggu ini</button>
+                                <button class="btn btn-outline-secondary" id="btnThisMonth" type="button">Bulan ini</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <div class="row">
                 <div class="col-lg-3 col-6">
-                    <!-- small box -->
                     <div class="small-box bg-info">
                         <div class="inner">
-                            <h3>150</h3>
-
-                            <p>New Orders</p>
+                            <h3 id="valTotalUang">-</h3>
+                            <p>Total Uang Masuk</p>
                         </div>
                         <div class="icon">
-                            <i class="ion ion-bag"></i>
+                            <i class="fas fa-money-bill-wave"></i>
                         </div>
-                        <a class="small-box-footer" href="#">More info <i class="fas fa-arrow-circle-right"></i></a>
+                        <a class="small-box-footer" href="/reports/rekap">Cetak Rekap <i class="fas fa-arrow-circle-right"></i></a>
                     </div>
                 </div>
-                <!-- ./col -->
                 <div class="col-lg-3 col-6">
-                    <!-- small box -->
                     <div class="small-box bg-success">
                         <div class="inner">
-                            <h3>53<sup style="font-size: 20px">%</sup></h3>
-
-                            <p>Bounce Rate</p>
+                            <h3 id="valTotalBeras">-</h3>
+                            <p>Total Beras Masuk</p>
                         </div>
                         <div class="icon">
-                            <i class="ion ion-stats-bars"></i>
+                            <i class="fas fa-seedling"></i>
                         </div>
-                        <a class="small-box-footer" href="#">More info <i class="fas fa-arrow-circle-right"></i></a>
+                        <a class="small-box-footer" href="/reports/rekap">Lihat rincian <i class="fas fa-arrow-circle-right"></i></a>
                     </div>
                 </div>
-                <!-- ./col -->
                 <div class="col-lg-3 col-6">
-                    <!-- small box -->
                     <div class="small-box bg-warning">
                         <div class="inner">
-                            <h3>44</h3>
-
-                            <p>User Registrations</p>
+                            <h3 id="valTotalTransaksi">-</h3>
+                            <p>Total Transaksi</p>
                         </div>
                         <div class="icon">
-                            <i class="ion ion-person-add"></i>
+                            <i class="fas fa-receipt"></i>
                         </div>
-                        <a class="small-box-footer" href="#">More info <i class="fas fa-arrow-circle-right"></i></a>
+                        <a class="small-box-footer" href="/zakat-payments/list">Riwayat Pembayaran <i class="fas fa-arrow-circle-right"></i></a>
                     </div>
                 </div>
-                <!-- ./col -->
                 <div class="col-lg-3 col-6">
-                    <!-- small box -->
                     <div class="small-box bg-danger">
                         <div class="inner">
-                            <h3>65</h3>
-
-                            <p>Unique Visitors</p>
+                            <h3 id="valTotalJiwa">-</h3>
+                            <p>Total Muzakki (Fitrah)</p>
                         </div>
                         <div class="icon">
-                            <i class="ion ion-pie-graph"></i>
+                            <i class="fas fa-users"></i>
                         </div>
-                        <a class="small-box-footer" href="#">More info <i class="fas fa-arrow-circle-right"></i></a>
+                        <a class="small-box-footer" href="/reports/muzakki-detail">Export Data <i class="fas fa-arrow-circle-right"></i></a>
                     </div>
                 </div>
-                <!-- ./col -->
+            </div>
+
+            <div class="row">
+                <div class="col-lg-8">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Ringkasan per Jenis</h3>
+                        </div>
+                        <div class="card-body p-0">
+                            <div class="table-responsive">
+                                <table class="table table-bordered mb-0">
+                                    <thead>
+                                    <tr>
+                                        <th>Jenis</th>
+                                        <th class="text-right" style="width: 120px">Transaksi</th>
+                                        <th class="text-right" style="width: 200px">Uang (Rp)</th>
+                                        <th class="text-right" style="width: 160px">Beras (Kg)</th>
+                                        <th class="text-right" style="width: 120px">Jiwa</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody id="byTypeRows">
+                                    <tr>
+                                        <td colspan="5" class="text-center text-muted">Memuat...</td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Pembayaran Terbaru (5)</h3>
+                            <div class="card-tools">
+                                <a class="btn btn-sm btn-primary" href="/zakat-payments/new" sec:authorize="hasAnyRole('ADMIN','OPERATOR')">
+                                    <i class="fas fa-plus"></i> Input Pembayaran
+                                </a>
+                            </div>
+                        </div>
+                        <div class="card-body p-0">
+                            <div class="table-responsive">
+                                <table class="table table-striped mb-0">
+                                    <thead>
+                                    <tr>
+                                        <th style="width: 140px">Tanggal</th>
+                                        <th style="width: 170px">Kwitansi</th>
+                                        <th>Alamat</th>
+                                        <th style="width: 170px">Jenis</th>
+                                        <th class="text-right" style="width: 170px">Nominal</th>
+                                        <th class="text-right" style="width: 140px">Beras</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody id="recentRows">
+                                    <tr>
+                                        <td colspan="6" class="text-center text-muted">Memuat...</td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="card-footer text-right">
+                            <a href="/zakat-payments/list">Lihat semua</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Aksi Cepat</h3>
+                        </div>
+                        <div class="card-body">
+                            <a class="btn btn-primary btn-block mb-2" href="/zakat-payments/new" sec:authorize="hasAnyRole('ADMIN','OPERATOR')">
+                                <i class="fas fa-plus"></i> Input Pembayaran
+                            </a>
+                            <a class="btn btn-outline-primary btn-block mb-2" href="/zakat-payments/list">
+                                <i class="fas fa-list"></i> Riwayat Pembayaran
+                            </a>
+                            <a class="btn btn-outline-success btn-block mb-2" href="/reports/rekap">
+                                <i class="fas fa-print"></i> Cetak Rekap
+                            </a>
+                            <a class="btn btn-outline-info btn-block" href="/reports/muzakki-detail">
+                                <i class="fas fa-file-csv"></i> Export CSV Muzakki
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Info</h3>
+                        </div>
+                        <div class="card-body">
+                            <div id="instansiBox" class="d-none mb-3">
+                                <div class="font-weight-bold" id="instansiNama">-</div>
+                                <div class="text-muted" id="instansiAlamat">-</div>
+                            </div>
+
+                            <div class="mb-3">
+                                <div class="text-muted">Kwitansi</div>
+                                <div><span class="font-weight-bold" id="receiptLast">-</span></div>
+                                <div class="text-muted">Berikutnya: <span id="receiptNext">-</span></div>
+                            </div>
+
+                            <div>
+                                <div class="text-muted mb-1">Zakat Quality Aktif (Fitrah)</div>
+                                <ul class="pl-3 mb-0" id="qualityList">
+                                    <li class="text-muted">Memuat...</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </section>
-    <!-- End Main content -->
-
-
 </div>
 
 <th:block layout:fragment="script">
     <script>
-        console.log("Home Page");
+        (function () {
+            const $from = $("#filterFrom");
+            const $to = $("#filterTo");
+            const $btnApply = $("#btnApply");
+            const $btnReset = $("#btnReset");
+            const $btnToday = $("#btnToday");
+            const $btnThisWeek = $("#btnThisWeek");
+            const $btnThisMonth = $("#btnThisMonth");
+
+            const $valTotalUang = $("#valTotalUang");
+            const $valTotalBeras = $("#valTotalBeras");
+            const $valTotalTransaksi = $("#valTotalTransaksi");
+            const $valTotalJiwa = $("#valTotalJiwa");
+
+            const $byTypeRows = $("#byTypeRows");
+            const $recentRows = $("#recentRows");
+
+            const $instansiBox = $("#instansiBox");
+            const $instansiNama = $("#instansiNama");
+            const $instansiAlamat = $("#instansiAlamat");
+            const $receiptLast = $("#receiptLast");
+            const $receiptNext = $("#receiptNext");
+            const $qualityList = $("#qualityList");
+
+            function todayIso() {
+                return new Date().toISOString().slice(0, 10);
+            }
+
+            function rupiah(v) {
+                if (v == null) return "-";
+                const n = Number(v);
+                return `Rp ${new Intl.NumberFormat("id-ID").format(n)}`;
+            }
+
+            function kg(v) {
+                if (v == null) return "-";
+                const n = Number(v);
+                return `${new Intl.NumberFormat("id-ID").format(n)} Kg`;
+            }
+
+            function formatDateId(iso) {
+                if (!iso) return "-";
+                const parts = String(iso).split("-");
+                if (parts.length !== 3) return iso;
+                const [yyyy, mm, dd] = parts;
+                return `${dd}/${mm}/${yyyy}`;
+            }
+
+            function escapeHtml(str) {
+                return String(str ?? "")
+                    .replaceAll("&", "&amp;")
+                    .replaceAll("<", "&lt;")
+                    .replaceAll(">", "&gt;")
+                    .replaceAll("\"", "&quot;")
+                    .replaceAll("'", "&#039;");
+            }
+
+            function startOfWeekIso(d = new Date()) {
+                const x = new Date(d);
+                const day = x.getDay(); // 0..6 (Minggu..Sabtu)
+                const diff = (day === 0 ? -6 : 1) - day; // Senin sebagai awal minggu
+                x.setDate(x.getDate() + diff);
+                return x.toISOString().slice(0, 10);
+            }
+
+            function startOfMonthIso(d = new Date()) {
+                const x = new Date(d);
+                x.setDate(1);
+                return x.toISOString().slice(0, 10);
+            }
+
+            async function load() {
+                const from = $from.val();
+                const to = $to.val();
+                if (!from || !to) return;
+
+                $byTypeRows.empty().append(`<tr><td colspan="5" class="text-center text-muted">Memuat...</td></tr>`);
+                $recentRows.empty().append(`<tr><td colspan="6" class="text-center text-muted">Memuat...</td></tr>`);
+                $qualityList.empty().append(`<li class="text-muted">Memuat...</li>`);
+
+                const res = await fetch(`/api/dashboard/summary?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}`, {
+                    headers: {"Accept": "application/json"}
+                });
+                if (!res.ok) {
+                    const t = await res.text();
+                    alert(t || `Gagal load (${res.status})`);
+                    return;
+                }
+                const data = await res.json();
+
+                $valTotalUang.text(rupiah(data.totalUangMasuk));
+                $valTotalBeras.text(kg(data.totalBerasKg));
+                $valTotalTransaksi.text(new Intl.NumberFormat("id-ID").format(Number(data.totalTransaksi ?? 0)));
+                $valTotalJiwa.text(new Intl.NumberFormat("id-ID").format(Number(data.totalJiwaFitrah ?? 0)));
+
+                // byType
+                const byType = Array.isArray(data.byType) ? data.byType : [];
+                $byTypeRows.empty();
+                if (!byType.length) {
+                    $byTypeRows.append(`<tr><td colspan="5" class="text-center text-muted">Tidak ada data</td></tr>`);
+                } else {
+                    for (const r of byType) {
+                        const label = r.zakatTypeLabel || r.zakatType || "-";
+                        $byTypeRows.append(`
+                            <tr>
+                                <td>${escapeHtml(label)}</td>
+                                <td class="text-right">${new Intl.NumberFormat("id-ID").format(Number(r.transaksi ?? 0))}</td>
+                                <td class="text-right">${rupiah(r.totalUang)}</td>
+                                <td class="text-right">${kg(r.totalBerasKg)}</td>
+                                <td class="text-right">${new Intl.NumberFormat("id-ID").format(Number(r.totalJiwa ?? 0))}</td>
+                            </tr>
+                        `);
+                    }
+                }
+
+                // recent
+                const recent = Array.isArray(data.recentPayments) ? data.recentPayments : [];
+                $recentRows.empty();
+                if (!recent.length) {
+                    $recentRows.append(`<tr><td colspan="6" class="text-center text-muted">Tidak ada data</td></tr>`);
+                } else {
+                    for (const p of recent) {
+                        const tanggal = p.createdAt ? String(p.createdAt).slice(0, 10) : "";
+                        const label = p.zakatTypeLabel || p.zakatType || "-";
+                        let nominalText = "-";
+                        let berasText = "-";
+                        const jiwa = Number(p.jumlahJiwa ?? 0);
+                        const isFitrah = p.zakatType === "ZAKAT_FITRAH_BERAS" || p.zakatType === "ZAKAT_FITRAH_UANG";
+                        if (p.jumlahUang != null) {
+                            const n = Number(p.jumlahUang);
+                            const perJiwa = isFitrah && jiwa > 0 ? n / jiwa : n;
+                            nominalText = rupiah(perJiwa);
+                        }
+                        if (p.beratBerasKg != null) {
+                            const n = Number(p.beratBerasKg);
+                            const perJiwa = isFitrah && jiwa > 0 ? n / jiwa : n;
+                            berasText = kg(perJiwa);
+                        }
+                        const alamat = (p.alamat ?? "").toString();
+                        const alamatShort = alamat.length > 50 ? (alamat.slice(0, 50) + "...") : alamat;
+                        $recentRows.append(`
+                            <tr>
+                                <td>${escapeHtml(formatDateId(tanggal))}</td>
+                                <td>${escapeHtml(p.receiptNumber || "-")}</td>
+                                <td title="${escapeHtml(alamat)}">${escapeHtml(alamatShort)}</td>
+                                <td>${escapeHtml(label)}</td>
+                                <td class="text-right">${nominalText}</td>
+                                <td class="text-right">${berasText}</td>
+                            </tr>
+                        `);
+                    }
+                }
+
+                // info: instansi
+                const prof = data.institutionProfile;
+                if (prof) {
+                    $instansiBox.removeClass("d-none");
+                    $instansiNama.text(prof.namaInstansi || "-");
+                    const alamat = prof.alamatLengkap || "-";
+                    const kota = prof.kotaKabupaten ? `, ${prof.kotaKabupaten}` : "";
+                    $instansiAlamat.text(`${alamat}${kota}`);
+                } else {
+                    $instansiBox.addClass("d-none");
+                }
+
+                // info: receipt
+                const ri = data.receiptInfo;
+                $receiptLast.text((ri && ri.lastReceiptNumber) ? ri.lastReceiptNumber : "-");
+                $receiptNext.text((ri && ri.nextReceiptNumber) ? ri.nextReceiptNumber : "-");
+
+                // info: quality counts
+                const qualities = Array.isArray(data.activeQualities) ? data.activeQualities : [];
+                $qualityList.empty();
+                if (!qualities.length) {
+                    $qualityList.append(`<li class="text-muted">-</li>`);
+                } else {
+                    for (const q of qualities) {
+                        const label = q.zakatTypeLabel || q.zakatType || "-";
+                        $qualityList.append(`<li>${escapeHtml(label)}: <strong>${new Intl.NumberFormat("id-ID").format(Number(q.activeCount ?? 0))}</strong></li>`);
+                    }
+                }
+            }
+
+            $btnApply.on("click", load);
+            $btnReset.on("click", function () {
+                const iso = todayIso();
+                $from.val(iso);
+                $to.val(iso);
+                load();
+            });
+            $btnToday.on("click", function () {
+                const iso = todayIso();
+                $from.val(iso);
+                $to.val(iso);
+                load();
+            });
+            $btnThisWeek.on("click", function () {
+                const end = todayIso();
+                const start = startOfWeekIso(new Date());
+                $from.val(start);
+                $to.val(end);
+                load();
+            });
+            $btnThisMonth.on("click", function () {
+                const end = todayIso();
+                const start = startOfMonthIso(new Date());
+                $from.val(start);
+                $to.val(end);
+                load();
+            });
+
+            const iso = todayIso();
+            $from.val(startOfMonthIso(new Date()));
+            $to.val(iso);
+            load();
+        })();
     </script>
 </th:block>
 

@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html layout:decorate="~{shared/layout}"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
       xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
@@ -31,7 +32,7 @@
                 <div class="card-header">
                     <h3 class="card-title">Daftar Payment</h3>
                     <div class="card-tools">
-                        <a class="btn btn-sm btn-primary" href="/zakat-payments/new">
+                        <a class="btn btn-sm btn-primary" href="/zakat-payments/new" sec:authorize="hasAnyRole('ADMIN','OPERATOR')">
                             <i class="fas fa-plus"></i> Input Baru
                         </a>
                         <button class="btn btn-sm btn-default" id="btnRefresh" type="button">
@@ -92,7 +93,7 @@
                         </thead>
                         <tbody id="paymentRows">
                         <tr>
-                            <td colspan="7" class="text-center text-muted">Memuat...</td>
+                            <td colspan="8" class="text-center text-muted">Memuat...</td>
                         </tr>
                         </tbody>
                     </table>
@@ -110,7 +111,9 @@
 </div>
 
 <th:block layout:fragment="script">
-    <script>
+    <script th:inline="javascript">
+        const CAN_MUTATE = /*[[${#authorization.expression("hasAnyRole('ADMIN','OPERATOR')")}]]*/ false;
+
         (function () {
             const $rows = $("#paymentRows");
             const $pageInfo = $("#pageInfo");
@@ -153,13 +156,13 @@
                 const content = data && data.content ? data.content : [];
                 $rows.empty();
                 if (!content.length) {
-                    $rows.append(`<tr><td colspan="7" class="text-center text-muted">Tidak ada data</td></tr>`);
+                    $rows.append(`<tr><td colspan="8" class="text-center text-muted">Tidak ada data</td></tr>`);
                 } else {
                     for (const item of content) {
                         const canceledBadge = item.canceled ? `<span class="badge badge-secondary">BATAL</span>` : ``;
                         const receipt = item.receiptNumber ? `<code>${escapeHtml(item.receiptNumber)}</code>` : "-";
                         const alamat = item.alamat ? escapeHtml(item.alamat) : "-";
-                        const actionHtml = item.canceled
+                        const actionHtml = (!CAN_MUTATE || item.canceled)
                             ? `<span class="text-muted">-</span>`
                             : `
                                 <a class="btn btn-xs btn-info mr-1" href="/zakat-payments/${encodeURIComponent(item.id)}/edit">
@@ -219,7 +222,7 @@
                     const data = await res.json();
                     render(data);
                 } catch (e) {
-                    $rows.empty().append(`<tr><td colspan="7" class="text-center text-danger">${String(e.message || e)}</td></tr>`);
+                    $rows.empty().append(`<tr><td colspan="8" class="text-center text-danger">${String(e.message || e)}</td></tr>`);
                 } finally {
                     $btnRefresh.prop("disabled", false);
                 }

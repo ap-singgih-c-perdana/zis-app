@@ -24,6 +24,13 @@ public class WebSecurityConfig {
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(authorize -> authorize
+                        // Pages
+                        .requestMatchers("/user/**", "/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/zakat-payments/new", "/zakat-payments/*/edit").hasAnyRole("ADMIN", "OPERATOR")
+                        .requestMatchers("/zakat-payments/list").hasAnyRole("ADMIN", "OPERATOR", "VIEWER")
+                        .requestMatchers("/reports/**").hasAnyRole("ADMIN", "OPERATOR", "VIEWER")
+                        .requestMatchers("/").hasAnyRole("ADMIN", "OPERATOR", "VIEWER")
+
                         // Users
                         .requestMatchers("/api/users/**").hasRole("ADMIN")
 
@@ -40,7 +47,7 @@ public class WebSecurityConfig {
                         // Payments: OPERATOR/ADMIN can create & list
                         .requestMatchers(HttpMethod.POST, "/api/zakat-payments/**").hasAnyRole("ADMIN", "OPERATOR")
                         .requestMatchers(HttpMethod.PUT, "/api/zakat-payments/**").hasAnyRole("ADMIN", "OPERATOR")
-                        .requestMatchers(HttpMethod.GET, "/api/zakat-payments/**").hasAnyRole("ADMIN", "OPERATOR")
+                        .requestMatchers(HttpMethod.GET, "/api/zakat-payments/**").hasAnyRole("ADMIN", "OPERATOR", "VIEWER")
 
                         // Reports: VIEWER and above
                         .requestMatchers(HttpMethod.GET, "/api/reports/**").hasAnyRole("ADMIN", "OPERATOR", "VIEWER")
