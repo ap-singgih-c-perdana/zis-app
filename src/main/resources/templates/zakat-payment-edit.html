@@ -304,8 +304,16 @@
                     }
 
                     const names = Array.isArray(currentPayment.muzakkiNames) ? currentPayment.muzakkiNames : [];
-                    $jumlahJiwa.val(String(names.length || 1));
-                    renderMuzakkiInputs(names.length ? names : [""]);
+                    // If payment type is FIDIAH, hide muzakki inputs and don't render names
+                    if (currentPayment.zakatType === 'FIDIAH') {
+                        $muzakkiContainer.closest('.card').hide();
+                        $jumlahJiwa.val('1');
+                        renderMuzakkiInputs(0);
+                    } else {
+                        $muzakkiContainer.closest('.card').show();
+                        $jumlahJiwa.val(String(names.length || 1));
+                        renderMuzakkiInputs(names.length ? names : [""]);
+                    }
 
                     if (isFitrahType(currentPayment.zakatType)) {
                         $groupNominal.addClass("d-none");
@@ -329,7 +337,8 @@
 
                 if (!currentPayment) return;
                 if (!alamat) return showError("Alamat wajib diisi");
-                if (names.length !== jiwa) return showError("Jumlah nama muzakki harus sama dengan jumlah jiwa");
+                // Skip muzakki validation for Fidiah (nominal-only)
+                if (currentPayment.zakatType !== 'FIDIAH' && names.length !== jiwa) return showError("Jumlah nama muzakki harus sama dengan jumlah jiwa");
 
                 const payload = {
                     alamat: alamat,

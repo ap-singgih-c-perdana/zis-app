@@ -9,8 +9,8 @@ public enum ZisType {
     ZAKAT_FITRAH_BERAS("Zakat Fitrah (Beras)"),
     ZAKAT_FITRAH_UANG("Zakat Fitrah (Uang)"),
     ZAKAT_MAL("Zakat Mal"),
-    INFAQ_SEDEKAH("Infaq/Sedekah");
+    INFAQ_SEDEKAH("Infaq/Sedekah"),
+    FIDIAH("Fidiah");
 
     private final String label;
 }
-

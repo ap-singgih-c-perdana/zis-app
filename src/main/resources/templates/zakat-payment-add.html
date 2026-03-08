@@ -71,6 +71,7 @@
                                     <option value="ZAKAT_FITRAH_UANG">Zakat Fitrah (Uang)</option>
                                     <option value="ZAKAT_MAL">Zakat Mal</option>
                                     <option value="INFAQ_SEDEKAH">Infaq / Sedekah</option>
+                                    <option value="FIDIAH">Fidiah</option>
                                 </select>
                             </div>
                         </div>
@@ -286,24 +287,41 @@
                 $alertError.addClass("d-none").text("");
                 $alertSuccess.addClass("d-none").text("");
 
+                const val = $zakatType.val();
                 if (isFitrahType()) {
+                    // Fitrih: choose quality, jumlahJiwa matters
                     $groupNominal.addClass("d-none");
                     $jumlahUang.val("");
 
                     $groupQuality.removeClass("d-none");
                     $zakatQualityId.val("");
-                    loadQualities($zakatType.val());
-                } else if ($zakatType.val()) {
+                    loadQualities(val);
+                    $muzakkiContainer.closest('.card').show();
+                } else if (val === 'FIDIAH') {
+                    // Fidiah: only numeric amount input required
                     $groupQuality.addClass("d-none");
                     $zakatQualityId.val("");
                     $qualityHint.text("");
                     $previewBox.addClass("d-none");
 
                     $groupNominal.removeClass("d-none");
+                    // For fidiah we don't need per-jiwa muzakki inputs
+                    renderMuzakkiInputs(0);
+                } else if (val) {
+                    // Other zakat types: expect nominal input
+                    $groupQuality.addClass("d-none");
+                    $zakatQualityId.val("");
+                    $qualityHint.text("");
+                    $previewBox.addClass("d-none");
+
+                    $groupNominal.removeClass("d-none");
+                    $muzakkiContainer.closest('.card').show();
+                    renderMuzakkiInputs(clampJiwa());
                 } else {
                     $groupQuality.addClass("d-none");
                     $groupNominal.addClass("d-none");
                     $previewBox.addClass("d-none");
+                    $muzakkiContainer.closest('.card').show();
                 }
             }
 
@@ -315,7 +333,8 @@
 
                 if (!zakatType) return showError("Jenis zakat wajib dipilih");
                 if (!alamat) return showError("Alamat wajib diisi");
-                if (names.length !== jiwa) return showError("Jumlah nama muzakki harus sama dengan jumlah jiwa");
+                // For Fidiah we don't require muzakki names (it's a nominal-only payment)
+                if (zakatType !== 'FIDIAH' && names.length !== jiwa) return showError("Jumlah nama muzakki harus sama dengan jumlah jiwa");
 
                 const payload = {
                     jumlahJiwa: jiwa,
