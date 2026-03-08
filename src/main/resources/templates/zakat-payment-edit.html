@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html layout:decorate="~{shared/layout}"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Edit Pembayaran</title>
+</head>
+<body>
+
+<div layout:fragment="content">
+    <div class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-6">
+                    <h1 class="m-0 text-dark">Edit Pembayaran</h1>
+                </div>
+                <div class="col-sm-6">
+                    <ol class="breadcrumb float-sm-right">
+                        <li class="breadcrumb-item"><a href="/">Home</a></li>
+                        <li class="breadcrumb-item"><a href="/zakat-payments/list">Riwayat</a></li>
+                        <li class="breadcrumb-item active">Edit</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <section class="content">
+        <div class="container-fluid">
+
+            <div class="alert alert-success d-none" id="alertSuccess"></div>
+            <div class="alert alert-danger d-none" id="alertError"></div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Info Pembayaran</h3>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label>No. Kwitansi</label>
+                                <input class="form-control" id="receiptNumber" readonly type="text">
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label>Tanggal</label>
+                                <input class="form-control" id="createdAt" readonly type="text">
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="zakatType">Jenis Zakat</label>
+                                <input class="form-control" id="zakatType" readonly type="text">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Jiwa & Nilai</h3>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="jumlahJiwa">Jumlah Jiwa</label>
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <button class="btn btn-outline-secondary" id="btnJiwaMinus" type="button">-</button>
+                                    </div>
+                                    <input class="form-control text-center" id="jumlahJiwa" min="1" step="1" type="number" value="1">
+                                    <div class="input-group-append">
+                                        <button class="btn btn-outline-secondary" id="btnJiwaPlus" type="button">+</button>
+                                    </div>
+                                </div>
+                                <small class="text-muted">Edit nama muzakki akan mengikuti jumlah jiwa.</small>
+                            </div>
+                        </div>
+
+                        <div class="col-md-8">
+                            <div class="form-group d-none" id="groupQuality">
+                                <label for="zakatQualityId">Zakat Quality</label>
+                                <select class="form-control" id="zakatQualityId" disabled>
+                                    <option value="" selected disabled>Pilih zakat quality...</option>
+                                </select>
+                                <small class="text-muted" id="qualityHint"></small>
+                            </div>
+
+                            <div class="form-group d-none" id="groupNominal">
+                                <label for="jumlahUang">Nominal Uang (Rp)</label>
+                                <input class="form-control" id="jumlahUang" min="1" placeholder="0" step="1" type="number">
+                            </div>
+
+                            <div class="callout callout-info d-none" id="previewBox">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div><strong>Per jiwa:</strong> <span id="previewPerJiwa">-</span></div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div><strong>Total:</strong> <span id="previewTotal">-</span></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Data Muzakki</h3>
+                </div>
+                <div class="card-body" id="muzakkiContainer"></div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Alamat</h3>
+                </div>
+                <div class="card-body">
+                    <div class="form-group">
+                        <label for="alamat">Alamat</label>
+                        <textarea class="form-control" id="alamat" rows="3"></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-body">
+                    <button class="btn btn-primary" id="btnSave" type="button">
+                        <i class="fas fa-save"></i> Simpan Perubahan
+                    </button>
+                    <a class="btn btn-default" href="/zakat-payments/list">Kembali</a>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+
+<th:block layout:fragment="script">
+    <script>
+        (function () {
+            const FITRAH_TYPES = new Set(["ZAKAT_FITRAH_BERAS", "ZAKAT_FITRAH_UANG"]);
+            const paymentId = window.location.pathname.split("/").filter(Boolean).slice(-2)[0]; // /zakat-payments/{id}/edit
+
+            const $alertSuccess = $("#alertSuccess");
+            const $alertError = $("#alertError");
+            const $receiptNumber = $("#receiptNumber");
+            const $createdAt = $("#createdAt");
+            const $zakatType = $("#zakatType");
+            const $jumlahJiwa = $("#jumlahJiwa");
+            const $btnJiwaMinus = $("#btnJiwaMinus");
+            const $btnJiwaPlus = $("#btnJiwaPlus");
+            const $groupQuality = $("#groupQuality");
+            const $zakatQualityId = $("#zakatQualityId");
+            const $qualityHint = $("#qualityHint");
+            const $groupNominal = $("#groupNominal");
+            const $jumlahUang = $("#jumlahUang");
+            const $previewBox = $("#previewBox");
+            const $previewPerJiwa = $("#previewPerJiwa");
+            const $previewTotal = $("#previewTotal");
+            const $muzakkiContainer = $("#muzakkiContainer");
+            const $alamat = $("#alamat");
+            const $btnSave = $("#btnSave");
+
+            let currentPayment = null;
+            let currentQualities = [];
+
+            function showError(message) {
+                $alertSuccess.addClass("d-none").text("");
+                $alertError.removeClass("d-none").text(message || "Terjadi kesalahan");
+                window.scrollTo({top: 0, behavior: "smooth"});
+            }
+
+            function showSuccess(message) {
+                $alertError.addClass("d-none").text("");
+                $alertSuccess.removeClass("d-none").text(message || "Berhasil");
+                window.scrollTo({top: 0, behavior: "smooth"});
+            }
+
+            function formatNumber(n) {
+                if (n === null || n === undefined || n === "") return "-";
+                const num = Number(n);
+                if (Number.isNaN(num)) return "-";
+                return new Intl.NumberFormat("id-ID").format(num);
+            }
+
+            function clampJiwa() {
+                let v = parseInt($jumlahJiwa.val(), 10);
+                if (Number.isNaN(v) || v < 1) v = 1;
+                $jumlahJiwa.val(String(v));
+                return v;
+            }
+
+            function renderMuzakkiInputs(names) {
+                const count = names.length;
+                $muzakkiContainer.empty();
+                for (let i = 0; i < count; i++) {
+                    const idx = i + 1;
+                    const name = names[i] || "";
+                    const group = $(`
+                        <div class="form-group">
+                            <label>Nama Muzakki #${idx}</label>
+                            <input class="form-control muzakki-name" placeholder="Nama muzakki" type="text" value="">
+                        </div>
+                    `);
+                    group.find("input").val(name);
+                    $muzakkiContainer.append(group);
+                }
+            }
+
+            function isFitrahType(type) {
+                return FITRAH_TYPES.has(type);
+            }
+
+            function updatePreview() {
+                if (!currentPayment || !isFitrahType(currentPayment.zakatType)) {
+                    $previewBox.addClass("d-none");
+                    return;
+                }
+                const selectedId = $zakatQualityId.val();
+                const q = currentQualities.find(x => x.id === selectedId);
+                if (!q) {
+                    $previewBox.addClass("d-none");
+                    return;
+                }
+                const jiwa = clampJiwa();
+                if (currentPayment.zakatType === "ZAKAT_FITRAH_BERAS") {
+                    const perJiwa = q.beratPerJiwaKg;
+                    const total = perJiwa * jiwa;
+                    $previewPerJiwa.text(`${formatNumber(perJiwa)} Kg`);
+                    $previewTotal.text(`${formatNumber(total)} Kg`);
+                } else {
+                    const perJiwa = q.nominalPerJiwa;
+                    const total = perJiwa * jiwa;
+                    $previewPerJiwa.text(`Rp ${formatNumber(perJiwa)}`);
+                    $previewTotal.text(`Rp ${formatNumber(total)}`);
+                }
+                $previewBox.removeClass("d-none");
+            }
+
+            async function loadQualities(zakatType, selectedId) {
+                $qualityHint.text("");
+                $zakatQualityId.prop("disabled", true);
+                $zakatQualityId.empty().append(`<option value="" selected disabled>Memuat...</option>`);
+                currentQualities = [];
+                $previewBox.addClass("d-none");
+
+                try {
+                    const res = await fetch(`/api/zakat-qualities?zakatType=${encodeURIComponent(zakatType)}`, {
+                        headers: {"Accept": "application/json"}
+                    });
+                    if (!res.ok) throw new Error(`Gagal load zakat quality (${res.status})`);
+                    const list = await res.json();
+                    currentQualities = Array.isArray(list) ? list : [];
+
+                    $zakatQualityId.empty().append(`<option value="" selected disabled>Pilih zakat quality...</option>`);
+                    for (const q of currentQualities) {
+                        const label = (() => {
+                            if (zakatType === "ZAKAT_FITRAH_BERAS") return `${q.name} (${formatNumber(q.beratPerJiwaKg)} Kg/jiwa)`;
+                            return `${q.name} (Rp ${formatNumber(q.nominalPerJiwa)}/jiwa)`;
+                        })();
+                        $zakatQualityId.append(`<option value="${q.id}">${label}</option>`);
+                    }
+                    $zakatQualityId.prop("disabled", false);
+                    if (selectedId) $zakatQualityId.val(selectedId);
+                    updatePreview();
+                } catch (e) {
+                    $zakatQualityId.empty().append(`<option value="" selected disabled>Gagal memuat</option>`);
+                    $qualityHint.text(String(e.message || e));
+                }
+            }
+
+            async function loadPayment() {
+                try {
+                    const res = await fetch(`/api/zakat-payments/${encodeURIComponent(paymentId)}`, {headers: {"Accept": "application/json"}});
+                    if (!res.ok) throw new Error(`Gagal load payment (${res.status})`);
+                    currentPayment = await res.json();
+
+                    if (currentPayment.canceled) {
+                        $btnSave.prop("disabled", true);
+                        showError("Payment ini sudah dibatalkan dan tidak bisa diedit.");
+                    }
+
+                    $receiptNumber.val(currentPayment.receiptNumber || "");
+                    $zakatType.val(currentPayment.zakatType || "");
+                    $alamat.val(currentPayment.alamat || "");
+
+                    if (currentPayment.createdAt) {
+                        const d = new Date(currentPayment.createdAt);
+                        $createdAt.val(new Intl.DateTimeFormat("id-ID", {dateStyle: "medium", timeStyle: "short"}).format(d));
+                    }
+
+                    const names = Array.isArray(currentPayment.muzakkiNames) ? currentPayment.muzakkiNames : [];
+                    $jumlahJiwa.val(String(names.length || 1));
+                    renderMuzakkiInputs(names.length ? names : [""]);
+
+                    if (isFitrahType(currentPayment.zakatType)) {
+                        $groupNominal.addClass("d-none");
+                        $groupQuality.removeClass("d-none");
+                        const selectedId = currentPayment.zakatQuality ? currentPayment.zakatQuality.id : null;
+                        await loadQualities(currentPayment.zakatType, selectedId);
+                    } else {
+                        $groupQuality.addClass("d-none");
+                        $groupNominal.removeClass("d-none");
+                        $jumlahUang.val(currentPayment.jumlahUang || "");
+                    }
+                } catch (e) {
+                    showError(String(e.message || e));
+                }
+            }
+
+            async function submit() {
+                const jiwa = clampJiwa();
+                const alamat = ($alamat.val() || "").trim();
+                const names = $(".muzakki-name").toArray().map(el => (el.value || "").trim()).filter(x => x.length);
+
+                if (!currentPayment) return;
+                if (!alamat) return showError("Alamat wajib diisi");
+                if (names.length !== jiwa) return showError("Jumlah nama muzakki harus sama dengan jumlah jiwa");
+
+                const payload = {
+                    alamat: alamat,
+                    muzakkiNames: names
+                };
+
+                if (isFitrahType(currentPayment.zakatType)) {
+                    const qualityId = $zakatQualityId.val();
+                    if (!qualityId) return showError("Zakat quality wajib dipilih");
+                    payload.zakatQualityId = qualityId;
+                } else {
+                    const nominal = Number($jumlahUang.val());
+                    if (!nominal || nominal <= 0) return showError("Nominal uang wajib diisi");
+                    payload.jumlahUang = nominal;
+                }
+
+                $btnSave.prop("disabled", true);
+                try {
+                    const res = await fetch(`/api/zakat-payments/${encodeURIComponent(paymentId)}`, {
+                        method: "PUT",
+                        headers: {"Content-Type": "application/json", "Accept": "application/json"},
+                        body: JSON.stringify(payload)
+                    });
+                    if (!res.ok) {
+                        const text = await res.text();
+                        return showError(text || `Gagal menyimpan (${res.status})`);
+                    }
+                    const data = await res.json();
+                    currentPayment = data;
+                    showSuccess("Perubahan tersimpan.");
+                } catch (e) {
+                    showError(String(e.message || e));
+                } finally {
+                    $btnSave.prop("disabled", false);
+                }
+            }
+
+            $btnJiwaMinus.on("click", function () {
+                const v = clampJiwa();
+                const next = Math.max(1, v - 1);
+                $jumlahJiwa.val(String(next));
+                const currentNames = $(".muzakki-name").toArray().map(el => el.value || "");
+                renderMuzakkiInputs(currentNames.slice(0, next));
+                updatePreview();
+            });
+            $btnJiwaPlus.on("click", function () {
+                const v = clampJiwa();
+                const next = v + 1;
+                $jumlahJiwa.val(String(next));
+                const currentNames = $(".muzakki-name").toArray().map(el => el.value || "");
+                currentNames.push("");
+                renderMuzakkiInputs(currentNames);
+                updatePreview();
+            });
+            $jumlahJiwa.on("change", function () {
+                const next = clampJiwa();
+                const currentNames = $(".muzakki-name").toArray().map(el => el.value || "");
+                const adjusted = currentNames.slice(0, next);
+                while (adjusted.length < next) adjusted.push("");
+                renderMuzakkiInputs(adjusted);
+                updatePreview();
+            });
+            $zakatQualityId.on("change", updatePreview);
+            $btnSave.on("click", submit);
+
+            loadPayment();
+        })();
+    </script>
+</th:block>
+
+</body>
+</html>
+

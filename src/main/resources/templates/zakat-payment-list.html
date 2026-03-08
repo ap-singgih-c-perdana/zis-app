@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html layout:decorate="~{shared/layout}"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Riwayat Pembayaran</title>
+</head>
+<body>
+
+<div layout:fragment="content">
+    <div class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-6">
+                    <h1 class="m-0 text-dark">Riwayat Pembayaran</h1>
+                </div>
+                <div class="col-sm-6">
+                    <ol class="breadcrumb float-sm-right">
+                        <li class="breadcrumb-item"><a href="/">Home</a></li>
+                        <li class="breadcrumb-item active">Riwayat Pembayaran</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <section class="content">
+        <div class="container-fluid">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Daftar Payment</h3>
+                    <div class="card-tools">
+                        <a class="btn btn-sm btn-primary" href="/zakat-payments/new">
+                            <i class="fas fa-plus"></i> Input Baru
+                        </a>
+                        <button class="btn btn-sm btn-default" id="btnRefresh" type="button">
+                            <i class="fas fa-sync"></i> Refresh
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label for="filterFrom">Dari Tanggal</label>
+                                <input class="form-control" id="filterFrom" type="date">
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label for="filterTo">Sampai Tanggal</label>
+                                <input class="form-control" id="filterTo" type="date">
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="filterQ">Cari (nama/alamat)</label>
+                                <input class="form-control" id="filterQ" placeholder="Ketik nama muzakki atau alamat..." type="text">
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="form-group">
+                                <label>&nbsp;</label>
+                                <div class="custom-control custom-checkbox">
+                                    <input class="custom-control-input" id="filterIncludeCanceled" type="checkbox">
+                                    <label class="custom-control-label" for="filterIncludeCanceled">Termasuk batal</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <button class="btn btn-primary" id="btnApply" type="button">Terapkan</button>
+                            <button class="btn btn-default" id="btnReset" type="button">Reset</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body table-responsive p-0">
+                    <table class="table table-hover text-nowrap">
+                        <thead>
+                        <tr>
+                            <th>Kwitansi</th>
+                            <th>Created</th>
+                            <th>Zakat Type</th>
+                            <th>Alamat</th>
+                            <th>Nominal</th>
+                            <th>Muzakki</th>
+                            <th>Preview</th>
+                            <th>Aksi</th>
+                        </tr>
+                        </thead>
+                        <tbody id="paymentRows">
+                        <tr>
+                            <td colspan="7" class="text-center text-muted">Memuat...</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="card-footer clearfix">
+                    <div class="float-left text-muted" id="pageInfo"></div>
+                    <ul class="pagination pagination-sm m-0 float-right">
+                        <li class="page-item"><a class="page-link" href="#" id="btnPrev">&laquo;</a></li>
+                        <li class="page-item"><a class="page-link" href="#" id="btnNext">&raquo;</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+
+<th:block layout:fragment="script">
+    <script>
+        (function () {
+            const $rows = $("#paymentRows");
+            const $pageInfo = $("#pageInfo");
+            const $btnPrev = $("#btnPrev");
+            const $btnNext = $("#btnNext");
+            const $btnRefresh = $("#btnRefresh");
+            const $btnApply = $("#btnApply");
+            const $btnReset = $("#btnReset");
+            const $filterFrom = $("#filterFrom");
+            const $filterTo = $("#filterTo");
+            const $filterQ = $("#filterQ");
+            const $filterIncludeCanceled = $("#filterIncludeCanceled");
+
+            let page = 0;
+            const size = 20;
+
+            function formatInstant(iso) {
+                if (!iso) return "-";
+                const d = new Date(iso);
+                if (Number.isNaN(d.getTime())) return iso;
+                return new Intl.DateTimeFormat("id-ID", {dateStyle: "medium", timeStyle: "short"}).format(d);
+            }
+
+            function formatNominal(item) {
+                if (item.beratBerasKg != null) return `${item.beratBerasKg} Kg`;
+                if (item.jumlahUang != null) return `Rp ${new Intl.NumberFormat("id-ID").format(item.jumlahUang)}`;
+                return "-";
+            }
+
+            function escapeHtml(str) {
+                return String(str ?? "")
+                    .replaceAll("&", "&amp;")
+                    .replaceAll("<", "&lt;")
+                    .replaceAll(">", "&gt;")
+                    .replaceAll("\"", "&quot;")
+                    .replaceAll("'", "&#039;");
+            }
+
+            function render(data) {
+                const content = data && data.content ? data.content : [];
+                $rows.empty();
+                if (!content.length) {
+                    $rows.append(`<tr><td colspan="7" class="text-center text-muted">Tidak ada data</td></tr>`);
+                } else {
+                    for (const item of content) {
+                        const canceledBadge = item.canceled ? `<span class="badge badge-secondary">BATAL</span>` : ``;
+                        const receipt = item.receiptNumber ? `<code>${escapeHtml(item.receiptNumber)}</code>` : "-";
+                        const alamat = item.alamat ? escapeHtml(item.alamat) : "-";
+                        const actionHtml = item.canceled
+                            ? `<span class="text-muted">-</span>`
+                            : `
+                                <a class="btn btn-xs btn-info mr-1" href="/zakat-payments/${encodeURIComponent(item.id)}/edit">
+                                  <i class="fas fa-edit"></i> Edit
+                                </a>
+                                <button class="btn btn-xs btn-danger btn-cancel" data-id="${escapeHtml(item.id)}" type="button">
+                                  <i class="fas fa-ban"></i> Batalkan
+                                </button>
+                              `;
+
+                        $rows.append(`
+                            <tr class="${item.canceled ? "text-muted" : ""}">
+                                <td>${receipt} ${canceledBadge}</td>
+                                <td>${formatInstant(item.createdAt)}</td>
+                                <td>${escapeHtml(item.zakatType || "-")}</td>
+                                <td>${alamat}</td>
+                                <td>${formatNominal(item)}</td>
+                                <td>${item.muzakkiCount ?? 0}</td>
+                                <td>${escapeHtml(item.muzakkiPreview || "-")}</td>
+                                <td>${actionHtml}</td>
+                            </tr>
+                        `);
+                    }
+                }
+
+                const total = data.totalElements ?? 0;
+                const totalPages = data.totalPages ?? 0;
+                $pageInfo.text(`Page ${page + 1} / ${Math.max(1, totalPages)} • Total: ${total}`);
+
+                $btnPrev.toggleClass("disabled", page <= 0);
+                $btnNext.toggleClass("disabled", page >= (totalPages - 1));
+            }
+
+            function buildQuery() {
+                const params = new URLSearchParams();
+                params.set("page", String(page));
+                params.set("size", String(size));
+
+                const from = $filterFrom.val();
+                const to = $filterTo.val();
+                const q = ($filterQ.val() || "").trim();
+                const includeCanceled = $filterIncludeCanceled.is(":checked");
+
+                if (from) params.set("from", from);
+                if (to) params.set("to", to);
+                if (q) params.set("q", q);
+                if (includeCanceled) params.set("includeCanceled", "true");
+
+                return params.toString();
+            }
+
+            async function load() {
+                $btnRefresh.prop("disabled", true);
+                try {
+                    const res = await fetch(`/api/zakat-payments?${buildQuery()}`, {headers: {"Accept": "application/json"}});
+                    if (!res.ok) throw new Error(`Gagal load (${res.status})`);
+                    const data = await res.json();
+                    render(data);
+                } catch (e) {
+                    $rows.empty().append(`<tr><td colspan="7" class="text-center text-danger">${String(e.message || e)}</td></tr>`);
+                } finally {
+                    $btnRefresh.prop("disabled", false);
+                }
+            }
+
+            async function cancelPayment(paymentId) {
+                const reason = window.prompt("Alasan pembatalan (wajib diisi):");
+                if (reason == null) return;
+                if (!reason.trim()) return alert("Alasan wajib diisi");
+
+                try {
+                    const res = await fetch(`/api/zakat-payments/${encodeURIComponent(paymentId)}/cancel`, {
+                        method: "POST",
+                        headers: {"Content-Type": "application/json", "Accept": "application/json"},
+                        body: JSON.stringify({reason: reason.trim()})
+                    });
+                    if (!res.ok) {
+                        const text = await res.text();
+                        return alert(text || `Gagal membatalkan (${res.status})`);
+                    }
+                    load();
+                } catch (e) {
+                    alert(String(e.message || e));
+                }
+            }
+
+            $btnPrev.on("click", function (e) {
+                e.preventDefault();
+                if (page <= 0) return;
+                page -= 1;
+                load();
+            });
+            $btnNext.on("click", function (e) {
+                e.preventDefault();
+                page += 1;
+                load();
+            });
+            $btnRefresh.on("click", function () {
+                load();
+            });
+
+            $btnApply.on("click", function () {
+                page = 0;
+                load();
+            });
+
+            $btnReset.on("click", function () {
+                const today = new Date();
+                const iso = today.toISOString().slice(0, 10);
+                $filterFrom.val(iso);
+                $filterTo.val(iso);
+                $filterQ.val("");
+                $filterIncludeCanceled.prop("checked", false);
+                page = 0;
+                load();
+            });
+
+            $rows.on("click", ".btn-cancel", function () {
+                const id = $(this).data("id");
+                if (!id) return;
+                cancelPayment(id);
+            });
+
+            // init default period: today
+            const today = new Date();
+            const iso = today.toISOString().slice(0, 10);
+            $filterFrom.val(iso);
+            $filterTo.val(iso);
+
+            load();
+        })();
+    </script>
+</th:block>
+
+</body>
+</html>

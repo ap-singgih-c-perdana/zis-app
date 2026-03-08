@@ -1,0 +1,29 @@
+package com.zakat.service.dto;
+
+import com.zakat.enums.ZakatType;
+
+import java.math.BigDecimal;
+import java.time.Instant;
+import java.util.List;
+import java.util.UUID;
+
+public record ZakatPaymentResponse(
+        UUID id,
+        String receiptNumber,
+        boolean canceled,
+        Instant createdAt,
+        ZakatType zakatType,
+        Integer jumlahJiwa,
+        String alamat,
+        BigDecimal beratBerasKg,
+        BigDecimal jumlahUang,
+        ZakatQualitySummary zakatQuality,
+        List<String> muzakkiNames
+) {
+    public record ZakatQualitySummary(
+            UUID id,
+            String name,
+            BigDecimal beratPerJiwaKg
+    ) {
+    }
+}
