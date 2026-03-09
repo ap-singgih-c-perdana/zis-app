@@ -3,6 +3,8 @@ package com.zakat.controller;
 import com.zakat.entity.MuzakkiPerson;
 import com.zakat.entity.ZakatPayment;
 import com.zakat.entity.ZakatQuality;
+import com.zakat.enums.ZisType;
+import com.zakat.service.DashboardService;
 import com.zakat.service.ZakatPaymentService;
 import com.zakat.service.dto.CancelZakatPaymentRequest;
 import com.zakat.service.dto.CreateZakatPaymentRequest;
@@ -96,19 +98,29 @@ public class ZakatPaymentController {
                 ? List.of()
                 : payment.getMuzakkiList().stream().map(MuzakkiPerson::getNama).toList();
 
+        ZisType computedType;
+        if (payment.getZakatQuality() != null) {
+            computedType = payment.getZakatQuality().getZakatType();
+        } else {
+            computedType = DashboardService.getZisType(payment);
+        }
+
         return new ZakatPaymentResponse(
                 payment.getId(),
                 payment.getReceiptNumber(),
                 payment.isCanceled(),
                 payment.getCreatedAt(),
-                payment.getZakatType(),
-                payment.getZakatType() == null ? null : payment.getZakatType().getLabel(),
+                computedType,
+                computedType == null ? null : computedType.getLabel(),
                 payment.getJumlahJiwa(),
                 payment.getAlamat(),
                 payment.getPayerName(),
                 payment.getPayerPhone(),
                 payment.getBeratBerasKg(),
                 payment.getJumlahUang(),
+                payment.getJumlahUangZakatMal(),
+                payment.getJumlahUangInfaqSedekah(),
+                payment.getJumlahUangFidiah(),
                 qualitySummary,
                 muzakkiNames
         );

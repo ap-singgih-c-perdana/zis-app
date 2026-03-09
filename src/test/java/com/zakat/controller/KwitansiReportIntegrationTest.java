@@ -4,8 +4,10 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.zakat.entity.MuzakkiPerson;
 import com.zakat.entity.ZakatPayment;
+import com.zakat.entity.ZakatQuality;
 import com.zakat.enums.ZisType;
 import com.zakat.repository.ZakatPaymentRepository;
+import com.zakat.repository.ZakatQualityRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,9 +45,13 @@ class KwitansiReportIntegrationTest {
     @Autowired
     private ZakatPaymentRepository zakatPaymentRepository;
 
+    @Autowired
+    private ZakatQualityRepository zakatQualityRepository;
+
     @BeforeEach
     void setUp() {
         zakatPaymentRepository.deleteAll();
+        zakatQualityRepository.deleteAll();
     }
 
     @Test
@@ -54,10 +60,17 @@ class KwitansiReportIntegrationTest {
         Instant now = Instant.now();
         LocalDate today = LocalDate.ofInstant(now, JAKARTA);
 
+        ZakatQuality quality = zakatQualityRepository.save(ZakatQuality.builder()
+                .name("Fitrah Uang")
+                .zakatType(ZisType.ZAKAT_FITRAH_UANG)
+                .nominalPerJiwa(45000L)
+                .active(true)
+                .build());
+
         ZakatPayment payment = new ZakatPayment();
         payment.setJumlahJiwa(4);
         payment.setAlamat("Jl. Mawar No. 1");
-        payment.setZakatType(ZisType.ZAKAT_FITRAH_UANG);
+        payment.setZakatQuality(quality);
         payment.setJumlahUang(new BigDecimal("180000"));
         payment.setCreatedAt(now);
         payment.setReceiptYear(today.getYear());

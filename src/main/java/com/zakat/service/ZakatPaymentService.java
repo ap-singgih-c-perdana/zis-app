@@ -94,14 +94,16 @@ public class ZakatPaymentService {
                     if (count > PREVIEW_LIMIT) {
                         preview = preview + ", +" + (count - PREVIEW_LIMIT);
                     }
+
                     return new ZakatPaymentListItemResponse(
                             payment.getId(),
                             payment.getReceiptNumber(),
                             payment.getCreatedAt(),
-                            payment.getZakatType(),
-                            payment.getZakatType() == null ? null : payment.getZakatType().getLabel(),
                             payment.getBeratBerasKg(),
                             payment.getJumlahUang(),
+                            payment.getJumlahUangZakatMal(),
+                            payment.getJumlahUangInfaqSedekah(),
+                            payment.getJumlahUangFidiah(),
                             count,
                             preview,
                             payment.getAlamat(),
@@ -121,18 +123,16 @@ public class ZakatPaymentService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Jumlah muzakki harus sama dengan jumlahJiwa");
         }
 
-        ZisType zakatType = request.zakatType();
-
+        // determine zakatType from zakatQuality if provided
         ZakatQuality zakatQuality = null;
+        ZisType zakatType = null;
         if (request.zakatQualityId() != null) {
             zakatQuality = zakatQualityRepository.findById(request.zakatQualityId())
                     .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Zakat quality tidak ditemukan"));
             if (!zakatQuality.isActive()) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Zakat quality sudah tidak aktif");
             }
-            if (zakatQuality.getZakatType() != zakatType) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Zakat quality tidak sesuai zakatType");
-            }
+            zakatType = zakatQuality.getZakatType();
         }
 
         ZakatPayment payment = new ZakatPayment();
@@ -142,8 +142,13 @@ public class ZakatPaymentService {
         payment.setPayerPhone(request.payerPhone());
         payment.setJumlahJiwa(request.jumlahJiwa());
         payment.setAlamat(request.alamat());
-        payment.setZakatType(zakatType);
+        // zakatType is inferred from zakatQuality (if any)
         payment.setZakatQuality(zakatQuality);
+
+        // persist optional separate nominals if provided
+        payment.setJumlahUangZakatMal(request.jumlahUangZakatMal());
+        payment.setJumlahUangInfaqSedekah(request.jumlahUangInfaqSedekah());
+        payment.setJumlahUangFidiah(request.jumlahUangFidiah());
 
         if (zakatType == ZisType.ZAKAT_FITRAH_BERAS) {
             BigDecimal beratBerasKg = request.beratBerasKg();
@@ -167,8 +172,14 @@ public class ZakatPaymentService {
             payment.setJumlahUang(jumlahUang);
             payment.setBeratBerasKg(null);
         } else {
-            if (request.jumlahUang() == null && request.beratBerasKg() == null) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "beratBerasKg atau jumlahUang wajib diisi");
+            // non-fitrah: accept either jumlahUang or any of the optional amounts or beratBerasKg
+            boolean hasAnyAmount = (request.jumlahUang() != null)
+                    || (request.jumlahUangZakatMal() != null)
+                    || (request.jumlahUangInfaqSedekah() != null)
+                    || (request.jumlahUangFidiah() != null)
+                    || (request.beratBerasKg() != null);
+            if (!hasAnyAmount) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "beratBerasKg atau jumlahUang (atau salah satu nominal opsional) wajib diisi");
             }
             payment.setJumlahUang(request.jumlahUang());
             payment.setBeratBerasKg(request.beratBerasKg());
@@ -203,7 +214,9 @@ public class ZakatPaymentService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Payment sudah dibatalkan");
         }
 
-        int jumlahJiwa = request.muzakkiNames().size();
+        int jumlahJiwa = request.muzakkiNames() == null || request.muzakkiNames().isEmpty()
+                ? (payment.getJumlahJiwa() == null ? 0 : payment.getJumlahJiwa())
+                : request.muzakkiNames().size();
         payment.setJumlahJiwa(jumlahJiwa);
         payment.setAlamat(request.alamat());
 
@@ -217,45 +230,59 @@ public class ZakatPaymentService {
             payment.getMuzakkiList().addAll(muzakkiList);
         }
 
-        ZisType zakatType = payment.getZakatType();
-        if (zakatType == ZisType.ZAKAT_FITRAH_BERAS || zakatType == ZisType.ZAKAT_FITRAH_UANG) {
-            if (request.zakatQualityId() != null) {
-                ZakatQuality quality = zakatQualityRepository.findById(request.zakatQualityId())
-                        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Zakat quality tidak ditemukan"));
-                if (!quality.isActive()) {
-                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Zakat quality sudah tidak aktif");
-                }
-                if (quality.getZakatType() != zakatType) {
-                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Zakat quality tidak sesuai zakatType");
-                }
-                payment.setZakatQuality(quality);
+        // Determine update mode from request: if client provided zakatQualityId => treat as fitrah update; else non-fitrah
+        if (request.zakatQualityId() != null) {
+            // Client requests fitrah via specific quality
+            ZakatQuality quality = zakatQualityRepository.findById(request.zakatQualityId())
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Zakat quality tidak ditemukan"));
+            if (!quality.isActive()) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Zakat quality sudah tidak aktif");
             }
+            payment.setZakatQuality(quality);
 
-            ZakatQuality selectedQuality = payment.getZakatQuality();
-            if (selectedQuality == null) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "zakatQualityId wajib diisi untuk zakat fitrah");
-            }
-
-            if (zakatType == ZisType.ZAKAT_FITRAH_BERAS) {
-                if (selectedQuality.getBeratPerJiwaKg() == null) {
+            ZisType reqType = quality.getZakatType();
+            if (reqType == ZisType.ZAKAT_FITRAH_BERAS) {
+                if (quality.getBeratPerJiwaKg() == null) {
                     throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Zakat quality tidak memiliki beratPerJiwaKg");
                 }
-                payment.setBeratBerasKg(selectedQuality.getBeratPerJiwaKg().multiply(BigDecimal.valueOf(jumlahJiwa)));
+                payment.setBeratBerasKg(quality.getBeratPerJiwaKg().multiply(BigDecimal.valueOf(jumlahJiwa)));
                 payment.setJumlahUang(null);
-            } else {
-                if (selectedQuality.getNominalPerJiwa() == null) {
+            } else if (reqType == ZisType.ZAKAT_FITRAH_UANG) {
+                if (quality.getNominalPerJiwa() == null) {
                     throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Zakat quality tidak memiliki nominalPerJiwa");
                 }
-                payment.setJumlahUang(BigDecimal.valueOf(selectedQuality.getNominalPerJiwa()).multiply(BigDecimal.valueOf(jumlahJiwa)));
+                payment.setJumlahUang(BigDecimal.valueOf(quality.getNominalPerJiwa()).multiply(BigDecimal.valueOf(jumlahJiwa)));
                 payment.setBeratBerasKg(null);
             }
-        } else {
-            payment.setZakatQuality(null);
-            if (request.jumlahUang() == null) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "jumlahUang wajib diisi untuk jenis zakat ini");
+            // If client provided optional nominal fields in request, persist them. Otherwise leave existing values.
+            if (request.jumlahUangZakatMal() != null) {
+                payment.setJumlahUangZakatMal(request.jumlahUangZakatMal());
             }
+            if (request.jumlahUangInfaqSedekah() != null) {
+                payment.setJumlahUangInfaqSedekah(request.jumlahUangInfaqSedekah());
+            }
+            if (request.jumlahUangFidiah() != null) {
+                payment.setJumlahUangFidiah(request.jumlahUangFidiah());
+            }
+        } else {
+            // non-fitrah update: clear any attached quality and accept any provided amounts
+            payment.setZakatQuality(null);
+
+            boolean hasAnyAmount = (request.jumlahUang() != null)
+                    || (request.jumlahUangZakatMal() != null)
+                    || (request.jumlahUangInfaqSedekah() != null)
+                    || (request.jumlahUangFidiah() != null);
+            if (!hasAnyAmount) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "jumlahUang atau salah satu nominal opsional wajib diisi untuk jenis zakat ini");
+            }
+
             payment.setJumlahUang(request.jumlahUang());
             payment.setBeratBerasKg(null);
+
+            // persist optional separate nominals on update
+            payment.setJumlahUangZakatMal(request.jumlahUangZakatMal());
+            payment.setJumlahUangInfaqSedekah(request.jumlahUangInfaqSedekah());
+            payment.setJumlahUangFidiah(request.jumlahUangFidiah());
         }
 
         // update payer info when editing

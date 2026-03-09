@@ -20,6 +20,9 @@ public record ZakatPaymentResponse(
         String payerPhone,
         BigDecimal beratBerasKg,
         BigDecimal jumlahUang,
+        BigDecimal jumlahUangZakatMal,
+        BigDecimal jumlahUangInfaqSedekah,
+        BigDecimal jumlahUangFidiah,
         ZakatQualitySummary zakatQuality,
         List<String> muzakkiNames
 ) {

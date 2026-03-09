@@ -5,8 +5,6 @@ import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 
-import com.zakat.enums.ZisType;
-
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
@@ -16,10 +14,12 @@ public record CreateZakatPaymentRequest(
         @NotBlank String alamat,
         String payerName,
         String payerPhone,
-        @NotNull ZisType zakatType,
         UUID zakatQualityId,
         @Positive BigDecimal beratBerasKg,
         @Positive BigDecimal jumlahUang,
+        @Positive BigDecimal jumlahUangZakatMal,
+        @Positive BigDecimal jumlahUangInfaqSedekah,
+        @Positive BigDecimal jumlahUangFidiah,
         @NotEmpty List<@NotBlank String> muzakkiNames
 ) {
 }

@@ -51,8 +51,13 @@ public interface MuzakkiPersonRepository extends JpaRepository<MuzakkiPerson, UU
             select p.id as paymentId,
                    p.createdAt as createdAt,
                    m.nama as nama,
-                   p.zakatType as zakatType,
-                   p.jumlahUang as jumlahUang,
+                   (case
+                       when p.zakatQuality is not null then p.zakatQuality.zakatType
+                       when p.jumlahUangZakatMal is not null and p.jumlahUangZakatMal > 0 then com.zakat.enums.ZisType.ZAKAT_MAL
+                       when p.jumlahUangInfaqSedekah is not null and p.jumlahUangInfaqSedekah > 0 then com.zakat.enums.ZisType.INFAQ_SEDEKAH
+                       when p.jumlahUangFidiah is not null and p.jumlahUangFidiah > 0 then com.zakat.enums.ZisType.FIDIAH
+                       else null end) as zakatType,
+                   (coalesce(p.jumlahUang, 0) + coalesce(p.jumlahUangZakatMal, 0) + coalesce(p.jumlahUangInfaqSedekah, 0) + coalesce(p.jumlahUangFidiah, 0)) as jumlahUang,
                    p.beratBerasKg as beratBerasKg,
                    p.jumlahJiwa as jumlahJiwa
             from MuzakkiPerson m

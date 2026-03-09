@@ -81,9 +81,9 @@ public interface ZakatPaymentRepository extends JpaRepository<ZakatPayment, UUID
 
     @Query("""
             select count(p) as totalTransaksi,
-                   coalesce(sum(p.jumlahUang), 0) as totalUangMasuk,
+                   (coalesce(sum(p.jumlahUang), 0) + coalesce(sum(p.jumlahUangZakatMal), 0) + coalesce(sum(p.jumlahUangInfaqSedekah), 0) + coalesce(sum(p.jumlahUangFidiah), 0)) as totalUangMasuk,
                    coalesce(sum(p.beratBerasKg), 0) as totalBerasKg,
-                   coalesce(sum(case when p.zakatType in :fitrahTypes then p.jumlahJiwa else 0 end), 0) as totalJiwaFitrah
+                   coalesce(sum(case when (p.zakatQuality is not null and p.zakatQuality.zakatType in :fitrahTypes) then p.jumlahJiwa else 0 end), 0) as totalJiwaFitrah
             from ZakatPayment p
             where p.createdAt >= :fromInclusive
               and p.createdAt < :toExclusive
@@ -98,31 +98,44 @@ public interface ZakatPaymentRepository extends JpaRepository<ZakatPayment, UUID
     interface DashboardByTypeRow {
         ZisType getZakatType();
 
-        long getTransaksi();
+        BigDecimal getFitrahUang();
 
-        BigDecimal getTotalUang();
+        BigDecimal getMalUang();
+
+        BigDecimal getInfaqUang();
+
+        BigDecimal getFidiahUang();
 
         BigDecimal getTotalBerasKg();
-
-        long getTotalJiwa();
     }
 
     @Query("""
-            select p.zakatType as zakatType,
-                   count(p) as transaksi,
-                   coalesce(sum(p.jumlahUang), 0) as totalUang,
-                   coalesce(sum(p.beratBerasKg), 0) as totalBerasKg,
-                   coalesce(sum(p.jumlahJiwa), 0) as totalJiwa
+            select (case
+                       when p.zakatQuality is not null then p.zakatQuality.zakatType
+                       when p.jumlahUangZakatMal is not null and p.jumlahUangZakatMal > 0 then com.zakat.enums.ZisType.ZAKAT_MAL
+                       when p.jumlahUangInfaqSedekah is not null and p.jumlahUangInfaqSedekah > 0 then com.zakat.enums.ZisType.INFAQ_SEDEKAH
+                       when p.jumlahUangFidiah is not null and p.jumlahUangFidiah > 0 then com.zakat.enums.ZisType.FIDIAH
+                       else null end) as zakatType,
+                   coalesce(sum(case when (p.zakatQuality is not null and p.zakatQuality.zakatType = com.zakat.enums.ZisType.ZAKAT_FITRAH_UANG) then p.jumlahUang else 0 end), 0) as fitrahUang,
+                   coalesce(sum(case when (p.jumlahUangZakatMal is not null and p.jumlahUangZakatMal > 0) then p.jumlahUangZakatMal else 0 end), 0) as malUang,
+                   coalesce(sum(case when (p.jumlahUangInfaqSedekah is not null and p.jumlahUangInfaqSedekah > 0) then p.jumlahUangInfaqSedekah else 0 end), 0) as infaqUang,
+                   coalesce(sum(case when (p.jumlahUangFidiah is not null and p.jumlahUangFidiah > 0) then p.jumlahUangFidiah else 0 end), 0) as fidiahUang,
+                   coalesce(sum(p.beratBerasKg), 0) as totalBerasKg
             from ZakatPayment p
             where p.createdAt >= :fromInclusive
               and p.createdAt < :toExclusive
               and p.canceled = false
-            group by p.zakatType
-            """)
-    List<DashboardByTypeRow> dashboardByType(
-            @Param("fromInclusive") Instant fromInclusive,
-            @Param("toExclusive") Instant toExclusive
-    );
+            group by (case
+                        when p.zakatQuality is not null then p.zakatQuality.zakatType
+                        when p.jumlahUangZakatMal is not null and p.jumlahUangZakatMal > 0 then com.zakat.enums.ZisType.ZAKAT_MAL
+                        when p.jumlahUangInfaqSedekah is not null and p.jumlahUangInfaqSedekah > 0 then com.zakat.enums.ZisType.INFAQ_SEDEKAH
+                        when p.jumlahUangFidiah is not null and p.jumlahUangFidiah > 0 then com.zakat.enums.ZisType.FIDIAH
+                        else null end)
+             """)
+     List<DashboardByTypeRow> dashboardByType(
+             @Param("fromInclusive") Instant fromInclusive,
+             @Param("toExclusive") Instant toExclusive
+     );
 
     interface RekapRow {
         ZisType getZakatType();
@@ -135,15 +148,25 @@ public interface ZakatPaymentRepository extends JpaRepository<ZakatPayment, UUID
     }
 
     @Query("""
-            select p.zakatType as zakatType,
-                   coalesce(sum(p.jumlahUang), 0) as totalUang,
+            select (case
+                       when p.zakatQuality is not null then p.zakatQuality.zakatType
+                       when p.jumlahUangZakatMal is not null and p.jumlahUangZakatMal > 0 then com.zakat.enums.ZisType.ZAKAT_MAL
+                       when p.jumlahUangInfaqSedekah is not null and p.jumlahUangInfaqSedekah > 0 then com.zakat.enums.ZisType.INFAQ_SEDEKAH
+                       when p.jumlahUangFidiah is not null and p.jumlahUangFidiah > 0 then com.zakat.enums.ZisType.FIDIAH
+                       else null end) as zakatType,
+                   (coalesce(sum(p.jumlahUang), 0) + coalesce(sum(p.jumlahUangZakatMal), 0) + coalesce(sum(p.jumlahUangInfaqSedekah), 0) + coalesce(sum(p.jumlahUangFidiah), 0)) as totalUang,
                    coalesce(sum(p.beratBerasKg), 0) as totalBerasKg,
                    coalesce(sum(p.jumlahJiwa), 0) as totalJiwa
             from ZakatPayment p
             where p.createdAt >= :fromInclusive
               and p.createdAt < :toExclusive
               and p.canceled = false
-            group by p.zakatType
+            group by (case
+                        when p.zakatQuality is not null then p.zakatQuality.zakatType
+                        when p.jumlahUangZakatMal is not null and p.jumlahUangZakatMal > 0 then com.zakat.enums.ZisType.ZAKAT_MAL
+                        when p.jumlahUangInfaqSedekah is not null and p.jumlahUangInfaqSedekah > 0 then com.zakat.enums.ZisType.INFAQ_SEDEKAH
+                        when p.jumlahUangFidiah is not null and p.jumlahUangFidiah > 0 then com.zakat.enums.ZisType.FIDIAH
+                        else null end)
             """)
     List<RekapRow> rekapByType(
             @Param("fromInclusive") Instant fromInclusive,
@@ -155,7 +178,8 @@ public interface ZakatPaymentRepository extends JpaRepository<ZakatPayment, UUID
             from ZakatPayment p
             where p.createdAt >= :fromInclusive
               and p.createdAt < :toExclusive
-              and p.zakatType in :fitrahTypes
+              and p.zakatQuality is not null
+              and p.zakatQuality.zakatType in :fitrahTypes
               and p.canceled = false
             """)
     long sumJiwaFitrah(

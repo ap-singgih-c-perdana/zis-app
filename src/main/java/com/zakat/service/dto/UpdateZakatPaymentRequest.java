@@ -1,7 +1,6 @@
 package com.zakat.service.dto;
 
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 
@@ -15,6 +14,9 @@ public record UpdateZakatPaymentRequest(
         String payerPhone,
         UUID zakatQualityId,
         @Positive BigDecimal jumlahUang,
-        @NotNull @NotEmpty List<@NotBlank String> muzakkiNames
+        @Positive BigDecimal jumlahUangZakatMal,
+        @Positive BigDecimal jumlahUangInfaqSedekah,
+        @Positive BigDecimal jumlahUangFidiah,
+        @NotNull List<@NotBlank String> muzakkiNames
 ) {
 }

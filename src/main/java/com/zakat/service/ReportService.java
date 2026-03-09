@@ -190,13 +190,20 @@ public class ReportService {
         Instant createdAt = payment.getCreatedAt();
         LocalDate tanggal = createdAt == null ? null : LocalDate.ofInstant(createdAt, DEFAULT_ZONE);
 
+        ZisType computedType;
+        if (payment.getZakatQuality() != null) {
+            computedType = payment.getZakatQuality().getZakatType();
+        } else {
+            computedType = DashboardService.getZisType(payment);
+        }
+
         return new KwitansiReportResponse(
                 payment.getId(),
                 payment.getReceiptNumber(),
                 createdAt,
                 tanggal,
-                payment.getZakatType(),
-                payment.getZakatType() == null ? null : payment.getZakatType().getLabel(),
+                computedType,
+                computedType == null ? null : computedType.getLabel(),
                 payment.getJumlahJiwa(),
                 payment.getAlamat(),
                 payment.getJumlahUang(),
