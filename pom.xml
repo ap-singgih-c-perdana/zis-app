@@ -10,10 +10,10 @@
         <relativePath/> <!-- lookup parent from a repository -->
     </parent>
     <groupId>com.zakat</groupId>
-    <artifactId>springboot-adminlte3-template</artifactId>
+    <artifactId>zis-app</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>springboot-adminlte3-template</name>
-    <description>springboot-adminlte3-template</description>
+    <name>zis-app</name>
+    <description>ZIS App</description>
     <properties>
         <java.version>21</java.version>
     </properties>
