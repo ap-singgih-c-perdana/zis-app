@@ -30,6 +30,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.net.URI;
 import java.util.List;
+import java.util.Comparator;
 import java.time.LocalDate;
 import java.security.Principal;
 import java.util.UUID;
@@ -96,7 +97,14 @@ public class ZakatPaymentController {
 
         List<String> muzakkiNames = payment.getMuzakkiList() == null
                 ? List.of()
-                : payment.getMuzakkiList().stream().map(MuzakkiPerson::getNama).toList();
+                : payment.getMuzakkiList().stream()
+                .sorted((a, b) -> {
+                    int cmp = Comparator.nullsLast(Integer::compareTo).compare(a.getSequenceNo(), b.getSequenceNo());
+                    if (cmp != 0) return cmp;
+                    return Comparator.nullsLast(UUID::compareTo).compare(a.getId(), b.getId());
+                })
+                .map(MuzakkiPerson::getNama)
+                .toList();
 
         ZisType computedType;
         if (payment.getZakatQuality() != null) {

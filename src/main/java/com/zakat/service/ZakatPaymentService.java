@@ -40,6 +40,7 @@ import java.util.stream.Collectors;
 public class ZakatPaymentService {
 
     private static final int PREVIEW_LIMIT = 3;
+    private static final int MAX_JIWA = 10;
     private static final ZoneId DEFAULT_ZONE = ZoneId.of("Asia/Jakarta");
     private static final Instant MAX_INSTANT = Instant.parse("9999-12-31T23:59:59.999999999Z");
 
@@ -86,9 +87,6 @@ public class ZakatPaymentService {
         List<ZakatPaymentListItemResponse> content = page.getContent().stream()
                 .map(payment -> {
                     List<String> names = namesByPaymentId.getOrDefault(payment.getId(), List.of());
-                    names = names.stream()
-                            .sorted(String.CASE_INSENSITIVE_ORDER)
-                            .toList();
                     int count = names.size();
                     String preview = String.join(", ", names.stream().limit(PREVIEW_LIMIT).toList());
                     if (count > PREVIEW_LIMIT) {
@@ -120,6 +118,9 @@ public class ZakatPaymentService {
 
     @Transactional
     public ZakatPayment create(@Valid CreateZakatPaymentRequest request) {
+        if (request.jumlahJiwa() > MAX_JIWA) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Jumlah jiwa maksimal " + MAX_JIWA);
+        }
         if (request.muzakkiNames() == null || request.muzakkiNames().size() != request.jumlahJiwa()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Jumlah muzakki harus sama dengan jumlahJiwa");
         }
@@ -187,9 +188,7 @@ public class ZakatPaymentService {
             payment.setBeratBerasKg(request.beratBerasKg());
         }
 
-        List<MuzakkiPerson> muzakkiList = request.muzakkiNames().stream()
-                .map(nama -> MuzakkiPerson.builder().nama(nama).payment(payment).build())
-                .collect(Collectors.toCollection(ArrayList::new));
+        List<MuzakkiPerson> muzakkiList = buildOrderedMuzakkiList(payment, request.muzakkiNames());
         payment.setMuzakkiList(muzakkiList);
 
         return zakatPaymentRepository.save(payment);
@@ -219,13 +218,14 @@ public class ZakatPaymentService {
         int jumlahJiwa = request.muzakkiNames() == null || request.muzakkiNames().isEmpty()
                 ? (payment.getJumlahJiwa() == null ? 0 : payment.getJumlahJiwa())
                 : request.muzakkiNames().size();
+        if (jumlahJiwa > MAX_JIWA) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Jumlah jiwa maksimal " + MAX_JIWA);
+        }
         payment.setJumlahJiwa(jumlahJiwa);
         payment.setAlamat(request.alamat());
         payment.setPaymentMethod(request.paymentMethod());
 
-        List<MuzakkiPerson> muzakkiList = request.muzakkiNames().stream()
-                .map(nama -> MuzakkiPerson.builder().nama(nama).payment(payment).build())
-                .collect(Collectors.toCollection(ArrayList::new));
+        List<MuzakkiPerson> muzakkiList = buildOrderedMuzakkiList(payment, request.muzakkiNames());
         if (payment.getMuzakkiList() == null) {
             payment.setMuzakkiList(muzakkiList);
         } else {
@@ -293,6 +293,23 @@ public class ZakatPaymentService {
         payment.setPayerPhone(request.payerPhone());
 
         return zakatPaymentRepository.save(payment);
+    }
+
+    private static List<MuzakkiPerson> buildOrderedMuzakkiList(ZakatPayment payment, List<String> names) {
+        List<MuzakkiPerson> result = new ArrayList<>();
+        if (names == null) {
+            return result;
+        }
+        for (int i = 0; i < names.size(); i++) {
+            result.add(
+                    MuzakkiPerson.builder()
+                            .nama(names.get(i))
+                            .payment(payment)
+                            .sequenceNo(i + 1)
+                            .build()
+            );
+        }
+        return result;
     }
 
     @Transactional

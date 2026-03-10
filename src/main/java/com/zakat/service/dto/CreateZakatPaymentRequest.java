@@ -1,19 +1,21 @@
 package com.zakat.service.dto;
 
 import com.zakat.enums.PaymentMethod;
+import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.Size;
 
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
 
 public record CreateZakatPaymentRequest(
-        @NotNull @Positive Integer jumlahJiwa,
+        @NotNull @Positive @Max(10) Integer jumlahJiwa,
         @NotBlank String alamat,
-        String payerName,
+        @NotBlank String payerName,
         String payerPhone,
         @NotNull PaymentMethod paymentMethod,
         UUID zakatQualityId,
@@ -22,6 +24,6 @@ public record CreateZakatPaymentRequest(
         @Positive BigDecimal jumlahUangZakatMal,
         @Positive BigDecimal jumlahUangInfaqSedekah,
         @Positive BigDecimal jumlahUangFidiah,
-        @NotEmpty List<@NotBlank String> muzakkiNames
+        @NotEmpty @Size(max = 10) List<@NotBlank String> muzakkiNames
 ) {
 }

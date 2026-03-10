@@ -30,6 +30,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -278,17 +280,17 @@ public class ReportService {
             setField(fields, "noKwitansi", safe(kw.receiptNumber()), textFont);
             setField(fields, "alamat", safe(payment.getAlamat()), textFont);
             setField(fields, "jumlahBeras", formatNumber(payment.getBeratBerasKg()), textFont);
-            setField(fields, "jumlahUang", formatLong(perJiwa), textFont);
+            setField(fields, "jumlahUang", formatCurrency(perJiwa), textFont);
             setField(fields, "jumlahJiwaBeras", (payment.getBeratBerasKg() != null && payment.getBeratBerasKg().compareTo(BigDecimal.ZERO) > 0) ? safe(payment.getJumlahJiwa()) : "", textFont);
             setField(fields, "jumlahJiwaUang", (payment.getJumlahUang() != null && payment.getJumlahUang().compareTo(BigDecimal.ZERO) > 0) ? safe(payment.getJumlahJiwa()) : "", textFont);
-            setField(fields, "jumlahZakatMal", formatNumber(payment.getJumlahUangZakatMal()), textFont);
-            setField(fields, "jumlahInfaqSedekah", formatNumber(payment.getJumlahUangInfaqSedekah()), textFont);
-            setField(fields, "jumlahFidiah", formatNumber(payment.getJumlahUangFidiah()), textFont);
+            setField(fields, "jumlahZakatMal", formatCurrency(payment.getJumlahUangZakatMal()), textFont);
+            setField(fields, "jumlahInfaqSedekah", formatCurrency(payment.getJumlahUangInfaqSedekah()), textFont);
+            setField(fields, "jumlahFidiah", formatCurrency(payment.getJumlahUangFidiah()), textFont);
             setField(fields, "dd", tgl == null ? "" : String.format("%02d", tgl.getDayOfMonth()), textFont);
             setField(fields, "MM", tgl == null ? "" : String.format("%02d", tgl.getMonthValue()), textFont);
             setField(fields, "yyyy", tgl == null ? "" : String.valueOf(tgl.getYear()), textFont);
             setField(fields, "totalBeras", formatNumber(payment.getBeratBerasKg()), textFont);
-            setField(fields, "totalUang", formatNumber(payment.getJumlahUang()), textFont);
+            setField(fields, "totalUang", formatCurrency(payment.getJumlahUang()), textFont);
 
             List<String> names = kw.muzakkiNames() == null ? List.of() : kw.muzakkiNames();
             for (int i = 1; i <= 10; i++) {
@@ -426,8 +428,18 @@ public class ReportService {
         return v == null ? "" : v.stripTrailingZeros().toPlainString();
     }
 
-    private static String formatLong(Long v) {
-        return v == null ? "" : String.valueOf(v);
+    private static String formatCurrency(BigDecimal v) {
+        if (v == null) return "";
+        return formatCurrency(v.setScale(0, RoundingMode.HALF_UP).longValue());
+    }
+
+    private static String formatCurrency(Long v) {
+        if (v == null) return "";
+        DecimalFormatSymbols symbols = new DecimalFormatSymbols();
+        symbols.setGroupingSeparator('.');
+        DecimalFormat df = new DecimalFormat("#,###", symbols);
+        df.setGroupingUsed(true);
+        return df.format(v);
     }
 
     private static PdfFont loadTimesNewRomanFont() {

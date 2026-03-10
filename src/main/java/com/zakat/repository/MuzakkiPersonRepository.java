@@ -17,13 +17,15 @@ public interface MuzakkiPersonRepository extends JpaRepository<MuzakkiPerson, UU
         UUID getPaymentId();
 
         String getNama();
+
+        Integer getSequenceNo();
     }
 
     @Query("""
-            select m.payment.id as paymentId, m.nama as nama
+            select m.payment.id as paymentId, m.nama as nama, m.sequenceNo as sequenceNo
             from MuzakkiPerson m
             where m.payment.id in :paymentIds
-            order by m.id
+            order by m.payment.id, coalesce(m.sequenceNo, 2147483647) asc, m.id asc
             """)
     List<MuzakkiNameRow> findNamesByPaymentIds(@Param("paymentIds") List<UUID> paymentIds);
 
@@ -65,7 +67,7 @@ public interface MuzakkiPersonRepository extends JpaRepository<MuzakkiPerson, UU
             where p.createdAt >= :fromInclusive
               and p.createdAt < :toExclusive
               and p.canceled = false
-            order by p.createdAt asc, lower(coalesce(m.nama, '')) asc
+            order by p.createdAt asc, coalesce(m.sequenceNo, 2147483647) asc, m.id asc
             """)
     List<MuzakkiReportRow> findReportRows(
             @Param("fromInclusive") Instant fromInclusive,
