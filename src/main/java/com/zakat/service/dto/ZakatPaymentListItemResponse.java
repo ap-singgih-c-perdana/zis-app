@@ -1,5 +1,7 @@
 package com.zakat.service.dto;
 
+import com.zakat.enums.PaymentMethod;
+
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.UUID;
@@ -18,6 +20,7 @@ public record ZakatPaymentListItemResponse(
         String alamat,
         String payerName,
         String payerPhone,
+        PaymentMethod paymentMethod,
         boolean canceled
 ) {
 }

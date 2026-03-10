@@ -102,6 +102,7 @@
                             <th>Zakat Mal (Rp)</th>
                             <th>Infaq/Sedekah (Rp)</th>
                             <th>Fidiah (Rp)</th>
+                            <th>Metode</th>
                             <th>Pembayar</th>
                             <th>No. HP</th>
                             <th>Alamat</th>
@@ -113,7 +114,7 @@
                         </thead>
                         <tbody id="paymentRows">
                         <tr>
-                            <td colspan="14" class="text-center text-muted">Memuat...</td>
+                            <td colspan="15" class="text-center text-muted">Memuat...</td>
                         </tr>
                         </tbody>
                     </table>
@@ -184,7 +185,7 @@
                 const content = data && data.content ? data.content : [];
                 $rows.empty();
                 if (!content.length) {
-                    $rows.append(`<tr><td colspan="14" class="text-center text-muted">Tidak ada data</td></tr>`);
+                    $rows.append(`<tr><td colspan="15" class="text-center text-muted">Tidak ada data</td></tr>`);
                 } else {
                     for (const item of content) {
                         const canceledBadge = item.canceled ? `<span class="badge badge-secondary">BATAL</span>` : ``;
@@ -192,12 +193,19 @@
                         const alamat = item.alamat ? escapeHtml(item.alamat) : "-";
                         const payer = item.payerName ? escapeHtml(item.payerName) : "-";
                         const payerPhone = item.payerPhone ? escapeHtml(item.payerPhone) : "-";
+                        const paymentMethod = item.paymentMethod === "TRANSFER" ? "Transfer" : (item.paymentMethod === "CASH" ? "Cash" : "-");
+                        const printHtml = `
+                            <a class="btn btn-xs btn-success mr-1" href="/api/reports/kwitansi/${encodeURIComponent(item.id)}/template/print" target="_blank" rel="noopener">
+                              <i class="fas fa-print"></i> Kwitansi
+                            </a>
+                        `;
                         const actionHtml = (!CAN_MUTATE || item.canceled)
-                            ? `<span class="text-muted">-</span>`
+                            ? printHtml
                             : `
                                 <a class="btn btn-xs btn-info mr-1" href="/zakat-payments/${encodeURIComponent(item.id)}/edit">
                                   <i class="fas fa-edit"></i> Edit
                                 </a>
+                                ${printHtml}
                                 <button class="btn btn-xs btn-danger btn-cancel" data-id="${escapeHtml(item.id)}" type="button">
                                   <i class="fas fa-ban"></i> Batalkan
                                 </button>
@@ -217,6 +225,7 @@
                                 <td>${fmtMoney(item.jumlahUangZakatMal)}</td>
                                 <td>${fmtMoney(item.jumlahUangInfaqSedekah)}</td>
                                 <td>${fmtMoney(item.jumlahUangFidiah)}</td>
+                                <td>${escapeHtml(paymentMethod)}</td>
                                 <td>${payer}</td>
                                 <td>${payerPhone}</td>
                                 <td>${alamat}</td>
@@ -267,7 +276,7 @@
                     const data = await res.json();
                     render(data);
                 } catch (e) {
-                    $rows.empty().append(`<tr><td colspan="10" class="text-center text-danger">${String(e.message || e)}</td></tr>`);
+                    $rows.empty().append(`<tr><td colspan="15" class="text-center text-danger">${String(e.message || e)}</td></tr>`);
                 } finally {
                     $btnRefresh.prop("disabled", false);
                 }

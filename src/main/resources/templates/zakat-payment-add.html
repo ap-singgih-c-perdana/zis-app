@@ -55,6 +55,16 @@
                                 <input class="form-control" id="payerPhone" type="tel" placeholder="08xxxxxxxxxx">
                             </div>
                         </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="paymentMethod">Metode Pembayaran *</label>
+                                <select class="form-control" id="paymentMethod">
+                                    <option value="" selected disabled>Pilih metode pembayaran...</option>
+                                    <option value="CASH">Cash</option>
+                                    <option value="TRANSFER">Transfer</option>
+                                </select>
+                            </div>
+                        </div>
                         <!-- moved Alamat here so it appears above Jenis Zakat -->
                         <div class="col-12">
                             <div class="form-group">
@@ -202,10 +212,12 @@
             const $alamat = $("#alamat");
             const $payerName = $("#payerName");
             const $payerPhone = $("#payerPhone");
+            const $paymentMethod = $("#paymentMethod");
             const $btnSave = $("#btnSave");
             const $btnReset = $("#btnReset");
 
             let currentQualities = [];
+            let successTimer = null;
 
             function showError(message) {
                 $alertSuccess.addClass("d-none").text("");
@@ -213,9 +225,22 @@
                 window.scrollTo({top: 0, behavior: "smooth"});
             }
 
-            function showSuccess(message) {
+            function showSuccess(message, linkHtml) {
                 $alertError.addClass("d-none").text("");
-                $alertSuccess.removeClass("d-none").text(message || "Berhasil");
+                const safeMessage = String(message || "Berhasil")
+                    .replaceAll("&", "&amp;")
+                    .replaceAll("<", "&lt;")
+                    .replaceAll(">", "&gt;")
+                    .replaceAll("\"", "&quot;")
+                    .replaceAll("'", "&#039;");
+                $alertSuccess.removeClass("d-none").html(`${safeMessage}${linkHtml ? ` ${linkHtml}` : ""}`);
+                if (successTimer) {
+                    clearTimeout(successTimer);
+                }
+                successTimer = setTimeout(function () {
+                    $alertSuccess.addClass("d-none").html("");
+                    successTimer = null;
+                }, 5000);
                 window.scrollTo({top: 0, behavior: "smooth"});
             }
 
@@ -356,10 +381,12 @@
                 const jiwa = clampJiwa();
                 const zakatType = $zakatType.val();
                 const alamat = ($alamat.val() || "").trim();
+                const paymentMethod = $paymentMethod.val();
                 const names = $(".muzakki-name").toArray().map(el => (el.value || "").trim()).filter(x => x.length);
 
                 if (!zakatType) return showError("Jenis zakat wajib dipilih");
                 if (!alamat) return showError("Alamat wajib diisi");
+                if (!paymentMethod) return showError("Metode pembayaran wajib dipilih");
                 // For Fidiah we don't require muzakki names (it's a nominal-only payment)
                 if (zakatType !== 'FIDIAH' && names.length !== jiwa) return showError("Jumlah nama muzakki harus sama dengan jumlah jiwa");
 
@@ -368,6 +395,7 @@
                     alamat: alamat,
                     payerName: $payerName.val()?.trim() || null,
                     payerPhone: $payerPhone.val()?.trim() || null,
+                    paymentMethod: paymentMethod,
                     zakatType: zakatType,
                     muzakkiNames: names
                 };
@@ -408,7 +436,10 @@
 
                     const data = await res.json();
                     const receipt = data.receiptNumber ? ` No. Kwitansi: ${data.receiptNumber}` : "";
-                    showSuccess(`Pembayaran tersimpan.${receipt}`);
+                    showSuccess(
+                        `Pembayaran tersimpan.${receipt}`,
+                        `<a href="/zakat-payments/list" class="alert-link ml-2">Riwayat Pembayaran</a>`
+                    );
 
                     // Clear form inputs (but keep the success alert visible)
                     // Reset zakat type and related UI
@@ -427,6 +458,7 @@
                     $previewBox.addClass("d-none");
                     $payerName.val("");
                     $payerPhone.val("");
+                    $paymentMethod.val("");
                 } catch (e) {
                     showError(String(e.message || e));
                 } finally {
@@ -450,6 +482,7 @@
                 $previewBox.addClass("d-none");
                 $payerName.val("");
                 $payerPhone.val("");
+                $paymentMethod.val("");
             }
 
             // init
@@ -458,6 +491,7 @@
             renderMuzakkiInputs(1);
             $payerName.val("");
             $payerPhone.val("");
+            $paymentMethod.val("");
 
             $btnJiwaMinus.on("click", function () {
                 const v = clampJiwa();
@@ -491,6 +525,3 @@
 
 </body>
 </html>
-
-
-

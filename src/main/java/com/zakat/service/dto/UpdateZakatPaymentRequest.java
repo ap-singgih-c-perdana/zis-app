@@ -1,5 +1,6 @@
 package com.zakat.service.dto;
 
+import com.zakat.enums.PaymentMethod;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
@@ -12,6 +13,7 @@ public record UpdateZakatPaymentRequest(
         @NotBlank String alamat,
         String payerName,
         String payerPhone,
+        @NotNull PaymentMethod paymentMethod,
         UUID zakatQualityId,
         @Positive BigDecimal jumlahUang,
         @Positive BigDecimal jumlahUangZakatMal,

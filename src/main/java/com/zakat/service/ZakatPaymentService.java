@@ -109,6 +109,7 @@ public class ZakatPaymentService {
                             payment.getAlamat(),
                             payment.getPayerName(),
                             payment.getPayerPhone(),
+                            payment.getPaymentMethod(),
                             payment.isCanceled()
                     );
                 })
@@ -140,6 +141,7 @@ public class ZakatPaymentService {
         // payer info
         payment.setPayerName(request.payerName());
         payment.setPayerPhone(request.payerPhone());
+        payment.setPaymentMethod(request.paymentMethod());
         payment.setJumlahJiwa(request.jumlahJiwa());
         payment.setAlamat(request.alamat());
         // zakatType is inferred from zakatQuality (if any)
@@ -219,6 +221,7 @@ public class ZakatPaymentService {
                 : request.muzakkiNames().size();
         payment.setJumlahJiwa(jumlahJiwa);
         payment.setAlamat(request.alamat());
+        payment.setPaymentMethod(request.paymentMethod());
 
         List<MuzakkiPerson> muzakkiList = request.muzakkiNames().stream()
                 .map(nama -> MuzakkiPerson.builder().nama(nama).payment(payment).build())

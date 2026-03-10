@@ -116,6 +116,7 @@ public class ZakatPaymentController {
                 payment.getAlamat(),
                 payment.getPayerName(),
                 payment.getPayerPhone(),
+                payment.getPaymentMethod(),
                 payment.getBeratBerasKg(),
                 payment.getJumlahUang(),
                 payment.getJumlahUangZakatMal(),

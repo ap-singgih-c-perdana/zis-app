@@ -62,6 +62,16 @@
                                 <input class="form-control" id="payerPhone" type="tel">
                             </div>
                         </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="paymentMethod">Metode Pembayaran *</label>
+                                <select class="form-control" id="paymentMethod">
+                                    <option value="" selected disabled>Pilih metode pembayaran...</option>
+                                    <option value="CASH">Cash</option>
+                                    <option value="TRANSFER">Transfer</option>
+                                </select>
+                            </div>
+                        </div>
                         <div class="col-12">
                             <div class="form-group">
                                 <label for="alamat">Alamat</label>
@@ -171,9 +181,6 @@
                     <button class="btn btn-primary" id="btnSave" type="button">
                         <i class="fas fa-save"></i> Simpan Perubahan
                     </button>
-                    <button class="btn btn-success ml-2" id="btnPrintReceipt" type="button">
-                        <i class="fas fa-print"></i> Print Kwitansi
-                    </button>
                     <a class="btn btn-default" href="/zakat-payments/list">Kembali</a>
                 </div>
             </div>
@@ -207,6 +214,7 @@
             const $alamat = $("#alamat");
             const $payerName = $("#payerName");
             const $payerPhone = $("#payerPhone");
+            const $paymentMethod = $("#paymentMethod");
             const $btnSave = $("#btnSave");
 
             let currentPayment = null;
@@ -374,6 +382,7 @@
                     $alamat.val(currentPayment.alamat || "");
                     $payerName.val(currentPayment.payerName || "");
                     $payerPhone.val(currentPayment.payerPhone || "");
+                    $paymentMethod.val(currentPayment.paymentMethod || "CASH");
 
                     if (currentPayment.createdAt) {
                         const d = new Date(currentPayment.createdAt);
@@ -413,6 +422,8 @@
 
                 if (!currentPayment) return;
                 if (!alamat) return showError("Alamat wajib diisi");
+                const paymentMethod = $paymentMethod.val();
+                if (!paymentMethod) return showError("Metode pembayaran wajib dipilih");
                 const selectedType = $zakatType.val();
                 // Skip muzakki validation for Fidiah (nominal-only)
                 if (selectedType !== 'FIDIAH' && names.length !== jiwa) return showError("Jumlah nama muzakki harus sama dengan jumlah jiwa");
@@ -425,6 +436,7 @@
                 // include payer info in update
                 payload.payerName = $payerName.val()?.trim() || null;
                 payload.payerPhone = $payerPhone.val()?.trim() || null;
+                payload.paymentMethod = paymentMethod;
 
                 if (isFitrahType(selectedType)) {
                     const qualityId = $zakatQualityId.val();
@@ -509,12 +521,6 @@
                 updatePreview();
             });
             $btnSave.on("click", submit);
-            const $btnPrintReceipt = $("#btnPrintReceipt");
-            $btnPrintReceipt.on("click", function () {
-                if (!currentPayment || !currentPayment.id) return showError('Data payment belum tersedia');
-                const url = `/zakat-payments/${encodeURIComponent(currentPayment.id)}/receipt`;
-                window.open(url, '_blank', 'noopener');
-            });
 
             loadPayment();
         })();
