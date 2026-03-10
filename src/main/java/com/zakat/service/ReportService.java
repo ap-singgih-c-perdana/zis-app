@@ -2,8 +2,8 @@ package com.zakat.service;
 
 import com.zakat.entity.InstitutionProfile;
 import com.zakat.enums.ZisType;
-import com.zakat.repository.ZakatPaymentRepository;
 import com.zakat.repository.MuzakkiPersonRepository;
+import com.zakat.repository.ZakatPaymentRepository;
 import com.zakat.service.dto.InstitutionProfileResponse;
 import com.zakat.service.dto.KwitansiReportResponse;
 import com.zakat.service.dto.MuzakkiDetailReportResponse;
@@ -19,7 +19,6 @@ import java.math.RoundingMode;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
-import java.util.EnumMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -48,21 +47,13 @@ public class ReportService {
         Instant fromInclusive = fromDate.atStartOfDay(DEFAULT_ZONE).toInstant();
         Instant toExclusive = toDate.plusDays(1).atStartOfDay(DEFAULT_ZONE).toInstant();
 
-        List<ZakatPaymentRepository.RekapRow> rows = zakatPaymentRepository.rekapByType(fromInclusive, toExclusive);
-
-        Map<ZisType, BigDecimal> uangByType = new EnumMap<>(ZisType.class);
-        Map<ZisType, BigDecimal> berasByType = new EnumMap<>(ZisType.class);
-        for (ZakatPaymentRepository.RekapRow row : rows) {
-            uangByType.put(row.getZakatType(), defaultZero(row.getTotalUang()));
-            berasByType.put(row.getZakatType(), defaultZero(row.getTotalBerasKg()));
-        }
-
-        BigDecimal zakatFitrahUang = uangByType.getOrDefault(ZisType.ZAKAT_FITRAH_UANG, BigDecimal.ZERO);
-        BigDecimal zakatMal = uangByType.getOrDefault(ZisType.ZAKAT_MAL, BigDecimal.ZERO);
-        BigDecimal infaqSedekah = uangByType.getOrDefault(ZisType.INFAQ_SEDEKAH, BigDecimal.ZERO);
-        BigDecimal totalUangMasuk = zakatFitrahUang.add(zakatMal).add(infaqSedekah);
-
-        BigDecimal zakatFitrahBerasKg = berasByType.getOrDefault(ZisType.ZAKAT_FITRAH_BERAS, BigDecimal.ZERO);
+        ZakatPaymentRepository.DashboardTypeBreakdownRow breakdown = zakatPaymentRepository.dashboardTypeBreakdown(fromInclusive, toExclusive);
+        BigDecimal zakatFitrahUang = defaultZero(breakdown.getFitrahUang());
+        BigDecimal zakatFitrahBerasKg = defaultZero(breakdown.getFitrahBeras());
+        BigDecimal fidiah = defaultZero(breakdown.getFidiah());
+        BigDecimal zakatMal = defaultZero(breakdown.getZakatMal());
+        BigDecimal infaqSedekah = defaultZero(breakdown.getInfaqSedekah());
+        BigDecimal totalUangMasuk = zakatFitrahUang.add(fidiah).add(zakatMal).add(infaqSedekah);
 
         long totalMuzakkiFitrahJiwa = zakatPaymentRepository.sumJiwaFitrah(
                 fromInclusive,
@@ -87,6 +78,7 @@ public class ReportService {
                 toDate,
                 zakatFitrahUang,
                 zakatFitrahBerasKg,
+                fidiah,
                 zakatMal,
                 infaqSedekah,
                 totalUangMasuk,

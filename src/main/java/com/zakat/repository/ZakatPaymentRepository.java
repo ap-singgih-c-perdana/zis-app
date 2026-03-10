@@ -137,6 +137,34 @@ public interface ZakatPaymentRepository extends JpaRepository<ZakatPayment, UUID
              @Param("toExclusive") Instant toExclusive
      );
 
+    interface DashboardTypeBreakdownRow {
+        BigDecimal getFitrahUang();
+
+        BigDecimal getFitrahBeras();
+
+        BigDecimal getFidiah();
+
+        BigDecimal getZakatMal();
+
+        BigDecimal getInfaqSedekah();
+    }
+
+    @Query("""
+            select coalesce(sum(p.jumlahUang), 0) as fitrahUang,
+                   coalesce(sum(p.beratBerasKg), 0) as fitrahBeras,
+                   coalesce(sum(p.jumlahUangFidiah), 0) as fidiah,
+                   coalesce(sum(p.jumlahUangZakatMal), 0) as zakatMal,
+                   coalesce(sum(p.jumlahUangInfaqSedekah), 0) as infaqSedekah
+            from ZakatPayment p
+            where p.createdAt >= :fromInclusive
+              and p.createdAt < :toExclusive
+              and p.canceled = false
+            """)
+    DashboardTypeBreakdownRow dashboardTypeBreakdown(
+            @Param("fromInclusive") Instant fromInclusive,
+            @Param("toExclusive") Instant toExclusive
+    );
+
     interface RekapRow {
         ZisType getZakatType();
 

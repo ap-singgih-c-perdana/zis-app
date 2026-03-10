@@ -129,13 +129,12 @@
                                     <thead>
                                     <tr>
                                         <th>Jenis</th>
-                                        <th class="text-right" style="width: 200px">Uang (Rp)</th>
-                                        <th class="text-right" style="width: 160px">Beras (Kg)</th>
+                                        <th class="text-right" style="width: 260px">Nilai</th>
                                     </tr>
                                     </thead>
                                     <tbody id="byTypeRows">
                                     <tr>
-                                        <td colspan="3" class="text-center text-muted">Memuat...</td>
+                                        <td colspan="2" class="text-center text-muted">Memuat...</td>
                                     </tr>
                                     </tbody>
                                 </table>
@@ -308,7 +307,7 @@
                 const to = $to.val();
                 if (!from || !to) return;
 
-                $byTypeRows.empty().append(`<tr><td colspan="3" class="text-center text-muted">Memuat...</td></tr>`);
+                $byTypeRows.empty().append(`<tr><td colspan="2" class="text-center text-muted">Memuat...</td></tr>`);
                 $recentRows.empty().append(`<tr><td colspan="6" class="text-center text-muted">Memuat...</td></tr>`);
                 $qualityList.empty().append(`<li class="text-muted">Memuat...</li>`);
 
@@ -327,7 +326,7 @@
                 $valTotalTransaksi.text(new Intl.NumberFormat("id-ID").format(Number(data.totalTransaksi ?? 0)));
                 $valTotalJiwa.text(new Intl.NumberFormat("id-ID").format(Number(data.totalJiwaFitrah ?? 0)));
 
-                // byType: ensure all ZisType values are shown (show zeroes when missing)
+                // byType: ensure all requested types are shown (show zeroes when missing)
                 const byType = Array.isArray(data.byType) ? data.byType : [];
                 const map = new Map();
                 for (const r of byType) {
@@ -335,26 +334,34 @@
                     const key = r.zakatType || (r.zakatTypeLabel ? String(r.zakatTypeLabel) : null);
                     if (key) map.set(String(key), r);
                 }
-                // Ordered list: show fitrah uang, fitrah beras, zakat mal, infaq/sedekah, fidiah
+                // Ordered list sesuai ringkasan yang diminta
                 const ALL_TYPES = [
-                    "ZAKAT_FITRAH_UANG",
                     "ZAKAT_FITRAH_BERAS",
+                    "ZAKAT_FITRAH_UANG",
+                    "FIDIAH",
                     "ZAKAT_MAL",
-                    "INFAQ_SEDEKAH",
-                    "FIDIAH"
+                    "INFAQ_SEDEKAH"
                 ];
+                const TYPE_LABELS = {
+                    ZAKAT_FITRAH_BERAS: "Total Zakat Fitrah (Beras)",
+                    ZAKAT_FITRAH_UANG: "Total Zakat Fitrah (Uang)",
+                    FIDIAH: "Total Fidiah",
+                    ZAKAT_MAL: "Total Zakat Mal",
+                    INFAQ_SEDEKAH: "Total Infaq/Sedekah"
+                };
 
                 $byTypeRows.empty();
                 for (const t of ALL_TYPES) {
                     const r = map.get(t);
-                    const label = r && (r.zakatTypeLabel || r.zakatType) ? (r.zakatTypeLabel || r.zakatType) : t;
-                    const totalUang = r ? (r.totalUang ?? 0) : 0;
-                    const totalBeras = r ? (r.totalBerasKg ?? 0) : 0;
+                    const label = TYPE_LABELS[t] || (r && (r.zakatTypeLabel || r.zakatType) ? (r.zakatTypeLabel || r.zakatType) : t);
+                    const isBerasType = t === "ZAKAT_FITRAH_BERAS";
+                    const value = isBerasType
+                        ? kg(r ? (r.totalBerasKg ?? 0) : 0)
+                        : rupiah(r ? (r.totalUang ?? 0) : 0);
                     $byTypeRows.append(`
                         <tr>
                             <td>${escapeHtml(label)}</td>
-                            <td class="text-right">${rupiah(totalUang)}</td>
-                            <td class="text-right">${kg(totalBeras)}</td>
+                            <td class="text-right">${value}</td>
                         </tr>
                     `);
                 }

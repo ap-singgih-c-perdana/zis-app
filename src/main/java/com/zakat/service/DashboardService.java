@@ -14,6 +14,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -48,29 +49,39 @@ public class DashboardService {
                 List.of(ZisType.ZAKAT_FITRAH_BERAS, ZisType.ZAKAT_FITRAH_UANG)
         );
 
-        List<DashboardSummaryResponse.ByType> byType = zakatPaymentRepository.dashboardByType(fromInclusive, toExclusive).stream()
-                .map(r -> {
-                    java.math.BigDecimal totalUang = java.math.BigDecimal.ZERO;
-                    if (r.getZakatType() == com.zakat.enums.ZisType.ZAKAT_FITRAH_UANG) {
-                        totalUang = r.getFitrahUang();
-                    } else if (r.getZakatType() == com.zakat.enums.ZisType.ZAKAT_MAL) {
-                        totalUang = r.getMalUang();
-                    } else if (r.getZakatType() == com.zakat.enums.ZisType.INFAQ_SEDEKAH) {
-                        totalUang = r.getInfaqUang();
-                    } else if (r.getZakatType() == com.zakat.enums.ZisType.FIDIAH) {
-                        totalUang = r.getFidiahUang();
-                    } else if (r.getZakatType() == com.zakat.enums.ZisType.ZAKAT_FITRAH_BERAS) {
-                        // fitrah beras: money is typically zero; keep using fitrahUang which should be 0
-                        totalUang = r.getFitrahUang();
-                    }
-                    return new DashboardSummaryResponse.ByType(
-                            r.getZakatType(),
-                            r.getZakatType() == null ? null : r.getZakatType().getLabel(),
-                            totalUang,
-                            r.getTotalBerasKg()
-                    );
-                })
-                .toList();
+        ZakatPaymentRepository.DashboardTypeBreakdownRow breakdown = zakatPaymentRepository.dashboardTypeBreakdown(fromInclusive, toExclusive);
+        List<DashboardSummaryResponse.ByType> byType = List.of(
+                new DashboardSummaryResponse.ByType(
+                        ZisType.ZAKAT_FITRAH_UANG,
+                        ZisType.ZAKAT_FITRAH_UANG.getLabel(),
+                        defaultZero(breakdown.getFitrahUang()),
+                        BigDecimal.ZERO
+                ),
+                new DashboardSummaryResponse.ByType(
+                        ZisType.ZAKAT_FITRAH_BERAS,
+                        ZisType.ZAKAT_FITRAH_BERAS.getLabel(),
+                        BigDecimal.ZERO,
+                        defaultZero(breakdown.getFitrahBeras())
+                ),
+                new DashboardSummaryResponse.ByType(
+                        ZisType.FIDIAH,
+                        ZisType.FIDIAH.getLabel(),
+                        defaultZero(breakdown.getFidiah()),
+                        BigDecimal.ZERO
+                ),
+                new DashboardSummaryResponse.ByType(
+                        ZisType.ZAKAT_MAL,
+                        ZisType.ZAKAT_MAL.getLabel(),
+                        defaultZero(breakdown.getZakatMal()),
+                        BigDecimal.ZERO
+                ),
+                new DashboardSummaryResponse.ByType(
+                        ZisType.INFAQ_SEDEKAH,
+                        ZisType.INFAQ_SEDEKAH.getLabel(),
+                        defaultZero(breakdown.getInfaqSedekah()),
+                        BigDecimal.ZERO
+                )
+        );
 
         InstitutionProfileResponse profileResponse = toProfileResponse(institutionProfileService.get());
 
@@ -171,5 +182,9 @@ public class DashboardService {
                 profile.getNamaKetua(),
                 profile.getNamaBendahara()
         );
+    }
+
+    private static BigDecimal defaultZero(BigDecimal value) {
+        return value == null ? BigDecimal.ZERO : value;
     }
 }
