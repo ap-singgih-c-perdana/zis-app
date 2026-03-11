@@ -6,6 +6,8 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Column;
+import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -16,6 +18,10 @@ import org.hibernate.annotations.UuidGenerator;
 import java.util.UUID;
 
 @Entity
+@Table(
+        name = "muzakki_person",
+        uniqueConstraints = @UniqueConstraint(name = "uk_muzakki_payment_sequence", columnNames = {"payment_id", "sequence_no"})
+)
 @Getter
 @Setter
 @NoArgsConstructor
@@ -34,5 +40,8 @@ public class MuzakkiPerson {
     @ManyToOne
     @JoinColumn(name = "payment_id")
     private ZakatPayment payment;
+
+    @Column(name = "sequence_no")
+    private Integer sequenceNo;
 
 }

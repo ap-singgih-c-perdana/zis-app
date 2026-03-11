@@ -32,7 +32,7 @@
             <div class="alert alert-danger d-none" id="alertError"></div>
 
             <div class="card">
-                <div class="card-header">
+                <div class="card-header bg-gradient-blue">
                     <h3 class="card-title">Info Pembayaran</h3>
                 </div>
                 <div class="card-body">
@@ -45,14 +45,24 @@
                         </div>
                         <div class="col-md-4">
                             <div class="form-group">
-                                <label for="payerName">Nama Pembayar</label>
-                                <input class="form-control" id="payerName" type="text" placeholder="Nama pembayar (opsional)">
+                                <label for="payerName">Nama Pembayar *</label>
+                                <input class="form-control" id="payerName" type="text" placeholder="Nama pembayar">
                             </div>
                         </div>
                         <div class="col-md-4">
                             <div class="form-group">
                                 <label for="payerPhone">No. HP Pembayar</label>
                                 <input class="form-control" id="payerPhone" type="tel" placeholder="08xxxxxxxxxx">
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="paymentMethod">Metode Pembayaran *</label>
+                                <select class="form-control" id="paymentMethod">
+                                    <option value="" selected disabled>Pilih metode pembayaran...</option>
+                                    <option value="CASH">Cash</option>
+                                    <option value="TRANSFER">Transfer</option>
+                                </select>
                             </div>
                         </div>
                         <!-- moved Alamat here so it appears above Jenis Zakat -->
@@ -62,46 +72,30 @@
                                 <textarea class="form-control" id="alamat" placeholder="Contoh: Jl. Mawar No. 10, RT 02/RW 01" rows="2"></textarea>
                             </div>
                         </div>
-                        <div class="col-md-8">
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header bg-gradient-blue">
+                    <h3 class="card-title">Zakat Fitrah</h3>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
                             <div class="form-group">
                                 <label for="zakatType">Jenis Zakat *</label>
                                 <select class="form-control" id="zakatType">
                                     <option value="" selected disabled>Pilih jenis zakat...</option>
                                     <option value="ZAKAT_FITRAH_BERAS">Zakat Fitrah (Beras)</option>
                                     <option value="ZAKAT_FITRAH_UANG">Zakat Fitrah (Uang)</option>
-                                    <option value="ZAKAT_MAL">Zakat Mal</option>
-                                    <option value="INFAQ_SEDEKAH">Infaq / Sedekah</option>
-                                    <option value="FIDIAH">Fidiah</option>
+<!--                                    <option value="ZAKAT_MAL">Zakat Mal</option>-->
+<!--                                    <option value="INFAQ_SEDEKAH">Infaq / Sedekah</option>-->
+<!--                                    <option value="FIDIAH">Fidiah</option>-->
                                 </select>
                             </div>
                         </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="card">
-                <div class="card-header">
-                    <h3 class="card-title">Jiwa & Nilai</h3>
-                </div>
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-4">
-                            <div class="form-group">
-                                <label for="jumlahJiwa">Jumlah Jiwa *</label>
-                                <div class="input-group">
-                                    <div class="input-group-prepend">
-                                        <button class="btn btn-outline-secondary" id="btnJiwaMinus" type="button">-</button>
-                                    </div>
-                                    <input class="form-control text-center" id="jumlahJiwa" min="1" step="1" type="number" value="1">
-                                    <div class="input-group-append">
-                                        <button class="btn btn-outline-secondary" id="btnJiwaPlus" type="button">+</button>
-                                    </div>
-                                </div>
-                                <small class="text-muted">Field nama muzakki akan mengikuti jumlah jiwa.</small>
-                            </div>
-                        </div>
-
-                        <div class="col-md-8">
+                        <div class="col-md-6">
                             <div class="form-group d-none" id="groupQuality">
                                 <label for="zakatQualityId">Zakat Quality *</label>
                                 <select class="form-control" id="zakatQualityId" disabled>
@@ -128,14 +122,57 @@
                             </div>
                         </div>
                     </div>
+                    <div class="card">
+                        <div class="card-header bg-gradient-gray-dark">
+                            <h3 class="card-title" >Data Muzakki</h3>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="jumlahJiwa">Jumlah Jiwa *</label>
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <button class="btn btn-outline-secondary" id="btnJiwaMinus" type="button">-</button>
+                                    </div>
+                                    <input class="form-control text-center" id="jumlahJiwa" min="1" max="10" step="1" type="number" value="1">
+                                    <div class="input-group-append">
+                                        <button class="btn btn-outline-secondary" id="btnJiwaPlus" type="button">+</button>
+                                    </div>
+                                </div>
+                                <small class="text-muted">Field nama muzakki akan mengikuti jumlah jiwa.</small>
+                            </div>
+                        </div>
+                        <div class="card-body" id="muzakkiContainer"></div>
+                    </div>
                 </div>
             </div>
 
             <div class="card">
-                <div class="card-header">
-                    <h3 class="card-title">Data Muzakki</h3>
+                <div class="card-header bg-gradient-blue">
+                    <h3 class="card-title">Zakat Mal, Infaq/Sedekah dan Fidiah</h3>
                 </div>
-                <div class="card-body" id="muzakkiContainer"></div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label>Zakat Mal</label>
+                                <input class="form-control" id="zakatMal" type="number" min="0" step="1" placeholder="0 (opsional)">
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="payerName">Infaq/Sedekah</label>
+                                <input class="form-control" id="infaqSedekah" type="number" min="0" step="1" placeholder="0 (opsional)">
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="payerPhone">Fidiah</label>
+                                <input class="form-control" id="fidiah" type="number" min="0" step="1" placeholder="0 (opsional)">
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
             </div>
 
             <div class="card">
@@ -155,6 +192,7 @@
     <script>
         (function () {
             const FITRAH_TYPES = new Set(["ZAKAT_FITRAH_BERAS", "ZAKAT_FITRAH_UANG"]);
+            const MAX_JIWA = 10;
 
             const $alertSuccess = $("#alertSuccess");
             const $alertError = $("#alertError");
@@ -175,10 +213,12 @@
             const $alamat = $("#alamat");
             const $payerName = $("#payerName");
             const $payerPhone = $("#payerPhone");
+            const $paymentMethod = $("#paymentMethod");
             const $btnSave = $("#btnSave");
             const $btnReset = $("#btnReset");
 
             let currentQualities = [];
+            let successTimer = null;
 
             function showError(message) {
                 $alertSuccess.addClass("d-none").text("");
@@ -186,9 +226,22 @@
                 window.scrollTo({top: 0, behavior: "smooth"});
             }
 
-            function showSuccess(message) {
+            function showSuccess(message, linkHtml) {
                 $alertError.addClass("d-none").text("");
-                $alertSuccess.removeClass("d-none").text(message || "Berhasil");
+                const safeMessage = String(message || "Berhasil")
+                    .replaceAll("&", "&amp;")
+                    .replaceAll("<", "&lt;")
+                    .replaceAll(">", "&gt;")
+                    .replaceAll("\"", "&quot;")
+                    .replaceAll("'", "&#039;");
+                $alertSuccess.removeClass("d-none").html(`${safeMessage}${linkHtml ? ` ${linkHtml}` : ""}`);
+                if (successTimer) {
+                    clearTimeout(successTimer);
+                }
+                successTimer = setTimeout(function () {
+                    $alertSuccess.addClass("d-none").html("");
+                    successTimer = null;
+                }, 5000);
                 window.scrollTo({top: 0, behavior: "smooth"});
             }
 
@@ -215,11 +268,21 @@
                     `);
                     $muzakkiContainer.append(group);
                 }
+                syncMuzakkiFirstName();
+            }
+
+            function syncMuzakkiFirstName() {
+                const payerName = ($payerName.val() || "").trim();
+                const $first = $(".muzakki-name").first();
+                if ($first.length) {
+                    $first.val(payerName);
+                }
             }
 
             function clampJiwa() {
                 let v = parseInt($jumlahJiwa.val(), 10);
                 if (Number.isNaN(v) || v < 1) v = 1;
+                if (v > MAX_JIWA) v = MAX_JIWA;
                 $jumlahJiwa.val(String(v));
                 return v;
             }
@@ -329,18 +392,24 @@
                 const jiwa = clampJiwa();
                 const zakatType = $zakatType.val();
                 const alamat = ($alamat.val() || "").trim();
+                const payerName = ($payerName.val() || "").trim();
+                const paymentMethod = $paymentMethod.val();
                 const names = $(".muzakki-name").toArray().map(el => (el.value || "").trim()).filter(x => x.length);
 
                 if (!zakatType) return showError("Jenis zakat wajib dipilih");
                 if (!alamat) return showError("Alamat wajib diisi");
+                if (!payerName) return showError("Nama pembayar wajib diisi");
+                if (!paymentMethod) return showError("Metode pembayaran wajib dipilih");
+                if (jiwa > MAX_JIWA) return showError(`Jumlah jiwa maksimal ${MAX_JIWA}`);
                 // For Fidiah we don't require muzakki names (it's a nominal-only payment)
                 if (zakatType !== 'FIDIAH' && names.length !== jiwa) return showError("Jumlah nama muzakki harus sama dengan jumlah jiwa");
 
                 const payload = {
                     jumlahJiwa: jiwa,
                     alamat: alamat,
-                    payerName: $payerName.val()?.trim() || null,
+                    payerName: payerName,
                     payerPhone: $payerPhone.val()?.trim() || null,
+                    paymentMethod: paymentMethod,
                     zakatType: zakatType,
                     muzakkiNames: names
                 };
@@ -354,6 +423,14 @@
                     if (!nominal || nominal <= 0) return showError("Nominal uang wajib diisi");
                     payload.jumlahUang = nominal;
                 }
+
+                // include optional separate nominals if provided (>0)
+                const malAmt = Number($("#zakatMal").val());
+                if (!Number.isNaN(malAmt) && malAmt > 0) payload.jumlahUangZakatMal = malAmt;
+                const infaqAmt = Number($("#infaqSedekah").val());
+                if (!Number.isNaN(infaqAmt) && infaqAmt > 0) payload.jumlahUangInfaqSedekah = infaqAmt;
+                const fidiahAmt = Number($("#fidiah").val());
+                if (!Number.isNaN(fidiahAmt) && fidiahAmt > 0) payload.jumlahUangFidiah = fidiahAmt;
 
                 $btnSave.prop("disabled", true);
                 try {
@@ -373,7 +450,29 @@
 
                     const data = await res.json();
                     const receipt = data.receiptNumber ? ` No. Kwitansi: ${data.receiptNumber}` : "";
-                    showSuccess(`Pembayaran tersimpan.${receipt}`);
+                    showSuccess(
+                        `Pembayaran tersimpan.${receipt}`,
+                        `<a href="/zakat-payments/list" class="alert-link ml-2">Riwayat Pembayaran</a>`
+                    );
+
+                    // Clear form inputs (but keep the success alert visible)
+                    // Reset zakat type and related UI
+                    $zakatType.val("");
+                    $jumlahJiwa.val("1");
+                    renderMuzakkiInputs(1);
+                    $alamat.val("");
+                    $jumlahUang.val("");
+                    $("#zakatMal").val("");
+                    $("#infaqSedekah").val("");
+                    $("#fidiah").val("");
+                    $zakatQualityId.val("");
+                    currentQualities = [];
+                    $groupQuality.addClass("d-none");
+                    $groupNominal.addClass("d-none");
+                    $previewBox.addClass("d-none");
+                    $payerName.val("");
+                    $payerPhone.val("");
+                    $paymentMethod.val("");
                 } catch (e) {
                     showError(String(e.message || e));
                 } finally {
@@ -397,6 +496,7 @@
                 $previewBox.addClass("d-none");
                 $payerName.val("");
                 $payerPhone.val("");
+                $paymentMethod.val("");
             }
 
             // init
@@ -405,6 +505,7 @@
             renderMuzakkiInputs(1);
             $payerName.val("");
             $payerPhone.val("");
+            $paymentMethod.val("");
 
             $btnJiwaMinus.on("click", function () {
                 const v = clampJiwa();
@@ -414,6 +515,7 @@
             });
             $btnJiwaPlus.on("click", function () {
                 const v = clampJiwa();
+                if (v >= MAX_JIWA) return;
                 $jumlahJiwa.val(String(v + 1));
                 renderMuzakkiInputs(clampJiwa());
                 updatePreview();
@@ -429,6 +531,9 @@
             $zakatQualityId.on("change", function () {
                 updatePreview();
             });
+            $payerName.on("input", function () {
+                syncMuzakkiFirstName();
+            });
 
             $btnSave.on("click", submit);
             $btnReset.on("click", resetForm);
@@ -438,4 +543,3 @@
 
 </body>
 </html>
-

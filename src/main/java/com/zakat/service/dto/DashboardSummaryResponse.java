@@ -24,10 +24,8 @@ public record DashboardSummaryResponse(
     public record ByType(
             ZisType zakatType,
             String zakatTypeLabel,
-            long transaksi,
             BigDecimal totalUang,
-            BigDecimal totalBerasKg,
-            long totalJiwa
+            BigDecimal totalBerasKg
     ) {
     }
 

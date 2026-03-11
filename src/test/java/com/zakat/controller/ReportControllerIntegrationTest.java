@@ -5,6 +5,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.zakat.entity.ZakatPayment;
 import com.zakat.enums.ZisType;
 import com.zakat.repository.ZakatPaymentRepository;
+import com.zakat.repository.ZakatQualityRepository;
+import com.zakat.entity.ZakatQuality;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,9 +42,13 @@ class ReportControllerIntegrationTest {
     @Autowired
     private ZakatPaymentRepository zakatPaymentRepository;
 
+    @Autowired
+    private ZakatQualityRepository zakatQualityRepository;
+
     @BeforeEach
     void setUp() {
         zakatPaymentRepository.deleteAll();
+        zakatQualityRepository.deleteAll();
     }
 
     @Test
@@ -50,10 +56,24 @@ class ReportControllerIntegrationTest {
     void rekapZis_aggregatesByType_andReturnsTotals() throws Exception {
         Instant now = Instant.now();
 
+        ZakatQuality qualityUang = zakatQualityRepository.save(ZakatQuality.builder()
+                .name("Fitrah Uang")
+                .zakatType(ZisType.ZAKAT_FITRAH_UANG)
+                .nominalPerJiwa(45000L)
+                .active(true)
+                .build());
+
+        ZakatQuality qualityBeras = zakatQualityRepository.save(ZakatQuality.builder()
+                .name("Fitrah Beras")
+                .zakatType(ZisType.ZAKAT_FITRAH_BERAS)
+                .beratPerJiwaKg(new BigDecimal("2.4916666666667"))
+                .active(true)
+                .build());
+
         ZakatPayment fitrahUang = new ZakatPayment();
         fitrahUang.setJumlahJiwa(4);
         fitrahUang.setAlamat("A");
-        fitrahUang.setZakatType(ZisType.ZAKAT_FITRAH_UANG);
+        fitrahUang.setZakatQuality(qualityUang);
         fitrahUang.setJumlahUang(new BigDecimal("180000"));
         fitrahUang.setCreatedAt(now);
         zakatPaymentRepository.save(fitrahUang);
@@ -61,7 +81,7 @@ class ReportControllerIntegrationTest {
         ZakatPayment fitrahBeras = new ZakatPayment();
         fitrahBeras.setJumlahJiwa(60);
         fitrahBeras.setAlamat("B");
-        fitrahBeras.setZakatType(ZisType.ZAKAT_FITRAH_BERAS);
+        fitrahBeras.setZakatQuality(qualityBeras);
         fitrahBeras.setBeratBerasKg(new BigDecimal("149.5"));
         fitrahBeras.setCreatedAt(now);
         zakatPaymentRepository.save(fitrahBeras);
@@ -69,16 +89,14 @@ class ReportControllerIntegrationTest {
         ZakatPayment mal = new ZakatPayment();
         mal.setJumlahJiwa(1);
         mal.setAlamat("C");
-        mal.setZakatType(ZisType.ZAKAT_MAL);
-        mal.setJumlahUang(new BigDecimal("3512500"));
+        mal.setJumlahUangZakatMal(new BigDecimal("3512500"));
         mal.setCreatedAt(now);
         zakatPaymentRepository.save(mal);
 
         ZakatPayment infaq = new ZakatPayment();
         infaq.setJumlahJiwa(1);
         infaq.setAlamat("D");
-        infaq.setZakatType(ZisType.INFAQ_SEDEKAH);
-        infaq.setJumlahUang(new BigDecimal("100000"));
+        infaq.setJumlahUangInfaqSedekah(new BigDecimal("100000"));
         infaq.setCreatedAt(now);
         zakatPaymentRepository.save(infaq);
 

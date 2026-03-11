@@ -97,7 +97,12 @@
                         <tr>
                             <th>Kwitansi</th>
                             <th>Created</th>
-                            <th>Zakat Type</th>
+                            <th>Fitrah Uang (Rp)</th>
+                            <th>Fitrah Beras (Kg)</th>
+                            <th>Zakat Mal (Rp)</th>
+                            <th>Infaq/Sedekah (Rp)</th>
+                            <th>Fidiah (Rp)</th>
+                            <th>Metode</th>
                             <th>Pembayar</th>
                             <th>No. HP</th>
                             <th>Alamat</th>
@@ -109,7 +114,7 @@
                         </thead>
                         <tbody id="paymentRows">
                         <tr>
-                            <td colspan="10" class="text-center text-muted">Memuat...</td>
+                            <td colspan="15" class="text-center text-muted">Memuat...</td>
                         </tr>
                         </tbody>
                     </table>
@@ -170,11 +175,17 @@
                     .replaceAll("'", "&#039;");
             }
 
+            function startOfMonthIso(d = new Date()) {
+                const x = new Date(d);
+                x.setDate(1);
+                return x.toISOString().slice(0, 10);
+            }
+
             function render(data) {
                 const content = data && data.content ? data.content : [];
                 $rows.empty();
                 if (!content.length) {
-                    $rows.append(`<tr><td colspan="10" class="text-center text-muted">Tidak ada data</td></tr>`);
+                    $rows.append(`<tr><td colspan="15" class="text-center text-muted">Tidak ada data</td></tr>`);
                 } else {
                     for (const item of content) {
                         const canceledBadge = item.canceled ? `<span class="badge badge-secondary">BATAL</span>` : ``;
@@ -182,26 +193,43 @@
                         const alamat = item.alamat ? escapeHtml(item.alamat) : "-";
                         const payer = item.payerName ? escapeHtml(item.payerName) : "-";
                         const payerPhone = item.payerPhone ? escapeHtml(item.payerPhone) : "-";
+                        const paymentMethod = item.paymentMethod === "TRANSFER" ? "Transfer" : (item.paymentMethod === "CASH" ? "Cash" : "-");
+                        const printHtml = `
+                            <a class="btn btn-xs btn-success mr-1" href="/api/reports/kwitansi/${encodeURIComponent(item.id)}/template/print" target="_blank" rel="noopener">
+                              <i class="fas fa-print"></i> Kwitansi
+                            </a>
+                        `;
                         const actionHtml = (!CAN_MUTATE || item.canceled)
-                            ? `<span class="text-muted">-</span>`
+                            ? printHtml
                             : `
                                 <a class="btn btn-xs btn-info mr-1" href="/zakat-payments/${encodeURIComponent(item.id)}/edit">
                                   <i class="fas fa-edit"></i> Edit
                                 </a>
+                                ${printHtml}
                                 <button class="btn btn-xs btn-danger btn-cancel" data-id="${escapeHtml(item.id)}" type="button">
                                   <i class="fas fa-ban"></i> Batalkan
                                 </button>
                               `;
 
+                        const fmtMoney = v => (v == null) ? '-' : `Rp ${new Intl.NumberFormat("id-ID").format(v)}`;
+                        const fmtKg = v => (v == null) ? '-' : `${v} Kg`;
+                        const totalNominal = ((item.jumlahUang ?? 0) + (item.jumlahUangZakatMal ?? 0) + (item.jumlahUangInfaqSedekah ?? 0) + (item.jumlahUangFidiah ?? 0));
+                        const nominalDisplay = totalNominal > 0 ? `Rp ${new Intl.NumberFormat("id-ID").format(totalNominal)}` : (item.beratBerasKg != null ? `${item.beratBerasKg} Kg` : "-");
+
                         $rows.append(`
                             <tr class="${item.canceled ? "text-muted" : ""}">
                                 <td>${receipt} ${canceledBadge}</td>
                                 <td>${formatInstant(item.createdAt)}</td>
-                                <td>${escapeHtml(item.zakatTypeLabel || item.zakatType || "-")}</td>
+                                <td>${fmtMoney(item.jumlahUang)}</td>
+                                <td>${fmtKg(item.beratBerasKg)}</td>
+                                <td>${fmtMoney(item.jumlahUangZakatMal)}</td>
+                                <td>${fmtMoney(item.jumlahUangInfaqSedekah)}</td>
+                                <td>${fmtMoney(item.jumlahUangFidiah)}</td>
+                                <td>${escapeHtml(paymentMethod)}</td>
                                 <td>${payer}</td>
                                 <td>${payerPhone}</td>
                                 <td>${alamat}</td>
-                                <td>${formatNominal(item)}</td>
+                                <td>${nominalDisplay}</td>
                                 <td>${item.muzakkiCount ?? 0}</td>
                                 <td>${escapeHtml(item.muzakkiPreview || "-")}</td>
                                 <td>${actionHtml}</td>
@@ -248,7 +276,7 @@
                     const data = await res.json();
                     render(data);
                 } catch (e) {
-                    $rows.empty().append(`<tr><td colspan="10" class="text-center text-danger">${String(e.message || e)}</td></tr>`);
+                    $rows.empty().append(`<tr><td colspan="15" class="text-center text-danger">${String(e.message || e)}</td></tr>`);
                 } finally {
                     $btnRefresh.prop("disabled", false);
                 }
@@ -298,7 +326,7 @@
             $btnReset.on("click", function () {
                 const today = new Date();
                 const iso = today.toISOString().slice(0, 10);
-                $filterFrom.val(iso);
+                $filterFrom.val(startOfMonthIso(today));
                 $filterTo.val(iso);
                 $filterQ.val("");
                 $filterPayerName.val("");
@@ -314,10 +342,10 @@
                 cancelPayment(id);
             });
 
-            // init default period: today
+            // init default period: start of current month -> today
             const today = new Date();
             const iso = today.toISOString().slice(0, 10);
-            $filterFrom.val(iso);
+            $filterFrom.val(startOfMonthIso(today));
             $filterTo.val(iso);
             $filterPayerName.val("");
             $filterPayerPhone.val("");

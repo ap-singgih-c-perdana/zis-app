@@ -4,8 +4,10 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.zakat.entity.MuzakkiPerson;
 import com.zakat.entity.ZakatPayment;
+import com.zakat.entity.ZakatQuality;
 import com.zakat.enums.ZisType;
 import com.zakat.repository.ZakatPaymentRepository;
+import com.zakat.repository.ZakatQualityRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,9 +44,13 @@ class MuzakkiDetailReportIntegrationTest {
     @Autowired
     private ZakatPaymentRepository zakatPaymentRepository;
 
+    @Autowired
+    private ZakatQualityRepository zakatQualityRepository;
+
     @BeforeEach
     void setUp() {
         zakatPaymentRepository.deleteAll();
+        zakatQualityRepository.deleteAll();
     }
 
     @Test
@@ -53,10 +59,24 @@ class MuzakkiDetailReportIntegrationTest {
         Instant now = Instant.now();
         LocalDate today = LocalDate.ofInstant(now, JAKARTA);
 
+        ZakatQuality qualityUang = zakatQualityRepository.save(ZakatQuality.builder()
+                .name("Fitrah Uang")
+                .zakatType(ZisType.ZAKAT_FITRAH_UANG)
+                .nominalPerJiwa(45000L)
+                .active(true)
+                .build());
+
+        ZakatQuality qualityBeras = zakatQualityRepository.save(ZakatQuality.builder()
+                .name("Fitrah Beras")
+                .zakatType(ZisType.ZAKAT_FITRAH_BERAS)
+                .beratPerJiwaKg(new BigDecimal("2.5"))
+                .active(true)
+                .build());
+
         ZakatPayment p1 = new ZakatPayment();
         p1.setJumlahJiwa(4);
         p1.setAlamat("A");
-        p1.setZakatType(ZisType.ZAKAT_FITRAH_UANG);
+        p1.setZakatQuality(qualityUang);
         p1.setJumlahUang(new BigDecimal("180000"));
         p1.setCreatedAt(now);
         p1.setMuzakkiList(List.of(
@@ -67,7 +87,7 @@ class MuzakkiDetailReportIntegrationTest {
         ZakatPayment p2 = new ZakatPayment();
         p2.setJumlahJiwa(5);
         p2.setAlamat("B");
-        p2.setZakatType(ZisType.ZAKAT_FITRAH_BERAS);
+        p2.setZakatQuality(qualityBeras);
         p2.setBeratBerasKg(new BigDecimal("12.50"));
         p2.setCreatedAt(now);
         p2.setMuzakkiList(List.of(

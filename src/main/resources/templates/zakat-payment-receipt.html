@@ -1,110 +1,411 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html lang="id">
 <head>
     <meta charset="utf-8">
-    <title>Kwitansi Pembayaran</title>
+    <title>Kwitansi Zakat</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" th:href="@{~/webjars/AdminLTE/3.2.0/dist/css/adminlte.min.css}" />
     <style>
-        body { background: #fff; }
-        .receipt { max-width: 720px; margin: 20px auto; padding: 20px; border: 1px solid #ddd; }
-        .receipt .header { text-align: center; margin-bottom: 12px; }
-        .receipt h2 { margin:0; }
-        .receipt .meta { margin-bottom: 12px; }
-        .receipt .items { margin-top: 8px; }
-        .no-print { display:none; }
+        @page { size: A5 landscape; margin: 8mm; }
+
+        body {
+            --fs-base: 11pt;
+            --fs-title: 12.5pt;
+            --fs-header: 14pt;
+            --fs-receipt-no: 16pt;
+            --fs-small: 9.5pt;
+            margin: 0;
+            background: #fff;
+            color: #111;
+            font-family: "Times New Roman", Times, serif;
+            font-size: var(--fs-base);
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+
+        .sheet {
+            width: 210mm;
+            min-height: 148.5mm;
+            box-sizing: border-box;
+            margin: 0 auto;
+            padding: 8mm;
+        }
+
+        .header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 3px;
+        }
+
+        .logo {
+            width: 22mm;
+            height: 22mm;
+            margin-right: 8px;
+            object-fit: contain;
+        }
+
+        .title {
+            text-align: center;
+            font-weight: bold;
+            margin-bottom: 4px;
+            border-top: 1px solid #000;
+            border-bottom: 1px solid #000;
+            padding: 2px 0;
+            font-size: var(--fs-title);
+        }
+
+        .line {
+            border-bottom: 1px solid black;
+            flex: 1;
+            min-height: 18px;
+            padding: 0 4px 1px 4px;
+        }
+
+        .row {
+            display: flex;
+            gap: 5px;
+            margin: 3px 0;
+            align-items: flex-end;
+        }
+
+        .small-line {
+            width: 55mm;
+            border-bottom: 1px solid black;
+            min-height: 18px;
+            padding: 0 4px 1px 4px;
+        }
+
+        .muzakki-line {
+            width: 60mm;
+            border-bottom: 1px solid black;
+            min-height: 15px;
+            display: inline-block;
+            vertical-align: bottom;
+            padding: 0 2px 1px 2px;
+        }
+
+        .medium-line {
+            width: 45mm;
+            border-bottom: 1px solid black;
+            min-height: 18px;
+            display: inline-block;
+            padding: 0 4px 1px 4px;
+        }
+
+        .muzakki {
+            width: 100%;
+            margin-top: 2px;
+            border-collapse: collapse;
+        }
+
+        .muzakki td {
+            padding: 1px 2px;
+            font-size: var(--fs-base);
+            vertical-align: bottom;
+        }
+
+        .signature {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+            font-size: var(--fs-base);
+        }
+
+        .signature .block {
+            width: 32%;
+        }
+
+        .signature .space {
+            height: 26px;
+        }
+
+        .check {
+            display: inline-block;
+            width: 16px;
+            text-align: center;
+        }
+
+        .meta-small {
+            margin-top: 4px;
+            font-size: var(--fs-small);
+            color: #444;
+        }
+
+        #instansiNama {
+            font-size: var(--fs-header);
+            line-height: 1.1;
+        }
+
+        #receiptNoShort {
+            font-size: var(--fs-receipt-no);
+            line-height: 1;
+        }
+
+        .no-print {
+            margin: 8px;
+            text-align: right;
+        }
+
         @media print {
-            .receipt { border: none; }
+            .sheet {
+                margin: 0;
+                padding: 0;
+                width: auto;
+                min-height: auto;
+            }
+
+            .no-print {
+                display: none !important;
+            }
         }
     </style>
 </head>
 <body>
-<div class="receipt" id="receipt">
+<section class="sheet" id="sheet">
     <div class="header">
-        <img src="/img/dashboard.png" alt="logo" style="height:48px;" onerror="this.style.display='none'" />
-        <h2>Kwitansi Pembayaran Zakat</h2>
-        <div id="receiptNumber" class="text-muted"></div>
+        <img src="/img/logo-masjid.png" class="logo" alt="Logo Masjid" onerror="this.onerror=null;this.src='/img/dashboard.png'">
+        <div>
+            <b id="instansiNama">DEWAN KEMAKMURAN MASJID</b><br>
+            <span id="instansiAlamat">Sekretariat: -</span>
+        </div>
+        <div style="margin-left:auto; font-weight:bold;" id="receiptNoShort">----</div>
     </div>
 
-    <div class="meta">
-        <div><strong>Tanggal:</strong> <span id="createdAt">-</span></div>
-        <div><strong>Nama Pembayar:</strong> <span id="payerName">-</span></div>
-        <div><strong>No. HP Pembayar:</strong> <span id="payerPhone">-</span></div>
-        <div><strong>Nama Muzakki:</strong> <span id="namaMuzakki">-</span></div>
-        <div><strong>Jenis:</strong> <span id="zakatType">-</span></div>
-        <div><strong>Alamat:</strong> <span id="alamat">-</span></div>
+    <div class="title">
+        TANDA TERIMA ZAKAT / INFAQ / SEDEKAH
     </div>
 
-    <div class="items">
-        <table class="table table-borderless table-sm">
-            <tbody id="itemsBody">
-            </tbody>
-        </table>
+    <p style="margin:3px 0;"><b>Yang bertanda tangan di bawah ini:</b></p>
 
-        <div class="text-right mt-3">
-            <h5>Total: <span id="totalDisplay">-</span></h5>
+    <div class="row">
+        <span>Nama :</span>
+        <div class="line" id="payerNameLine"></div>
+        <span>No Tlp :</span>
+        <div class="small-line" id="payerPhoneLine"></div>
+    </div>
+
+    <div class="row">
+        <span>Alamat :</span>
+        <div class="line" id="alamatLine"></div>
+    </div>
+
+    <p style="margin:4px 0;">
+        Dengan ini menyerahkan Zakat Fitrah, Zakat Mal, Sedekah, Sumbangan Sosial / Sukarela berupa:
+    </p>
+
+    <b style="font-size:12px;">a. Zakat Fitrah</b>
+
+    <div class="row">
+        <span>Beras :</span>
+        <span class="check" id="cbBeras">☐</span>
+        <span>2,5 Kg (x)</span>
+        <div class="small-line" id="jiwaBeras"></div>
+        <span>Jiwa</span>
+    </div>
+
+    <div class="row">
+        <span>Uang :</span>
+        <span class="check" id="cb40">☐</span><span>Rp 40.000</span>
+        <span class="check" id="cb50">☐</span><span>Rp 50.000</span>
+        <span class="check" id="cb65">☐</span><span>Rp 65.000</span>
+        <span class="check" id="cbOther">☐</span><span>Lainnya Rp</span>
+        <span class="medium-line" id="otherNominal"></span>
+        <span>(x)</span>
+        <span class="small-line" id="jiwaUang"></span>
+        <span>Jiwa</span>
+    </div>
+
+    <div style="text-align:center;margin-top:3px">
+        <b>Nama Penzakat</b>
+    </div>
+
+    <table class="muzakki">
+        <tbody id="muzakkiRows"></tbody>
+    </table>
+
+    <div class="row">
+        <span>b. Zakat Mal : Rp</span>
+        <span class="medium-line" id="zakatMalLine"></span>
+    </div>
+
+    <div class="row">
+        <span>c. Infaq / Sedekah : Rp</span>
+        <span class="medium-line" id="infaqLine"></span>
+    </div>
+
+    <div class="row">
+        <span>d. Fidiah : Rp</span>
+        <span class="medium-line" id="fidiahLine"></span>
+    </div>
+
+    <div class="signature">
+        <div class="block">
+            Penerima Zakat
+            <div class="space"></div>
+            __________________
+        </div>
+        <div class="block" style="text-align:center;" id="ttdDatePlace">
+            Jakarta, dd/MM/yyyy
+        </div>
+        <div class="block" style="text-align:right;">
+            Yang menyerahkan
+            <div class="space"></div>
+            <span id="ttdPayerName">__________________</span>
         </div>
     </div>
 
-    <div class="mt-4">
-        <div>Terima kasih atas pembayaran Anda.</div>
+    <div class="meta-small">
+        No. Kwitansi: <span id="receiptNumberFull">-</span> • Tanggal Input: <span id="createdAt">-</span>
     </div>
+</section>
 
-    <div class="mt-4 no-print">
-        <button class="btn btn-primary" id="btnPrintNow">Print</button>
-    </div>
+<div class="no-print">
+    <button type="button" id="btnPrintNow">Print</button>
 </div>
 
 <script>
-    (function (){
-        const paymentId = window.location.pathname.split('/').filter(Boolean).slice(-2)[0];
-        function formatNumber(n){
-            const num = Number(n ?? 0);
-            return num ? new Intl.NumberFormat('id-ID').format(num) : '0';
-        }
-        function formatDate(d){
-            if(!d) return '-';
-            try{ return new Intl.DateTimeFormat('id-ID', {dateStyle:'medium', timeStyle:'short'}).format(new Date(d)); }catch(e){return d}
-        }
-        async function load(){
-            const res = await fetch(`/api/zakat-payments/${encodeURIComponent(paymentId)}`, {headers:{'Accept':'application/json'}});
-            if(!res.ok){ document.getElementById('receipt').innerText = 'Gagal memuat data kwitansi'; return; }
-            const p = await res.json();
-            document.getElementById('receiptNumber').innerText = p.receiptNumber || '';
-            document.getElementById('createdAt').innerText = formatDate(p.createdAt);
-            document.getElementById('namaMuzakki').innerText = (Array.isArray(p.muzakkiNames) ? p.muzakkiNames.join(', ') : '-') || '-';
-            document.getElementById('zakatType').innerText = p.zakatTypeLabel || p.zakatType || '-';
-            document.getElementById('alamat').innerText = p.alamat || '-';
-            document.getElementById('payerName').innerText = p.payerName || '-';
-            document.getElementById('payerPhone').innerText = p.payerPhone || '-';
+    (function () {
+        const paymentId = window.location.pathname.split("/").filter(Boolean).slice(-2)[0];
 
-            const $items = document.getElementById('itemsBody');
-            $items.innerHTML = '';
-            if(p.zakatType && (p.zakatType.startsWith('ZAKAT_FITRAH'))){
-                const q = p.zakatQuality || {};
-                const per = q.beratPerJiwaKg || q.nominalPerJiwa || 0;
-                const jiwa = (Array.isArray(p.muzakkiNames) ? p.muzakkiNames.length : (p.jumlahJiwa || 1));
-                const total = per * jiwa;
-                $items.innerHTML = `<tr><td>Per jiwa</td><td class="text-right">${q.beratPerJiwaKg ? formatNumber(q.beratPerJiwaKg)+' Kg' : 'Rp '+formatNumber(q.nominalPerJiwa)}</td></tr>
-                                    <tr><td>Jumlah Jiwa</td><td class="text-right">${jiwa}</td></tr>
-                                    <tr><td>Total</td><td class="text-right">${q.beratPerJiwaKg ? formatNumber(total)+' Kg' : 'Rp '+formatNumber(total)}</td></tr>`;
-                document.getElementById('totalDisplay').innerText = q.beratPerJiwaKg ? formatNumber(total)+' Kg' : 'Rp '+formatNumber(total);
-            } else {
-                const nominal = Number(p.jumlahUang || 0);
-                $items.innerHTML = `<tr><td>Jumlah Uang</td><td class="text-right">Rp ${formatNumber(nominal)}</td></tr>`;
-                document.getElementById('totalDisplay').innerText = 'Rp ' + formatNumber(nominal);
+        function esc(str) {
+            return String(str ?? "")
+                .replaceAll("&", "&amp;")
+                .replaceAll("<", "&lt;")
+                .replaceAll(">", "&gt;")
+                .replaceAll("\"", "&quot;")
+                .replaceAll("'", "&#039;");
+        }
+
+        function fmtNum(v) {
+            return new Intl.NumberFormat("id-ID").format(Number(v ?? 0));
+        }
+
+        function fmtDate(iso) {
+            if (!iso) return "-";
+            const d = new Date(iso);
+            if (Number.isNaN(d.getTime())) return "-";
+            return new Intl.DateTimeFormat("id-ID", {dateStyle: "medium", timeStyle: "short"}).format(d);
+        }
+
+        function fmtDateOnly(iso) {
+            if (!iso) return "-";
+            const d = new Date(iso);
+            if (Number.isNaN(d.getTime())) return "-";
+            return new Intl.DateTimeFormat("id-ID", {day: "2-digit", month: "2-digit", year: "numeric"}).format(d);
+        }
+
+        function setText(id, text) {
+            document.getElementById(id).textContent = text == null || text === "" ? "-" : String(text);
+        }
+
+        function setCheck(id, checked) {
+            document.getElementById(id).textContent = checked ? "☑" : "☐";
+        }
+
+        function shortReceiptNumber(receiptNumber) {
+            if (!receiptNumber) return "----";
+            const m = String(receiptNumber).match(/(\\d{1,6})$/);
+            return m ? m[1].padStart(4, "0") : String(receiptNumber).slice(-4);
+        }
+
+        function buildMuzakkiRows(names) {
+            const list = Array.isArray(names) ? names : [];
+            const rows = [];
+            for (let i = 0; i < 3; i++) {
+                const a = i + 1;
+                const b = i + 4;
+                const c = i + 7;
+                const nameA = list[a - 1] || "";
+                const nameB = list[b - 1] || "";
+                const nameC = list[c - 1] || "";
+                rows.push(`
+                    <tr>
+                        <td>${a}. <span class="muzakki-line">${nameA ? esc(nameA) : "&nbsp;"}</span></td>
+                        <td>${b}. <span class="muzakki-line">${nameB ? esc(nameB) : "&nbsp;"}</span></td>
+                        <td>${c}. <span class="muzakki-line">${nameC ? esc(nameC) : "&nbsp;"}</span></td>
+                    </tr>
+                `);
+            }
+            const name10 = list[9] || "";
+            rows.push(`
+                <tr>
+                    <td>10. <span class="muzakki-line">${name10 ? esc(name10) : "&nbsp;"}</span></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+            `);
+            document.getElementById("muzakkiRows").innerHTML = rows.join("");
+        }
+
+        async function load() {
+            const [kwRes, payRes] = await Promise.all([
+                fetch(`/api/reports/kwitansi/${encodeURIComponent(paymentId)}`, {headers: {"Accept": "application/json"}}),
+                fetch(`/api/zakat-payments/${encodeURIComponent(paymentId)}`, {headers: {"Accept": "application/json"}})
+            ]);
+
+            if (!kwRes.ok || !payRes.ok) {
+                document.getElementById("sheet").innerHTML = "<p>Gagal memuat data kwitansi</p>";
+                return;
             }
 
-            // auto print for convenience
-            setTimeout(()=>{
-                // do not auto print in hidden contexts
-                if (!window.matchMedia('(display-mode: standalone)').matches) {
-                    window.print();
-                }
+            const kw = await kwRes.json();
+            const p = await payRes.json();
+            const prof = kw.institutionProfile || {};
+            const receiptNumber = kw.receiptNumber || p.receiptNumber || "-";
+
+            const payerName = p.payerName || ((kw.muzakkiNames && kw.muzakkiNames[0]) || "-");
+            const payerPhone = p.payerPhone || "-";
+            const alamat = p.alamat || kw.alamat || "-";
+            const jiwa = Number(p.jumlahJiwa ?? kw.jumlahJiwa ?? (kw.muzakkiNames ? kw.muzakkiNames.length : 0) ?? 0);
+
+            const fitrahBeras = Number(p.beratBerasKg ?? kw.berasKg ?? 0);
+            const fitrahUang = Number(p.jumlahUang ?? kw.nominalRp ?? 0);
+            const zakatMal = Number(p.jumlahUangZakatMal ?? 0);
+            const infaq = Number(p.jumlahUangInfaqSedekah ?? 0);
+            const fidiah = Number(p.jumlahUangFidiah ?? 0);
+
+            const perJiwaUang = jiwa > 0 && fitrahUang > 0 ? Math.round(fitrahUang / jiwa) : Number((kw.zakatQuality && kw.zakatQuality.nominalPerJiwa) || 0);
+
+            setText("instansiNama", prof.namaInstansi || "DEWAN KEMAKMURAN MASJID");
+            setText("instansiAlamat", (prof.alamatLengkap || "-") + (prof.kotaKabupaten ? `, ${prof.kotaKabupaten}` : ""));
+            setText("receiptNoShort", shortReceiptNumber(receiptNumber));
+            setText("receiptNumberFull", receiptNumber);
+            setText("createdAt", fmtDate(kw.createdAt || p.createdAt));
+
+            setText("payerNameLine", payerName);
+            setText("payerPhoneLine", payerPhone);
+            setText("alamatLine", alamat);
+
+            setCheck("cbBeras", fitrahBeras > 0);
+            setCheck("cb40", perJiwaUang === 40000);
+            setCheck("cb50", perJiwaUang === 50000);
+            setCheck("cb65", perJiwaUang === 65000);
+            setCheck("cbOther", perJiwaUang > 0 && ![40000, 50000, 65000].includes(perJiwaUang));
+            setText("otherNominal", perJiwaUang > 0 && ![40000, 50000, 65000].includes(perJiwaUang) ? fmtNum(perJiwaUang) : "-");
+            setText("jiwaBeras", fitrahBeras > 0 ? String(jiwa) : "-");
+            setText("jiwaUang", fitrahUang > 0 ? String(jiwa) : "-");
+
+            buildMuzakkiRows(kw.muzakkiNames || p.muzakkiNames || []);
+            setText("zakatMalLine", fmtNum(zakatMal));
+            setText("infaqLine", fmtNum(infaq));
+            setText("fidiahLine", fmtNum(fidiah));
+
+            const place = prof.kotaKabupaten || "Jakarta";
+            const date = kw.tanggal ? String(kw.tanggal) : fmtDateOnly(kw.createdAt || p.createdAt);
+            setText("ttdDatePlace", `${place}, ${date}`);
+            setText("ttdPayerName", payerName || "__________________");
+
+            setTimeout(() => {
+                window.print();
             }, 300);
         }
-        document.getElementById('btnPrintNow').addEventListener('click', function(){ window.print(); });
-        load();
+
+        document.getElementById("btnPrintNow").addEventListener("click", function () {
+            window.print();
+        });
+
+        load().catch(() => {
+            document.getElementById("sheet").innerHTML = "<p>Gagal memuat data kwitansi</p>";
+        });
     })();
 </script>
 </body>
