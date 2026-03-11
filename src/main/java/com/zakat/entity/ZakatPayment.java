@@ -1,9 +1,8 @@
 package com.zakat.entity;
 
+import com.zakat.enums.PaymentMethod;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.EnumType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
@@ -11,8 +10,9 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.Column;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 
-import com.zakat.enums.ZisType;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -45,12 +45,23 @@ public class ZakatPayment {
 
     private String payerPhone;
 
+    @Enumerated(EnumType.STRING)
+    @Column
+    private PaymentMethod paymentMethod;
+
     private BigDecimal beratBerasKg;
 
     private BigDecimal jumlahUang;
 
-    @Enumerated(EnumType.STRING)
-    private ZisType zakatType;
+    // Optional separate columns for other nominal types
+    @Column(name = "jumlah_uang_zakat_mal")
+    private BigDecimal jumlahUangZakatMal;
+
+    @Column(name = "jumlah_uang_infaq_sedekah")
+    private BigDecimal jumlahUangInfaqSedekah;
+
+    @Column(name = "jumlah_uang_fidiah")
+    private BigDecimal jumlahUangFidiah;
 
     @CreationTimestamp
     private Instant createdAt;

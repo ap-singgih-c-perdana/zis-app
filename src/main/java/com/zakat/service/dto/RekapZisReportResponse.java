@@ -8,6 +8,7 @@ public record RekapZisReportResponse(
         LocalDate toDate,
         BigDecimal zakatFitrahUang,
         BigDecimal zakatFitrahBerasKg,
+        BigDecimal fidiah,
         BigDecimal zakatMal,
         BigDecimal infaqSedekah,
         BigDecimal totalUangMasuk,
@@ -15,4 +16,3 @@ public record RekapZisReportResponse(
         InstitutionProfileResponse institutionProfile
 ) {
 }
-

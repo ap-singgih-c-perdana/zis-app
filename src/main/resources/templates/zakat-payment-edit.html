@@ -62,6 +62,16 @@
                                 <input class="form-control" id="payerPhone" type="tel">
                             </div>
                         </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="paymentMethod">Metode Pembayaran *</label>
+                                <select class="form-control" id="paymentMethod">
+                                    <option value="" selected disabled>Pilih metode pembayaran...</option>
+                                    <option value="CASH">Cash</option>
+                                    <option value="TRANSFER">Transfer</option>
+                                </select>
+                            </div>
+                        </div>
                         <div class="col-12">
                             <div class="form-group">
                                 <label for="alamat">Alamat</label>
@@ -85,7 +95,7 @@
                                     <div class="input-group-prepend">
                                         <button class="btn btn-outline-secondary" id="btnJiwaMinus" type="button">-</button>
                                     </div>
-                                    <input class="form-control text-center" id="jumlahJiwa" min="1" step="1" type="number" value="1">
+                                    <input class="form-control text-center" id="jumlahJiwa" min="1" max="10" step="1" type="number" value="1">
                                     <div class="input-group-append">
                                         <button class="btn btn-outline-secondary" id="btnJiwaPlus" type="button">+</button>
                                     </div>
@@ -95,6 +105,14 @@
                         </div>
 
                         <div class="col-md-8">
+                            <div class="form-group">
+                                <label for="zakatType">Jenis Zakat *</label>
+                                <select class="form-control" id="zakatType">
+                                    <option value="" selected disabled>Pilih jenis zakat...</option>
+                                    <option value="ZAKAT_FITRAH_BERAS">Zakat Fitrah (Beras)</option>
+                                    <option value="ZAKAT_FITRAH_UANG">Zakat Fitrah (Uang)</option>
+                                </select>
+                            </div>
                             <div class="form-group d-none" id="groupQuality">
                                 <label for="zakatQualityId">Zakat Quality</label>
                                 <select class="form-control" id="zakatQualityId" disabled>
@@ -131,12 +149,37 @@
             </div>
 
             <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Zakat Mal, Infaq/Sedekah dan Fidiah</h3>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label>Zakat Mal</label>
+                                <input class="form-control" id="zakatMal" type="number" min="0" step="1" placeholder="0 (opsional)">
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label>Infaq/Sedekah</label>
+                                <input class="form-control" id="infaqSedekah" type="number" min="0" step="1" placeholder="0 (opsional)">
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label>Fidiah</label>
+                                <input class="form-control" id="fidiah" type="number" min="0" step="1" placeholder="0 (opsional)">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
                 <div class="card-body">
                     <button class="btn btn-primary" id="btnSave" type="button">
                         <i class="fas fa-save"></i> Simpan Perubahan
-                    </button>
-                    <button class="btn btn-success ml-2" id="btnPrintReceipt" type="button">
-                        <i class="fas fa-print"></i> Print Kwitansi
                     </button>
                     <a class="btn btn-default" href="/zakat-payments/list">Kembali</a>
                 </div>
@@ -149,6 +192,7 @@
     <script>
         (function () {
             const FITRAH_TYPES = new Set(["ZAKAT_FITRAH_BERAS", "ZAKAT_FITRAH_UANG"]);
+            const MAX_JIWA = 10;
             const paymentId = window.location.pathname.split("/").filter(Boolean).slice(-2)[0]; // /zakat-payments/{id}/edit
 
             const $alertSuccess = $("#alertSuccess");
@@ -171,6 +215,7 @@
             const $alamat = $("#alamat");
             const $payerName = $("#payerName");
             const $payerPhone = $("#payerPhone");
+            const $paymentMethod = $("#paymentMethod");
             const $btnSave = $("#btnSave");
 
             let currentPayment = null;
@@ -198,6 +243,7 @@
             function clampJiwa() {
                 let v = parseInt($jumlahJiwa.val(), 10);
                 if (Number.isNaN(v) || v < 1) v = 1;
+                if (v > MAX_JIWA) v = MAX_JIWA;
                 $jumlahJiwa.val(String(v));
                 return v;
             }
@@ -281,7 +327,48 @@
                 }
             }
 
-            async function loadPayment() {
+            function updateTypeUI(selectedQualityId) {
+                $alertError.addClass("d-none").text("");
+                $alertSuccess.addClass("d-none").text("");
+
+                const val = $zakatType.val();
+                if (isFitrahType(val)) {
+                    $groupNominal.addClass("d-none");
+                    $jumlahUang.val("");
+
+                    $groupQuality.removeClass("d-none");
+                    $zakatQualityId.val("");
+                    // pass selectedQualityId to loadQualities so it can pre-select
+                    loadQualities(val, selectedQualityId);
+                    $muzakkiContainer.closest('.card').show();
+                } else if (val === 'FIDIAH') {
+                    $groupQuality.addClass("d-none");
+                    $zakatQualityId.val("");
+                    $qualityHint.text("");
+                    $previewBox.addClass("d-none");
+
+                    $groupNominal.removeClass("d-none");
+                    // render zero muzakki inputs
+                    renderMuzakkiInputs([]);
+                } else if (val) {
+                    $groupQuality.addClass("d-none");
+                    $zakatQualityId.val("");
+                    $qualityHint.text("");
+                    $previewBox.addClass("d-none");
+
+                    $groupNominal.removeClass("d-none");
+                    $muzakkiContainer.closest('.card').show();
+                    const cnt = clampJiwa();
+                    renderMuzakkiInputs(new Array(cnt).fill(""));
+                } else {
+                    $groupQuality.addClass("d-none");
+                    $groupNominal.addClass("d-none");
+                    $previewBox.addClass("d-none");
+                    $muzakkiContainer.closest('.card').show();
+                }
+            }
+
+             async function loadPayment() {
                 try {
                     const res = await fetch(`/api/zakat-payments/${encodeURIComponent(paymentId)}`, {headers: {"Accept": "application/json"}});
                     if (!res.ok) throw new Error(`Gagal load payment (${res.status})`);
@@ -297,6 +384,7 @@
                     $alamat.val(currentPayment.alamat || "");
                     $payerName.val(currentPayment.payerName || "");
                     $payerPhone.val(currentPayment.payerPhone || "");
+                    $paymentMethod.val(currentPayment.paymentMethod || "CASH");
 
                     if (currentPayment.createdAt) {
                         const d = new Date(currentPayment.createdAt);
@@ -308,27 +396,26 @@
                     if (currentPayment.zakatType === 'FIDIAH') {
                         $muzakkiContainer.closest('.card').hide();
                         $jumlahJiwa.val('1');
-                        renderMuzakkiInputs(0);
+                        renderMuzakkiInputs([]);
                     } else {
                         $muzakkiContainer.closest('.card').show();
                         $jumlahJiwa.val(String(names.length || 1));
                         renderMuzakkiInputs(names.length ? names : [""]);
                     }
 
-                    if (isFitrahType(currentPayment.zakatType)) {
-                        $groupNominal.addClass("d-none");
-                        $groupQuality.removeClass("d-none");
-                        const selectedId = currentPayment.zakatQuality ? currentPayment.zakatQuality.id : null;
-                        await loadQualities(currentPayment.zakatType, selectedId);
-                    } else {
-                        $groupQuality.addClass("d-none");
-                        $groupNominal.removeClass("d-none");
-                        $jumlahUang.val(currentPayment.jumlahUang || "");
-                    }
-                } catch (e) {
-                    showError(String(e.message || e));
-                }
-            }
+                    const selectedId = currentPayment.zakatQuality ? currentPayment.zakatQuality.id : null;
+                    // set zakatType select value (may be blank for non-fitrah)
+                    $zakatType.val(currentPayment.zakatType || "");
+                    $jumlahUang.val(currentPayment.jumlahUang || "");
+                    $("#zakatMal").val(currentPayment.jumlahUangZakatMal || "");
+                    $("#infaqSedekah").val(currentPayment.jumlahUangInfaqSedekah || "");
+                    $("#fidiah").val(currentPayment.jumlahUangFidiah || "");
+                    // update UI based on current zakatType and preselect quality if present
+                    updateTypeUI(selectedId);
+                 } catch (e) {
+                     showError(String(e.message || e));
+                 }
+             }
 
             async function submit() {
                 const jiwa = clampJiwa();
@@ -337,8 +424,12 @@
 
                 if (!currentPayment) return;
                 if (!alamat) return showError("Alamat wajib diisi");
+                const paymentMethod = $paymentMethod.val();
+                if (!paymentMethod) return showError("Metode pembayaran wajib dipilih");
+                const selectedType = $zakatType.val();
+                if (jiwa > MAX_JIWA) return showError(`Jumlah jiwa maksimal ${MAX_JIWA}`);
                 // Skip muzakki validation for Fidiah (nominal-only)
-                if (currentPayment.zakatType !== 'FIDIAH' && names.length !== jiwa) return showError("Jumlah nama muzakki harus sama dengan jumlah jiwa");
+                if (selectedType !== 'FIDIAH' && names.length !== jiwa) return showError("Jumlah nama muzakki harus sama dengan jumlah jiwa");
 
                 const payload = {
                     alamat: alamat,
@@ -348,16 +439,33 @@
                 // include payer info in update
                 payload.payerName = $payerName.val()?.trim() || null;
                 payload.payerPhone = $payerPhone.val()?.trim() || null;
+                payload.paymentMethod = paymentMethod;
 
-                if (isFitrahType(currentPayment.zakatType)) {
+                if (isFitrahType(selectedType)) {
                     const qualityId = $zakatQualityId.val();
                     if (!qualityId) return showError("Zakat quality wajib dipilih");
                     payload.zakatQualityId = qualityId;
                 } else {
+                    // allow either jumlahUang or any of the optional separate nominals
                     const nominal = Number($jumlahUang.val());
-                    if (!nominal || nominal <= 0) return showError("Nominal uang wajib diisi");
-                    payload.jumlahUang = nominal;
+                    const malAmtCheck = Number($("#zakatMal").val());
+                    const infaqAmtCheck = Number($("#infaqSedekah").val());
+                    const fidiahAmtCheck = Number($("#fidiah").val());
+                    const hasAny = (!Number.isNaN(nominal) && nominal > 0)
+                        || (!Number.isNaN(malAmtCheck) && malAmtCheck > 0)
+                        || (!Number.isNaN(infaqAmtCheck) && infaqAmtCheck > 0)
+                        || (!Number.isNaN(fidiahAmtCheck) && fidiahAmtCheck > 0);
+                    if (!hasAny) return showError("Isi jumlahUang atau salah satu nominal opsional (Zakat Mal / Infaq / Fidiah)");
+                    if (!Number.isNaN(nominal) && nominal > 0) payload.jumlahUang = nominal;
                 }
+
+                // include optional separate nominals if provided (>0)
+                const malAmt = Number($("#zakatMal").val());
+                if (!Number.isNaN(malAmt) && malAmt > 0) payload.jumlahUangZakatMal = malAmt;
+                const infaqAmt = Number($("#infaqSedekah").val());
+                if (!Number.isNaN(infaqAmt) && infaqAmt > 0) payload.jumlahUangInfaqSedekah = infaqAmt;
+                const fidiahAmt = Number($("#fidiah").val());
+                if (!Number.isNaN(fidiahAmt) && fidiahAmt > 0) payload.jumlahUangFidiah = fidiahAmt;
 
                 $btnSave.prop("disabled", true);
                 try {
@@ -373,6 +481,10 @@
                     const data = await res.json();
                     currentPayment = data;
                     showSuccess("Perubahan tersimpan.");
+                    // update fields from returned data
+                    $("#zakatMal").val(currentPayment.jumlahUangZakatMal || "");
+                    $("#infaqSedekah").val(currentPayment.jumlahUangInfaqSedekah || "");
+                    $("#fidiah").val(currentPayment.jumlahUangFidiah || "");
                 } catch (e) {
                     showError(String(e.message || e));
                 } finally {
@@ -390,6 +502,7 @@
             });
             $btnJiwaPlus.on("click", function () {
                 const v = clampJiwa();
+                if (v >= MAX_JIWA) return;
                 const next = v + 1;
                 $jumlahJiwa.val(String(next));
                 const currentNames = $(".muzakki-name").toArray().map(el => el.value || "");
@@ -406,13 +519,12 @@
                 updatePreview();
             });
             $zakatQualityId.on("change", updatePreview);
-            $btnSave.on("click", submit);
-            const $btnPrintReceipt = $("#btnPrintReceipt");
-            $btnPrintReceipt.on("click", function () {
-                if (!currentPayment || !currentPayment.id) return showError('Data payment belum tersedia');
-                const url = `/zakat-payments/${encodeURIComponent(currentPayment.id)}/receipt`;
-                window.open(url, '_blank', 'noopener');
+            $zakatType.on("change", function () {
+                // when user changes type in edit form, update UI and preview
+                updateTypeUI();
+                updatePreview();
             });
+            $btnSave.on("click", submit);
 
             loadPayment();
         })();

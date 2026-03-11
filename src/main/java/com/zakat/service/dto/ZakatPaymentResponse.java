@@ -1,5 +1,6 @@
 package com.zakat.service.dto;
 
+import com.zakat.enums.PaymentMethod;
 import com.zakat.enums.ZisType;
 
 import java.math.BigDecimal;
@@ -18,8 +19,12 @@ public record ZakatPaymentResponse(
         String alamat,
         String payerName,
         String payerPhone,
+        PaymentMethod paymentMethod,
         BigDecimal beratBerasKg,
         BigDecimal jumlahUang,
+        BigDecimal jumlahUangZakatMal,
+        BigDecimal jumlahUangInfaqSedekah,
+        BigDecimal jumlahUangFidiah,
         ZakatQualitySummary zakatQuality,
         List<String> muzakkiNames
 ) {

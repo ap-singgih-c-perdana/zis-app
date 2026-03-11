@@ -1,6 +1,12 @@
-FROM adoptopenjdk/openjdk11:alpine-jre
-MAINTAINER Singgih Perdana "singgihcp88@gmail.com"
-ARG JAR_FILE=target/*.jar
-COPY ${JAR_FILE} application.jar
+# syntax=docker/dockerfile:1
+FROM maven:3.9.9-eclipse-temurin-21 AS build
+WORKDIR /app
+COPY pom.xml .
+COPY src ./src
+RUN mvn -q -DskipTests package
+
+FROM eclipse-temurin:21-jre
+WORKDIR /app
+COPY --from=build /app/target/*.jar app.jar
 EXPOSE 8080
-ENTRYPOINT ["java","-jar","/application.jar"]
+ENTRYPOINT ["java","-jar","/app/app.jar"]

@@ -3,6 +3,8 @@ package com.zakat.controller;
 import com.zakat.entity.MuzakkiPerson;
 import com.zakat.entity.ZakatPayment;
 import com.zakat.entity.ZakatQuality;
+import com.zakat.enums.ZisType;
+import com.zakat.service.DashboardService;
 import com.zakat.service.ZakatPaymentService;
 import com.zakat.service.dto.CancelZakatPaymentRequest;
 import com.zakat.service.dto.CreateZakatPaymentRequest;
@@ -28,6 +30,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.net.URI;
 import java.util.List;
+import java.util.Comparator;
 import java.time.LocalDate;
 import java.security.Principal;
 import java.util.UUID;
@@ -94,21 +97,39 @@ public class ZakatPaymentController {
 
         List<String> muzakkiNames = payment.getMuzakkiList() == null
                 ? List.of()
-                : payment.getMuzakkiList().stream().map(MuzakkiPerson::getNama).toList();
+                : payment.getMuzakkiList().stream()
+                .sorted((a, b) -> {
+                    int cmp = Comparator.nullsLast(Integer::compareTo).compare(a.getSequenceNo(), b.getSequenceNo());
+                    if (cmp != 0) return cmp;
+                    return Comparator.nullsLast(UUID::compareTo).compare(a.getId(), b.getId());
+                })
+                .map(MuzakkiPerson::getNama)
+                .toList();
+
+        ZisType computedType;
+        if (payment.getZakatQuality() != null) {
+            computedType = payment.getZakatQuality().getZakatType();
+        } else {
+            computedType = DashboardService.getZisType(payment);
+        }
 
         return new ZakatPaymentResponse(
                 payment.getId(),
                 payment.getReceiptNumber(),
                 payment.isCanceled(),
                 payment.getCreatedAt(),
-                payment.getZakatType(),
-                payment.getZakatType() == null ? null : payment.getZakatType().getLabel(),
+                computedType,
+                computedType == null ? null : computedType.getLabel(),
                 payment.getJumlahJiwa(),
                 payment.getAlamat(),
                 payment.getPayerName(),
                 payment.getPayerPhone(),
+                payment.getPaymentMethod(),
                 payment.getBeratBerasKg(),
                 payment.getJumlahUang(),
+                payment.getJumlahUangZakatMal(),
+                payment.getJumlahUangInfaqSedekah(),
+                payment.getJumlahUangFidiah(),
                 qualitySummary,
                 muzakkiNames
         );

@@ -1,6 +1,6 @@
 package com.zakat.service.dto;
 
-import com.zakat.enums.ZisType;
+import com.zakat.enums.PaymentMethod;
 
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -10,15 +10,17 @@ public record ZakatPaymentListItemResponse(
         UUID id,
         String receiptNumber,
         Instant createdAt,
-        ZisType zakatType,
-        String zakatTypeLabel,
         BigDecimal beratBerasKg,
         BigDecimal jumlahUang,
+        BigDecimal jumlahUangZakatMal,
+        BigDecimal jumlahUangInfaqSedekah,
+        BigDecimal jumlahUangFidiah,
         int muzakkiCount,
         String muzakkiPreview,
         String alamat,
         String payerName,
         String payerPhone,
+        PaymentMethod paymentMethod,
         boolean canceled
 ) {
 }
