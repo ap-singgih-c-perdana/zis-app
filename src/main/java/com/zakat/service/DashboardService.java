@@ -50,6 +50,8 @@ public class DashboardService {
         );
 
         ZakatPaymentRepository.DashboardTypeBreakdownRow breakdown = zakatPaymentRepository.dashboardTypeBreakdown(fromInclusive, toExclusive);
+        ZakatPaymentRepository.DashboardPaymentMethodBreakdownRow paymentMethodBreakdown =
+                zakatPaymentRepository.dashboardPaymentMethodBreakdown(fromInclusive, toExclusive);
         List<DashboardSummaryResponse.ByType> byType = List.of(
                 new DashboardSummaryResponse.ByType(
                         ZisType.ZAKAT_FITRAH_UANG,
@@ -113,6 +115,8 @@ public class DashboardService {
                 toDate,
                 totals.getTotalTransaksi(),
                 totals.getTotalUangMasuk(),
+                defaultZero(paymentMethodBreakdown.getTotalUangCash()),
+                defaultZero(paymentMethodBreakdown.getTotalUangTransfer()),
                 totals.getTotalBerasKg(),
                 totals.getTotalJiwaFitrah(),
                 byType,

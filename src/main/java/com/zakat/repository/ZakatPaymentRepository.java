@@ -83,8 +83,9 @@ public interface ZakatPaymentRepository extends JpaRepository<ZakatPayment, UUID
             select count(p) as totalTransaksi,
                    (coalesce(sum(p.jumlahUang), 0) + coalesce(sum(p.jumlahUangZakatMal), 0) + coalesce(sum(p.jumlahUangInfaqSedekah), 0) + coalesce(sum(p.jumlahUangFidiah), 0)) as totalUangMasuk,
                    coalesce(sum(p.beratBerasKg), 0) as totalBerasKg,
-                   coalesce(sum(case when (p.zakatQuality is not null and p.zakatQuality.zakatType in :fitrahTypes) then p.jumlahJiwa else 0 end), 0) as totalJiwaFitrah
+                   coalesce(sum(case when (q.zakatType in :fitrahTypes) then p.jumlahJiwa else 0 end), 0) as totalJiwaFitrah
             from ZakatPayment p
+            left join p.zakatQuality q
             where p.createdAt >= :fromInclusive
               and p.createdAt < :toExclusive
               and p.canceled = false
@@ -149,6 +150,12 @@ public interface ZakatPaymentRepository extends JpaRepository<ZakatPayment, UUID
         BigDecimal getInfaqSedekah();
     }
 
+    interface DashboardPaymentMethodBreakdownRow {
+        BigDecimal getTotalUangCash();
+
+        BigDecimal getTotalUangTransfer();
+    }
+
     @Query("""
             select coalesce(sum(p.jumlahUang), 0) as fitrahUang,
                    coalesce(sum(p.beratBerasKg), 0) as fitrahBeras,
@@ -161,6 +168,27 @@ public interface ZakatPaymentRepository extends JpaRepository<ZakatPayment, UUID
               and p.canceled = false
             """)
     DashboardTypeBreakdownRow dashboardTypeBreakdown(
+            @Param("fromInclusive") Instant fromInclusive,
+            @Param("toExclusive") Instant toExclusive
+    );
+
+    @Query("""
+            select coalesce(sum(case
+                                  when p.paymentMethod = com.zakat.enums.PaymentMethod.CASH
+                                  then (coalesce(p.jumlahUang, 0) + coalesce(p.jumlahUangZakatMal, 0) + coalesce(p.jumlahUangInfaqSedekah, 0) + coalesce(p.jumlahUangFidiah, 0))
+                                  else 0
+                               end), 0) as totalUangCash,
+                   coalesce(sum(case
+                                  when p.paymentMethod = com.zakat.enums.PaymentMethod.TRANSFER
+                                  then (coalesce(p.jumlahUang, 0) + coalesce(p.jumlahUangZakatMal, 0) + coalesce(p.jumlahUangInfaqSedekah, 0) + coalesce(p.jumlahUangFidiah, 0))
+                                  else 0
+                               end), 0) as totalUangTransfer
+            from ZakatPayment p
+            where p.createdAt >= :fromInclusive
+              and p.createdAt < :toExclusive
+              and p.canceled = false
+            """)
+    DashboardPaymentMethodBreakdownRow dashboardPaymentMethodBreakdown(
             @Param("fromInclusive") Instant fromInclusive,
             @Param("toExclusive") Instant toExclusive
     );

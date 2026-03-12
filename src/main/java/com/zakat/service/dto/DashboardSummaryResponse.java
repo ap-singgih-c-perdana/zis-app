@@ -13,6 +13,8 @@ public record DashboardSummaryResponse(
         LocalDate toDate,
         long totalTransaksi,
         BigDecimal totalUangMasuk,
+        BigDecimal totalUangCash,
+        BigDecimal totalUangTransfer,
         BigDecimal totalBerasKg,
         long totalJiwaFitrah,
         List<ByType> byType,

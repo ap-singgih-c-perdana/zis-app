@@ -3,6 +3,7 @@ package com.zakat.controller;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.zakat.entity.ZakatPayment;
+import com.zakat.enums.PaymentMethod;
 import com.zakat.enums.ZisType;
 import com.zakat.repository.ZakatPaymentRepository;
 import com.zakat.repository.ZakatQualityRepository;
@@ -76,6 +77,7 @@ class DashboardControllerIntegrationTest {
         fitrahUang.setAlamat("A");
         fitrahUang.setZakatQuality(qualityUang);
         fitrahUang.setJumlahUang(new BigDecimal("180000"));
+        fitrahUang.setPaymentMethod(PaymentMethod.CASH);
         fitrahUang.setCreatedAt(now);
         zakatPaymentRepository.save(fitrahUang);
 
@@ -84,6 +86,7 @@ class DashboardControllerIntegrationTest {
         fitrahBeras.setAlamat("B");
         fitrahBeras.setZakatQuality(qualityBeras);
         fitrahBeras.setBeratBerasKg(new BigDecimal("149.5"));
+        fitrahBeras.setPaymentMethod(PaymentMethod.TRANSFER);
         fitrahBeras.setCreatedAt(now);
         zakatPaymentRepository.save(fitrahBeras);
 
@@ -91,6 +94,7 @@ class DashboardControllerIntegrationTest {
         mal.setJumlahJiwa(1);
         mal.setAlamat("C");
         mal.setJumlahUangZakatMal(new BigDecimal("3512500"));
+        mal.setPaymentMethod(PaymentMethod.TRANSFER);
         mal.setCreatedAt(now);
         zakatPaymentRepository.save(mal);
 
@@ -108,13 +112,15 @@ class DashboardControllerIntegrationTest {
         assertThat(json.get("toDate").asText()).isEqualTo(today.toString());
         assertThat(json.get("totalTransaksi").asLong()).isEqualTo(3L);
         assertThat(json.get("totalUangMasuk").decimalValue()).isEqualByComparingTo("3692500");
+        assertThat(json.get("totalUangCash").decimalValue()).isEqualByComparingTo("180000");
+        assertThat(json.get("totalUangTransfer").decimalValue()).isEqualByComparingTo("3512500");
         assertThat(json.get("totalBerasKg").decimalValue()).isEqualByComparingTo("149.5");
         assertThat(json.get("totalJiwaFitrah").asLong()).isEqualTo(64L);
         assertThat(json.get("byType").isArray()).isTrue();
         assertThat(json.get("byType").size()).isGreaterThanOrEqualTo(2);
 
         assertThat(json.get("receiptInfo").isObject()).isTrue();
-        assertThat(json.get("receiptInfo").get("nextReceiptNumber").asText()).startsWith("KW/");
+        assertThat(json.get("receiptInfo").get("nextReceiptNumber").asText()).startsWith("MA/");
 
         assertThat(json.get("activeQualities").isArray()).isTrue();
         assertThat(json.get("recentPayments").isArray()).isTrue();
