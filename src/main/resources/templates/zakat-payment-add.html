@@ -39,8 +39,15 @@
                     <div class="row">
                         <div class="col-md-4">
                             <div class="form-group">
-                                <label>Tanggal</label>
-                                <input class="form-control" id="createdAt" readonly type="text">
+                                <label for="paymentDate">Tanggal Pembayaran *</label>
+                                <div class="input-group">
+                                    <input autocomplete="off" class="form-control" id="paymentDate" lang="id" placeholder="DD/MM/YYYY" readonly type="text">
+                                    <div class="input-group-append">
+                                        <button class="btn btn-outline-secondary" id="btnPaymentDatePicker" type="button">
+                                            <i class="far fa-calendar-alt"></i>
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                         <div class="col-md-4">
@@ -196,7 +203,8 @@
 
             const $alertSuccess = $("#alertSuccess");
             const $alertError = $("#alertError");
-            const $createdAt = $("#createdAt");
+            const $paymentDate = $("#paymentDate");
+            const $btnPaymentDatePicker = $("#btnPaymentDatePicker");
             const $zakatType = $("#zakatType");
             const $jumlahJiwa = $("#jumlahJiwa");
             const $btnJiwaMinus = $("#btnJiwaMinus");
@@ -256,9 +264,54 @@
                 return FITRAH_TYPES.has($zakatType.val());
             }
 
-            function renderMuzakkiInputs(count) {
+            function todayIsoDate() {
+                const now = new Date();
+                const y = now.getFullYear();
+                const m = String(now.getMonth() + 1).padStart(2, "0");
+                const d = String(now.getDate()).padStart(2, "0");
+                return `${y}-${m}-${d}`;
+            }
+
+            function initPaymentDatePicker(initialDate) {
+                const start = moment(initialDate || todayIsoDate(), "YYYY-MM-DD", true);
+                $paymentDate.daterangepicker({
+                    singleDatePicker: true,
+                    showDropdowns: true,
+                    autoApply: true,
+                    autoUpdateInput: true,
+                    startDate: start,
+                    maxDate: moment(),
+                    locale: {
+                        format: "DD/MM/YYYY",
+                        applyLabel: "Pilih",
+                        cancelLabel: "Batal",
+                        fromLabel: "Dari",
+                        toLabel: "Sampai",
+                        customRangeLabel: "Kustom",
+                        weekLabel: "Mg",
+                        daysOfWeek: ["Mg", "Sn", "Sl", "Rb", "Km", "Jm", "Sb"],
+                        monthNames: [
+                            "Januari", "Februari", "Maret", "April", "Mei", "Juni",
+                            "Juli", "Agustus", "September", "Oktober", "November", "Desember"
+                        ],
+                        firstDay: 1
+                    }
+                });
+                $paymentDate.val(start.format("DD/MM/YYYY"));
+            }
+
+            function parseDisplayDateToIso(displayDate) {
+                const m = moment(displayDate, "DD/MM/YYYY", true);
+                if (!m.isValid()) {
+                    return "";
+                }
+                return m.format("YYYY-MM-DD");
+            }
+
+            function renderMuzakkiInputs(names) {
                 $muzakkiContainer.empty();
-                for (let i = 0; i < count; i++) {
+                const list = Array.isArray(names) ? names : [];
+                for (let i = 0; i < list.length; i++) {
                     const idx = i + 1;
                     const group = $(`
                         <div class="form-group">
@@ -266,17 +319,21 @@
                             <input class="form-control muzakki-name" placeholder="Nama muzakki" type="text">
                         </div>
                     `);
+                    group.find("input").val(list[i] || "");
                     $muzakkiContainer.append(group);
                 }
-                syncMuzakkiFirstName();
             }
 
             function syncMuzakkiFirstName() {
                 const payerName = ($payerName.val() || "").trim();
                 const $first = $(".muzakki-name").first();
-                if ($first.length) {
+                if ($first.length && !($first.val() || "").trim()) {
                     $first.val(payerName);
                 }
+            }
+
+            function currentMuzakkiNames() {
+                return $(".muzakki-name").toArray().map(el => (el.value || "").trim());
             }
 
             function clampJiwa() {
@@ -379,7 +436,10 @@
 
                     $groupNominal.removeClass("d-none");
                     $muzakkiContainer.closest('.card').show();
-                    renderMuzakkiInputs(clampJiwa());
+                    const next = clampJiwa();
+                    const names = currentMuzakkiNames().slice(0, next);
+                    while (names.length < next) names.push("");
+                    renderMuzakkiInputs(names);
                 } else {
                     $groupQuality.addClass("d-none");
                     $groupNominal.addClass("d-none");
@@ -394,9 +454,15 @@
                 const alamat = ($alamat.val() || "").trim();
                 const payerName = ($payerName.val() || "").trim();
                 const paymentMethod = $paymentMethod.val();
+                const paymentDateDisplay = ($paymentDate.val() || "").trim();
                 const names = $(".muzakki-name").toArray().map(el => (el.value || "").trim()).filter(x => x.length);
+                const today = todayIsoDate();
+                const paymentDate = parseDisplayDateToIso(paymentDateDisplay);
 
                 if (!zakatType) return showError("Jenis zakat wajib dipilih");
+                if (!paymentDateDisplay) return showError("Tanggal pembayaran wajib diisi");
+                if (!paymentDate) return showError("Format tanggal harus dd/MM/yyyy");
+                if (paymentDate > today) return showError("Tanggal pembayaran tidak boleh melebihi hari ini");
                 if (!alamat) return showError("Alamat wajib diisi");
                 if (!payerName) return showError("Nama pembayar wajib diisi");
                 if (!paymentMethod) return showError("Metode pembayaran wajib dipilih");
@@ -405,6 +471,7 @@
                 if (zakatType !== 'FIDIAH' && names.length !== jiwa) return showError("Jumlah nama muzakki harus sama dengan jumlah jiwa");
 
                 const payload = {
+                    paymentDate: paymentDate,
                     jumlahJiwa: jiwa,
                     alamat: alamat,
                     payerName: payerName,
@@ -459,7 +526,8 @@
                     // Reset zakat type and related UI
                     $zakatType.val("");
                     $jumlahJiwa.val("1");
-                    renderMuzakkiInputs(1);
+                    $payerName.val("");
+                    renderMuzakkiInputs([""]);
                     $alamat.val("");
                     $jumlahUang.val("");
                     $("#zakatMal").val("");
@@ -470,7 +538,6 @@
                     $groupQuality.addClass("d-none");
                     $groupNominal.addClass("d-none");
                     $previewBox.addClass("d-none");
-                    $payerName.val("");
                     $payerPhone.val("");
                     $paymentMethod.val("");
                 } catch (e) {
@@ -486,42 +553,57 @@
 
                 $zakatType.val("");
                 $jumlahJiwa.val("1");
-                renderMuzakkiInputs(1);
+                $payerName.val("");
+                renderMuzakkiInputs([""]);
                 $alamat.val("");
                 $jumlahUang.val("");
+                const today = todayIsoDate();
+                $paymentDate.val(moment(today, "YYYY-MM-DD").format("DD/MM/YYYY"));
+                if ($paymentDate.data("daterangepicker")) {
+                    $paymentDate.data("daterangepicker").setStartDate(moment(today, "YYYY-MM-DD"));
+                    $paymentDate.data("daterangepicker").setEndDate(moment(today, "YYYY-MM-DD"));
+                }
                 $zakatQualityId.val("");
                 currentQualities = [];
                 $groupQuality.addClass("d-none");
                 $groupNominal.addClass("d-none");
                 $previewBox.addClass("d-none");
-                $payerName.val("");
                 $payerPhone.val("");
                 $paymentMethod.val("");
             }
 
             // init
-            const now = new Date();
-            $createdAt.val(new Intl.DateTimeFormat("id-ID", {dateStyle: "medium", timeStyle: "short"}).format(now));
-            renderMuzakkiInputs(1);
+            const today = todayIsoDate();
+            initPaymentDatePicker(today);
+            renderMuzakkiInputs([""]);
             $payerName.val("");
             $payerPhone.val("");
             $paymentMethod.val("");
 
             $btnJiwaMinus.on("click", function () {
                 const v = clampJiwa();
-                $jumlahJiwa.val(String(Math.max(1, v - 1)));
-                renderMuzakkiInputs(clampJiwa());
+                const next = Math.max(1, v - 1);
+                $jumlahJiwa.val(String(next));
+                const names = currentMuzakkiNames().slice(0, next);
+                while (names.length < next) names.push("");
+                renderMuzakkiInputs(names);
                 updatePreview();
             });
             $btnJiwaPlus.on("click", function () {
                 const v = clampJiwa();
                 if (v >= MAX_JIWA) return;
-                $jumlahJiwa.val(String(v + 1));
-                renderMuzakkiInputs(clampJiwa());
+                const next = v + 1;
+                $jumlahJiwa.val(String(next));
+                const names = currentMuzakkiNames().slice(0, next);
+                while (names.length < next) names.push("");
+                renderMuzakkiInputs(names);
                 updatePreview();
             });
             $jumlahJiwa.on("change", function () {
-                renderMuzakkiInputs(clampJiwa());
+                const next = clampJiwa();
+                const names = currentMuzakkiNames().slice(0, next);
+                while (names.length < next) names.push("");
+                renderMuzakkiInputs(names);
                 updatePreview();
             });
 
@@ -537,6 +619,11 @@
 
             $btnSave.on("click", submit);
             $btnReset.on("click", resetForm);
+            $btnPaymentDatePicker.on("click", function () {
+                if ($paymentDate.data("daterangepicker")) {
+                    $paymentDate.data("daterangepicker").show();
+                }
+            });
         })();
     </script>
 </th:block>

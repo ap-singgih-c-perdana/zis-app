@@ -43,6 +43,7 @@ public class ZakatPaymentService {
     private static final int MAX_JIWA = 10;
     private static final ZoneId DEFAULT_ZONE = ZoneId.of("Asia/Jakarta");
     private static final Instant MAX_INSTANT = Instant.parse("9999-12-31T23:59:59.999999999Z");
+    private static final String RECEIPT_NUMBER_FORMAT = "MA/%d/%06d";
 
     private final ZakatPaymentRepository zakatPaymentRepository;
     private final ZakatQualityRepository zakatQualityRepository;
@@ -139,6 +140,11 @@ public class ZakatPaymentService {
 
         ZakatPayment payment = new ZakatPayment();
         assignReceiptNumber(payment);
+        LocalDate paymentDate = request.paymentDate();
+        validatePaymentDate(paymentDate);
+        if (paymentDate != null) {
+            payment.setCreatedAt(paymentDate.atStartOfDay(DEFAULT_ZONE).toInstant());
+        }
         // payer info
         payment.setPayerName(request.payerName());
         payment.setPayerPhone(request.payerPhone());
@@ -224,6 +230,11 @@ public class ZakatPaymentService {
         payment.setJumlahJiwa(jumlahJiwa);
         payment.setAlamat(request.alamat());
         payment.setPaymentMethod(request.paymentMethod());
+        LocalDate paymentDate = request.paymentDate();
+        validatePaymentDate(paymentDate);
+        if (paymentDate != null) {
+            payment.setCreatedAt(paymentDate.atStartOfDay(DEFAULT_ZONE).toInstant());
+        }
 
         List<MuzakkiPerson> muzakkiList = buildOrderedMuzakkiList(payment, request.muzakkiNames());
         if (payment.getMuzakkiList() == null) {
@@ -335,6 +346,16 @@ public class ZakatPaymentService {
         zakatPaymentRepository.save(payment);
     }
 
+    private static void validatePaymentDate(LocalDate paymentDate) {
+        if (paymentDate == null) {
+            return;
+        }
+        LocalDate today = LocalDate.now(DEFAULT_ZONE);
+        if (paymentDate.isAfter(today)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Tanggal pembayaran tidak boleh melebihi hari ini");
+        }
+    }
+
     private void assignReceiptNumber(ZakatPayment payment) {
         int year = LocalDate.now(DEFAULT_ZONE).getYear();
 
@@ -360,6 +381,6 @@ public class ZakatPaymentService {
 
         payment.setReceiptYear(year);
         payment.setReceiptSequence(next);
-        payment.setReceiptNumber(String.format("KW/%d/%06d", year, next));
+        payment.setReceiptNumber(String.format(RECEIPT_NUMBER_FORMAT, year, next));
     }
 }

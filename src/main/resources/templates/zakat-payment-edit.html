@@ -46,8 +46,15 @@
                         </div>
                         <div class="col-md-4">
                             <div class="form-group">
-                                <label>Tanggal</label>
-                                <input class="form-control" id="createdAt" readonly type="text">
+                                <label for="paymentDate">Tanggal Pembayaran *</label>
+                                <div class="input-group">
+                                    <input autocomplete="off" class="form-control" id="paymentDate" lang="id" placeholder="DD/MM/YYYY" readonly type="text">
+                                    <div class="input-group-append">
+                                        <button class="btn btn-outline-secondary" id="btnPaymentDatePicker" type="button">
+                                            <i class="far fa-calendar-alt"></i>
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                         <div class="col-md-4">
@@ -198,7 +205,8 @@
             const $alertSuccess = $("#alertSuccess");
             const $alertError = $("#alertError");
             const $receiptNumber = $("#receiptNumber");
-            const $createdAt = $("#createdAt");
+            const $paymentDate = $("#paymentDate");
+            const $btnPaymentDatePicker = $("#btnPaymentDatePicker");
             const $zakatType = $("#zakatType");
             const $jumlahJiwa = $("#jumlahJiwa");
             const $btnJiwaMinus = $("#btnJiwaMinus");
@@ -267,6 +275,60 @@
 
             function isFitrahType(type) {
                 return FITRAH_TYPES.has(type);
+            }
+
+            function toIsoDate(iso) {
+                if (!iso) return "";
+                const d = new Date(iso);
+                if (Number.isNaN(d.getTime())) return "";
+                const y = d.getFullYear();
+                const m = String(d.getMonth() + 1).padStart(2, "0");
+                const day = String(d.getDate()).padStart(2, "0");
+                return `${y}-${m}-${day}`;
+            }
+
+            function todayIsoDate() {
+                const now = new Date();
+                const y = now.getFullYear();
+                const m = String(now.getMonth() + 1).padStart(2, "0");
+                const d = String(now.getDate()).padStart(2, "0");
+                return `${y}-${m}-${d}`;
+            }
+
+            function initPaymentDatePicker(initialDate) {
+                const start = moment(initialDate || todayIsoDate(), "YYYY-MM-DD", true);
+                $paymentDate.daterangepicker({
+                    singleDatePicker: true,
+                    showDropdowns: true,
+                    autoApply: true,
+                    autoUpdateInput: true,
+                    startDate: start,
+                    maxDate: moment(),
+                    locale: {
+                        format: "DD/MM/YYYY",
+                        applyLabel: "Pilih",
+                        cancelLabel: "Batal",
+                        fromLabel: "Dari",
+                        toLabel: "Sampai",
+                        customRangeLabel: "Kustom",
+                        weekLabel: "Mg",
+                        daysOfWeek: ["Mg", "Sn", "Sl", "Rb", "Km", "Jm", "Sb"],
+                        monthNames: [
+                            "Januari", "Februari", "Maret", "April", "Mei", "Juni",
+                            "Juli", "Agustus", "September", "Oktober", "November", "Desember"
+                        ],
+                        firstDay: 1
+                    }
+                });
+                $paymentDate.val(start.format("DD/MM/YYYY"));
+            }
+
+            function parseDisplayDateToIso(displayDate) {
+                const m = moment(displayDate, "DD/MM/YYYY", true);
+                if (!m.isValid()) {
+                    return "";
+                }
+                return m.format("YYYY-MM-DD");
             }
 
             function updatePreview() {
@@ -386,9 +448,14 @@
                     $payerPhone.val(currentPayment.payerPhone || "");
                     $paymentMethod.val(currentPayment.paymentMethod || "CASH");
 
-                    if (currentPayment.createdAt) {
-                        const d = new Date(currentPayment.createdAt);
-                        $createdAt.val(new Intl.DateTimeFormat("id-ID", {dateStyle: "medium", timeStyle: "short"}).format(d));
+                    const existingDate = toIsoDate(currentPayment.createdAt);
+                    const existingDateDisplay = existingDate
+                        ? moment(existingDate, "YYYY-MM-DD", true).format("DD/MM/YYYY")
+                        : "";
+                    $paymentDate.val(existingDateDisplay);
+                    if ($paymentDate.data("daterangepicker") && existingDate) {
+                        $paymentDate.data("daterangepicker").setStartDate(moment(existingDate, "YYYY-MM-DD"));
+                        $paymentDate.data("daterangepicker").setEndDate(moment(existingDate, "YYYY-MM-DD"));
                     }
 
                     const names = Array.isArray(currentPayment.muzakkiNames) ? currentPayment.muzakkiNames : [];
@@ -420,10 +487,16 @@
             async function submit() {
                 const jiwa = clampJiwa();
                 const alamat = ($alamat.val() || "").trim();
+                const paymentDateDisplay = ($paymentDate.val() || "").trim();
+                const today = todayIsoDate();
                 const names = $(".muzakki-name").toArray().map(el => (el.value || "").trim()).filter(x => x.length);
+                const paymentDate = parseDisplayDateToIso(paymentDateDisplay);
 
                 if (!currentPayment) return;
                 if (!alamat) return showError("Alamat wajib diisi");
+                if (!paymentDateDisplay) return showError("Tanggal pembayaran wajib diisi");
+                if (!paymentDate) return showError("Format tanggal harus dd/MM/yyyy");
+                if (paymentDate > today) return showError("Tanggal pembayaran tidak boleh melebihi hari ini");
                 const paymentMethod = $paymentMethod.val();
                 if (!paymentMethod) return showError("Metode pembayaran wajib dipilih");
                 const selectedType = $zakatType.val();
@@ -432,6 +505,7 @@
                 if (selectedType !== 'FIDIAH' && names.length !== jiwa) return showError("Jumlah nama muzakki harus sama dengan jumlah jiwa");
 
                 const payload = {
+                    paymentDate: paymentDate,
                     alamat: alamat,
                     muzakkiNames: names
                 };
@@ -525,7 +599,13 @@
                 updatePreview();
             });
             $btnSave.on("click", submit);
+            $btnPaymentDatePicker.on("click", function () {
+                if ($paymentDate.data("daterangepicker")) {
+                    $paymentDate.data("daterangepicker").show();
+                }
+            });
 
+            initPaymentDatePicker(todayIsoDate());
             loadPayment();
         })();
     </script>

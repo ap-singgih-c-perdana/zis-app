@@ -36,6 +36,8 @@ class KwitansiReportIntegrationTest {
 
     private static final ZoneId JAKARTA = ZoneId.of("Asia/Jakarta");
 
+    private static final String RECEIPT_NUMBER_FORMAT = "MA/%d/%06d";
+
     @Autowired
     private MockMvc mockMvc;
 
@@ -75,7 +77,7 @@ class KwitansiReportIntegrationTest {
         payment.setCreatedAt(now);
         payment.setReceiptYear(today.getYear());
         payment.setReceiptSequence(123L);
-        payment.setReceiptNumber(String.format("KW/%d/%06d", today.getYear(), 123));
+        payment.setReceiptNumber(String.format(RECEIPT_NUMBER_FORMAT, today.getYear(), 123));
         payment.setMuzakkiList(List.of(
                 MuzakkiPerson.builder().nama("Eko Yulianto").payment(payment).build(),
                 MuzakkiPerson.builder().nama("Nur Pujianto").payment(payment).build()

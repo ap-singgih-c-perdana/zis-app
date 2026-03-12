@@ -8,6 +8,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 import jakarta.persistence.Column;
 import jakarta.persistence.EnumType;
@@ -16,7 +17,6 @@ import jakarta.persistence.Enumerated;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UuidGenerator;
 
 import java.math.BigDecimal;
@@ -63,7 +63,7 @@ public class ZakatPayment {
     @Column(name = "jumlah_uang_fidiah")
     private BigDecimal jumlahUangFidiah;
 
-    @CreationTimestamp
+    @Column(nullable = false)
     private Instant createdAt;
 
     /**
@@ -80,7 +80,7 @@ public class ZakatPayment {
     private String canceledBy;
 
     /**
-     * Nomor kwitansi format: KW/{year}/{sequence(6 digits)}.
+     * Nomor kwitansi format: MA/{year}/{sequence(6 digits)}.
      */
     @Column(unique = true)
     private String receiptNumber;
@@ -95,5 +95,12 @@ public class ZakatPayment {
 
     @OneToMany(mappedBy = "payment", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<MuzakkiPerson> muzakkiList;
+
+    @PrePersist
+    void ensureCreatedAt() {
+        if (createdAt == null) {
+            createdAt = Instant.now();
+        }
+    }
 
 }
