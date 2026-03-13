@@ -325,9 +325,12 @@
             }
 
             function syncMuzakkiFirstName() {
+                if (!isFitrahType()) {
+                    return;
+                }
                 const payerName = ($payerName.val() || "").trim();
                 const $first = $(".muzakki-name").first();
-                if ($first.length && !($first.val() || "").trim()) {
+                if ($first.length) {
                     $first.val(payerName);
                 }
             }
@@ -417,6 +420,7 @@
                     $zakatQualityId.val("");
                     loadQualities(val);
                     $muzakkiContainer.closest('.card').show();
+                    syncMuzakkiFirstName();
                 } else if (val === 'FIDIAH') {
                     // Fidiah: only numeric amount input required
                     $groupQuality.addClass("d-none");
@@ -612,9 +616,6 @@
             });
             $zakatQualityId.on("change", function () {
                 updatePreview();
-            });
-            $payerName.on("input", function () {
-                syncMuzakkiFirstName();
             });
 
             $btnSave.on("click", submit);
