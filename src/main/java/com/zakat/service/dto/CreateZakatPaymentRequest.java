@@ -3,7 +3,6 @@ package com.zakat.service.dto;
 import com.zakat.enums.PaymentMethod;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PastOrPresent;
 import jakarta.validation.constraints.Positive;
@@ -27,6 +26,6 @@ public record CreateZakatPaymentRequest(
         @Positive BigDecimal jumlahUangZakatMal,
         @Positive BigDecimal jumlahUangInfaqSedekah,
         @Positive BigDecimal jumlahUangFidiah,
-        @NotEmpty @Size(max = 10) List<@NotBlank String> muzakkiNames
+        @NotNull @Size(max = 10) List<@NotBlank String> muzakkiNames
 ) {
 }

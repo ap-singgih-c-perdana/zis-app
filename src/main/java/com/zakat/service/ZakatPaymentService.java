@@ -122,9 +122,6 @@ public class ZakatPaymentService {
         if (request.jumlahJiwa() > MAX_JIWA) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Jumlah jiwa maksimal " + MAX_JIWA);
         }
-        if (request.muzakkiNames() == null || request.muzakkiNames().size() != request.jumlahJiwa()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Jumlah muzakki harus sama dengan jumlahJiwa");
-        }
 
         // determine zakatType from zakatQuality if provided
         ZakatQuality zakatQuality = null;
@@ -136,6 +133,12 @@ public class ZakatPaymentService {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Zakat quality sudah tidak aktif");
             }
             zakatType = zakatQuality.getZakatType();
+        }
+        List<String> muzakkiNames = request.muzakkiNames() == null ? List.of() : request.muzakkiNames();
+        if (zakatType == ZisType.ZAKAT_FITRAH_BERAS || zakatType == ZisType.ZAKAT_FITRAH_UANG) {
+            if (muzakkiNames.size() != request.jumlahJiwa()) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Jumlah muzakki harus sama dengan jumlahJiwa untuk fitrah");
+            }
         }
 
         ZakatPayment payment = new ZakatPayment();
@@ -194,7 +197,7 @@ public class ZakatPaymentService {
             payment.setBeratBerasKg(request.beratBerasKg());
         }
 
-        List<MuzakkiPerson> muzakkiList = buildOrderedMuzakkiList(payment, request.muzakkiNames());
+        List<MuzakkiPerson> muzakkiList = buildOrderedMuzakkiList(payment, muzakkiNames);
         payment.setMuzakkiList(muzakkiList);
 
         return zakatPaymentRepository.save(payment);

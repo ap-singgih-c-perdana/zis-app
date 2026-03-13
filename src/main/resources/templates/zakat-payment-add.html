@@ -91,7 +91,7 @@
                     <div class="row">
                         <div class="col-md-6">
                             <div class="form-group">
-                                <label for="zakatType">Jenis Zakat *</label>
+                                <label for="zakatType">Jenis Zakat</label>
                                 <select class="form-control" id="zakatType">
                                     <option value="" selected disabled>Pilih jenis zakat...</option>
                                     <option value="ZAKAT_FITRAH_BERAS">Zakat Fitrah (Beras)</option>
@@ -315,7 +315,7 @@
                     const idx = i + 1;
                     const group = $(`
                         <div class="form-group">
-                            <label>Nama Muzakki #${idx} *</label>
+                            <label>Nama Muzakki #${idx}</label>
                             <input class="form-control muzakki-name" placeholder="Nama muzakki" type="text">
                         </div>
                     `);
@@ -455,6 +455,7 @@
             async function submit() {
                 const jiwa = clampJiwa();
                 const zakatType = $zakatType.val();
+                const fitrahSelected = isFitrahType();
                 const alamat = ($alamat.val() || "").trim();
                 const payerName = ($payerName.val() || "").trim();
                 const paymentMethod = $paymentMethod.val();
@@ -462,8 +463,11 @@
                 const names = $(".muzakki-name").toArray().map(el => (el.value || "").trim()).filter(x => x.length);
                 const today = todayIsoDate();
                 const paymentDate = parseDisplayDateToIso(paymentDateDisplay);
+                const nominal = Number($jumlahUang.val());
+                const malAmt = Number($("#zakatMal").val());
+                const infaqAmt = Number($("#infaqSedekah").val());
+                const fidiahAmt = Number($("#fidiah").val());
 
-                if (!zakatType) return showError("Jenis zakat wajib dipilih");
                 if (!paymentDateDisplay) return showError("Tanggal pembayaran wajib diisi");
                 if (!paymentDate) return showError("Format tanggal harus dd/MM/yyyy");
                 if (paymentDate > today) return showError("Tanggal pembayaran tidak boleh melebihi hari ini");
@@ -471,8 +475,7 @@
                 if (!payerName) return showError("Nama pembayar wajib diisi");
                 if (!paymentMethod) return showError("Metode pembayaran wajib dipilih");
                 if (jiwa > MAX_JIWA) return showError(`Jumlah jiwa maksimal ${MAX_JIWA}`);
-                // For Fidiah we don't require muzakki names (it's a nominal-only payment)
-                if (zakatType !== 'FIDIAH' && names.length !== jiwa) return showError("Jumlah nama muzakki harus sama dengan jumlah jiwa");
+                if (fitrahSelected && names.length !== jiwa) return showError("Jumlah nama muzakki harus sama dengan jumlah jiwa untuk fitrah");
 
                 const payload = {
                     paymentDate: paymentDate,
@@ -485,22 +488,25 @@
                     muzakkiNames: names
                 };
 
-                if (isFitrahType()) {
+                if (fitrahSelected) {
                     const qualityId = $zakatQualityId.val();
                     if (!qualityId) return showError("Zakat quality wajib dipilih");
                     payload.zakatQualityId = qualityId;
                 } else {
-                    const nominal = Number($jumlahUang.val());
-                    if (!nominal || nominal <= 0) return showError("Nominal uang wajib diisi");
-                    payload.jumlahUang = nominal;
+                    const hasNominal =
+                        (!Number.isNaN(nominal) && nominal > 0) ||
+                        (!Number.isNaN(malAmt) && malAmt > 0) ||
+                        (!Number.isNaN(infaqAmt) && infaqAmt > 0) ||
+                        (!Number.isNaN(fidiahAmt) && fidiahAmt > 0);
+                    if (!hasNominal) {
+                        return showError("Isi minimal salah satu: Fitrah, Zakat Mal, Infaq/Sedekah, atau Fidiah");
+                    }
+                    if (!Number.isNaN(nominal) && nominal > 0) payload.jumlahUang = nominal;
                 }
 
                 // include optional separate nominals if provided (>0)
-                const malAmt = Number($("#zakatMal").val());
                 if (!Number.isNaN(malAmt) && malAmt > 0) payload.jumlahUangZakatMal = malAmt;
-                const infaqAmt = Number($("#infaqSedekah").val());
                 if (!Number.isNaN(infaqAmt) && infaqAmt > 0) payload.jumlahUangInfaqSedekah = infaqAmt;
-                const fidiahAmt = Number($("#fidiah").val());
                 if (!Number.isNaN(fidiahAmt) && fidiahAmt > 0) payload.jumlahUangFidiah = fidiahAmt;
 
                 $btnSave.prop("disabled", true);

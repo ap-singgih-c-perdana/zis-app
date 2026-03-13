@@ -113,7 +113,7 @@
 
                         <div class="col-md-8">
                             <div class="form-group">
-                                <label for="zakatType">Jenis Zakat *</label>
+                                <label for="zakatType">Jenis Zakat</label>
                                 <select class="form-control" id="zakatType">
                                     <option value="" selected disabled>Pilih jenis zakat...</option>
                                     <option value="ZAKAT_FITRAH_BERAS">Zakat Fitrah (Beras)</option>
@@ -491,6 +491,12 @@
                 const today = todayIsoDate();
                 const names = $(".muzakki-name").toArray().map(el => (el.value || "").trim()).filter(x => x.length);
                 const paymentDate = parseDisplayDateToIso(paymentDateDisplay);
+                const selectedType = $zakatType.val();
+                const fitrahSelected = isFitrahType(selectedType);
+                const nominal = Number($jumlahUang.val());
+                const malAmt = Number($("#zakatMal").val());
+                const infaqAmt = Number($("#infaqSedekah").val());
+                const fidiahAmt = Number($("#fidiah").val());
 
                 if (!currentPayment) return;
                 if (!alamat) return showError("Alamat wajib diisi");
@@ -499,10 +505,8 @@
                 if (paymentDate > today) return showError("Tanggal pembayaran tidak boleh melebihi hari ini");
                 const paymentMethod = $paymentMethod.val();
                 if (!paymentMethod) return showError("Metode pembayaran wajib dipilih");
-                const selectedType = $zakatType.val();
                 if (jiwa > MAX_JIWA) return showError(`Jumlah jiwa maksimal ${MAX_JIWA}`);
-                // Skip muzakki validation for Fidiah (nominal-only)
-                if (selectedType !== 'FIDIAH' && names.length !== jiwa) return showError("Jumlah nama muzakki harus sama dengan jumlah jiwa");
+                if (fitrahSelected && names.length !== jiwa) return showError("Jumlah nama muzakki harus sama dengan jumlah jiwa untuk fitrah");
 
                 const payload = {
                     paymentDate: paymentDate,
@@ -515,30 +519,22 @@
                 payload.payerPhone = $payerPhone.val()?.trim() || null;
                 payload.paymentMethod = paymentMethod;
 
-                if (isFitrahType(selectedType)) {
+                if (fitrahSelected) {
                     const qualityId = $zakatQualityId.val();
                     if (!qualityId) return showError("Zakat quality wajib dipilih");
                     payload.zakatQualityId = qualityId;
                 } else {
-                    // allow either jumlahUang or any of the optional separate nominals
-                    const nominal = Number($jumlahUang.val());
-                    const malAmtCheck = Number($("#zakatMal").val());
-                    const infaqAmtCheck = Number($("#infaqSedekah").val());
-                    const fidiahAmtCheck = Number($("#fidiah").val());
                     const hasAny = (!Number.isNaN(nominal) && nominal > 0)
-                        || (!Number.isNaN(malAmtCheck) && malAmtCheck > 0)
-                        || (!Number.isNaN(infaqAmtCheck) && infaqAmtCheck > 0)
-                        || (!Number.isNaN(fidiahAmtCheck) && fidiahAmtCheck > 0);
-                    if (!hasAny) return showError("Isi jumlahUang atau salah satu nominal opsional (Zakat Mal / Infaq / Fidiah)");
+                        || (!Number.isNaN(malAmt) && malAmt > 0)
+                        || (!Number.isNaN(infaqAmt) && infaqAmt > 0)
+                        || (!Number.isNaN(fidiahAmt) && fidiahAmt > 0);
+                    if (!hasAny) return showError("Isi minimal salah satu: Fitrah, Zakat Mal, Infaq/Sedekah, atau Fidiah");
                     if (!Number.isNaN(nominal) && nominal > 0) payload.jumlahUang = nominal;
                 }
 
                 // include optional separate nominals if provided (>0)
-                const malAmt = Number($("#zakatMal").val());
                 if (!Number.isNaN(malAmt) && malAmt > 0) payload.jumlahUangZakatMal = malAmt;
-                const infaqAmt = Number($("#infaqSedekah").val());
                 if (!Number.isNaN(infaqAmt) && infaqAmt > 0) payload.jumlahUangInfaqSedekah = infaqAmt;
-                const fidiahAmt = Number($("#fidiah").val());
                 if (!Number.isNaN(fidiahAmt) && fidiahAmt > 0) payload.jumlahUangFidiah = fidiahAmt;
 
                 $btnSave.prop("disabled", true);

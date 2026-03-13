@@ -34,6 +34,7 @@ public interface ZakatPaymentRepository extends JpaRepository<ZakatPayment, UUID
                           )
                       and (:payerLike is null or lower(p.payerName) like :payerLike)
                       and (:phoneLike is null or lower(coalesce(p.payerPhone, '')) like :phoneLike)
+                    order by p.createdAt desc, p.id desc
                     """,
             countQuery = """
                     select count(distinct p.id)
