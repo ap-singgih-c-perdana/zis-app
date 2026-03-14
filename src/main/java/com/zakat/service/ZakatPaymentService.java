@@ -17,6 +17,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -71,10 +73,23 @@ public class ZakatPaymentService {
         String qLike = normalizedQ == null ? "%" : "%" + normalizedQ + "%";
         String payerLike = (payerName == null || payerName.isBlank()) ? null : ("%" + payerName.trim().toLowerCase() + "%");
         String phoneLike = (payerPhone == null || payerPhone.isBlank()) ? null : ("%" + payerPhone.trim().toLowerCase() + "%");
+        String sortKey = normalizeSortKey(pageable);
+        String sortDir = normalizeSortDirection(pageable);
+        Pageable effectivePageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize());
 
-        Page<ZakatPayment> page = zakatPaymentRepository.search(fromInclusive, toExclusive, qLike, payerLike, phoneLike, includeCanceled, pageable);
+        Page<ZakatPayment> page = zakatPaymentRepository.search(
+                fromInclusive,
+                toExclusive,
+                qLike,
+                payerLike,
+                phoneLike,
+                includeCanceled,
+                sortKey,
+                sortDir,
+                effectivePageable
+        );
         if (page.isEmpty()) {
-            return Page.empty(pageable);
+            return Page.empty(effectivePageable);
         }
 
         List<UUID> paymentIds = page.getContent().stream().map(ZakatPayment::getId).toList();
@@ -114,7 +129,37 @@ public class ZakatPaymentService {
                 })
                 .toList();
 
-        return new PageImpl<>(content, pageable, page.getTotalElements());
+        return new PageImpl<>(content, effectivePageable, page.getTotalElements());
+    }
+
+    private static String normalizeSortKey(Pageable pageable) {
+        for (Sort.Order order : pageable.getSort()) {
+            String property = order.getProperty();
+            if ("id".equals(property)) {
+                continue;
+            }
+            if ("receiptNumber".equals(property)
+                    || "createdAt".equals(property)
+                    || "jumlahUang".equals(property)
+                    || "beratBerasKg".equals(property)
+                    || "jumlahUangZakatMal".equals(property)
+                    || "jumlahUangInfaqSedekah".equals(property)
+                    || "jumlahUangFidiah".equals(property)) {
+                return property;
+            }
+        }
+        return "createdAt";
+    }
+
+    private static String normalizeSortDirection(Pageable pageable) {
+        for (Sort.Order order : pageable.getSort()) {
+            String property = order.getProperty();
+            if ("id".equals(property)) {
+                continue;
+            }
+            return order.isAscending() ? "asc" : "desc";
+        }
+        return "desc";
     }
 
     @Transactional

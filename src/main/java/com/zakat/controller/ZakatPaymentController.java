@@ -79,7 +79,7 @@ public class ZakatPaymentController {
             @RequestParam(required = false) String payerName,
             @RequestParam(required = false) String payerPhone,
             @RequestParam(defaultValue = "false") boolean includeCanceled,
-            @PageableDefault(sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
+            @PageableDefault(sort = {"createdAt", "id"}, direction = Sort.Direction.DESC) Pageable pageable
     ) {
         return zakatPaymentService.search(from, to, q, payerName, payerPhone, includeCanceled, pageable);
     }

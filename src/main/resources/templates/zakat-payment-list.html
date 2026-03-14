@@ -95,13 +95,41 @@
                     <table class="table table-hover text-nowrap">
                         <thead>
                         <tr>
-                            <th>Kwitansi</th>
-                            <th>Created</th>
-                            <th>Fitrah Uang (Rp)</th>
-                            <th>Fitrah Beras (Kg)</th>
-                            <th>Zakat Mal (Rp)</th>
-                            <th>Infaq/Sedekah (Rp)</th>
-                            <th>Fidiah (Rp)</th>
+                            <th>
+                                <button class="btn btn-xs btn-link text-dark p-0 sort-btn" data-sort-key="receiptNumber" type="button">
+                                    Kwitansi <i class="fas fa-sort ml-1"></i>
+                                </button>
+                            </th>
+                            <th>
+                                <button class="btn btn-xs btn-link text-dark p-0 sort-btn" data-sort-key="createdAt" type="button">
+                                    Created <i class="fas fa-sort ml-1"></i>
+                                </button>
+                            </th>
+                            <th>
+                                <button class="btn btn-xs btn-link text-dark p-0 sort-btn" data-sort-key="jumlahUang" type="button">
+                                    Fitrah Uang (Rp) <i class="fas fa-sort ml-1"></i>
+                                </button>
+                            </th>
+                            <th>
+                                <button class="btn btn-xs btn-link text-dark p-0 sort-btn" data-sort-key="beratBerasKg" type="button">
+                                    Fitrah Beras (Kg) <i class="fas fa-sort ml-1"></i>
+                                </button>
+                            </th>
+                            <th>
+                                <button class="btn btn-xs btn-link text-dark p-0 sort-btn" data-sort-key="jumlahUangZakatMal" type="button">
+                                    Zakat Mal (Rp) <i class="fas fa-sort ml-1"></i>
+                                </button>
+                            </th>
+                            <th>
+                                <button class="btn btn-xs btn-link text-dark p-0 sort-btn" data-sort-key="jumlahUangInfaqSedekah" type="button">
+                                    Infaq/Sedekah (Rp) <i class="fas fa-sort ml-1"></i>
+                                </button>
+                            </th>
+                            <th>
+                                <button class="btn btn-xs btn-link text-dark p-0 sort-btn" data-sort-key="jumlahUangFidiah" type="button">
+                                    Fidiah (Rp) <i class="fas fa-sort ml-1"></i>
+                                </button>
+                            </th>
                             <th>Metode</th>
                             <th>Pembayar</th>
                             <th>No. HP</th>
@@ -149,9 +177,26 @@
             const $filterIncludeCanceled = $("#filterIncludeCanceled");
             const $filterPayerName = $("#filterPayerName");
             const $filterPayerPhone = $("#filterPayerPhone");
+            const $sortButtons = $(".sort-btn");
 
             let page = 0;
             const size = 20;
+            let sortKey = "createdAt";
+            let sortDir = "desc";
+
+            function sortIconClass(key) {
+                if (key !== sortKey) return "fas fa-sort ml-1";
+                return sortDir === "asc" ? "fas fa-sort-up ml-1" : "fas fa-sort-down ml-1";
+            }
+
+            function refreshSortButtons() {
+                $sortButtons.each(function () {
+                    const key = $(this).data("sort-key");
+                    const active = key === sortKey;
+                    $(this).toggleClass("text-primary", active).toggleClass("text-dark", !active);
+                    $(this).find("i").attr("class", sortIconClass(key));
+                });
+            }
 
             function formatInstant(iso) {
                 if (!iso) return "-";
@@ -264,6 +309,8 @@
                 if (payerName) params.set("payerName", payerName);
                 if (payerPhone) params.set("payerPhone", payerPhone);
                 if (includeCanceled) params.set("includeCanceled", "true");
+                params.append("sort", `${sortKey},${sortDir}`);
+                params.append("sort", "id,desc");
 
                 return params.toString();
             }
@@ -342,6 +389,20 @@
                 cancelPayment(id);
             });
 
+            $sortButtons.on("click", function () {
+                const nextKey = $(this).data("sort-key");
+                if (!nextKey) return;
+                if (sortKey === nextKey) {
+                    sortDir = sortDir === "asc" ? "desc" : "asc";
+                } else {
+                    sortKey = nextKey;
+                    sortDir = "asc";
+                }
+                page = 0;
+                refreshSortButtons();
+                load();
+            });
+
             // init default period: start of current month -> today
             const today = new Date();
             const iso = today.toISOString().slice(0, 10);
@@ -349,6 +410,7 @@
             $filterTo.val(iso);
             $filterPayerName.val("");
             $filterPayerPhone.val("");
+            refreshSortButtons();
 
             load();
         })();

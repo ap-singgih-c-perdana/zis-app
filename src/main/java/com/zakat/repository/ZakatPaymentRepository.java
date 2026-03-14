@@ -20,34 +20,67 @@ public interface ZakatPaymentRepository extends JpaRepository<ZakatPayment, UUID
 
     @Query(
             value = """
-                    select distinct p
+                    select p
                     from ZakatPayment p
-                    left join p.muzakkiList m
                     where p.createdAt >= :fromInclusive
                       and p.createdAt < :toExclusive
                       and (:includeCanceled = true or p.canceled = false)
                       and (
                             lower(p.alamat) like :qLike
-                            or lower(m.nama) like :qLike
                             or lower(p.payerName) like :qLike
                             or lower(coalesce(p.payerPhone, '')) like :qLike
+                            or exists (
+                                select 1
+                                from MuzakkiPerson m
+                                where m.payment = p
+                                  and lower(m.nama) like :qLike
+                            )
                           )
-                      and (:payerLike is null or lower(p.payerName) like :payerLike)
-                      and (:phoneLike is null or lower(coalesce(p.payerPhone, '')) like :phoneLike)
-                    order by p.createdAt desc, p.id desc
+                    and (:payerLike is null or lower(p.payerName) like :payerLike)
+                    and (:phoneLike is null or lower(coalesce(p.payerPhone, '')) like :phoneLike)
+                    order by
+                      case
+                        when :sortKey = 'receiptNumber' and p.receiptNumber is null then 1
+                        when :sortKey = 'createdAt' and p.createdAt is null then 1
+                        when :sortKey = 'jumlahUang' and p.jumlahUang is null then 1
+                        when :sortKey = 'beratBerasKg' and p.beratBerasKg is null then 1
+                        when :sortKey = 'jumlahUangZakatMal' and p.jumlahUangZakatMal is null then 1
+                        when :sortKey = 'jumlahUangInfaqSedekah' and p.jumlahUangInfaqSedekah is null then 1
+                        when :sortKey = 'jumlahUangFidiah' and p.jumlahUangFidiah is null then 1
+                        else 0
+                      end asc,
+                      case when :sortKey = 'receiptNumber' and :sortDir = 'asc' then p.receiptNumber end asc,
+                      case when :sortKey = 'receiptNumber' and :sortDir = 'desc' then p.receiptNumber end desc,
+                      case when :sortKey = 'createdAt' and :sortDir = 'asc' then p.createdAt end asc,
+                      case when :sortKey = 'createdAt' and :sortDir = 'desc' then p.createdAt end desc,
+                      case when :sortKey = 'jumlahUang' and :sortDir = 'asc' then p.jumlahUang end asc,
+                      case when :sortKey = 'jumlahUang' and :sortDir = 'desc' then p.jumlahUang end desc,
+                      case when :sortKey = 'beratBerasKg' and :sortDir = 'asc' then p.beratBerasKg end asc,
+                      case when :sortKey = 'beratBerasKg' and :sortDir = 'desc' then p.beratBerasKg end desc,
+                      case when :sortKey = 'jumlahUangZakatMal' and :sortDir = 'asc' then p.jumlahUangZakatMal end asc,
+                      case when :sortKey = 'jumlahUangZakatMal' and :sortDir = 'desc' then p.jumlahUangZakatMal end desc,
+                      case when :sortKey = 'jumlahUangInfaqSedekah' and :sortDir = 'asc' then p.jumlahUangInfaqSedekah end asc,
+                      case when :sortKey = 'jumlahUangInfaqSedekah' and :sortDir = 'desc' then p.jumlahUangInfaqSedekah end desc,
+                      case when :sortKey = 'jumlahUangFidiah' and :sortDir = 'asc' then p.jumlahUangFidiah end asc,
+                      case when :sortKey = 'jumlahUangFidiah' and :sortDir = 'desc' then p.jumlahUangFidiah end desc,
+                      p.createdAt desc, p.id desc
                     """,
             countQuery = """
-                    select count(distinct p.id)
+                    select count(p.id)
                     from ZakatPayment p
-                    left join p.muzakkiList m
                     where p.createdAt >= :fromInclusive
                       and p.createdAt < :toExclusive
                       and (:includeCanceled = true or p.canceled = false)
                       and (
                             lower(p.alamat) like :qLike
-                            or lower(m.nama) like :qLike
                             or lower(p.payerName) like :qLike
                             or lower(coalesce(p.payerPhone, '')) like :qLike
+                            or exists (
+                                select 1
+                                from MuzakkiPerson m
+                                where m.payment = p
+                                  and lower(m.nama) like :qLike
+                            )
                           )
                       and (:payerLike is null or lower(p.payerName) like :payerLike)
                       and (:phoneLike is null or lower(coalesce(p.payerPhone, '')) like :phoneLike)
@@ -60,6 +93,8 @@ public interface ZakatPaymentRepository extends JpaRepository<ZakatPayment, UUID
             @Param("payerLike") String payerLike,
             @Param("phoneLike") String phoneLike,
             @Param("includeCanceled") boolean includeCanceled,
+            @Param("sortKey") String sortKey,
+            @Param("sortDir") String sortDir,
             Pageable pageable
     );
 

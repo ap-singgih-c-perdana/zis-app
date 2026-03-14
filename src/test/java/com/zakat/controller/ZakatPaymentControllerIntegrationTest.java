@@ -360,6 +360,71 @@ class ZakatPaymentControllerIntegrationTest {
                 .andExpect(jsonPath("$.totalMuzakkiFitrahJiwa").value(0));
     }
 
+    @Test
+    @WithMockUser(username = "admin", roles = "ADMIN")
+    void get_supportsSortingForReceiptCreatedAndNominalColumns() throws Exception {
+        LocalDate today = LocalDate.now(JAKARTA);
+        LocalDate from = today.minusDays(7);
+
+        Map<String, Object> a = baseCreateBody(today.minusDays(2), 1, "Jl. A", "A", PaymentMethod.CASH, List.of());
+        a.put("jumlahUang", 30000);
+        a.put("beratBerasKg", 2.0);
+        a.put("jumlahUangZakatMal", 100000);
+        a.put("jumlahUangInfaqSedekah", 50000);
+        a.put("jumlahUangFidiah", 70000);
+        UUID idA = createPayment(a);
+
+        Map<String, Object> b = baseCreateBody(today.minusDays(1), 1, "Jl. B", "B", PaymentMethod.CASH, List.of());
+        b.put("jumlahUang", 10000);
+        b.put("beratBerasKg", 1.0);
+        b.put("jumlahUangZakatMal", 300000);
+        b.put("jumlahUangInfaqSedekah", 10000);
+        b.put("jumlahUangFidiah", 30000);
+        UUID idB = createPayment(b);
+
+        Map<String, Object> c = baseCreateBody(today, 1, "Jl. C", "C", PaymentMethod.CASH, List.of());
+        c.put("jumlahUang", 20000);
+        c.put("beratBerasKg", 3.0);
+        c.put("jumlahUangZakatMal", 200000);
+        c.put("jumlahUangInfaqSedekah", 20000);
+        c.put("jumlahUangFidiah", 10000);
+        UUID idC = createPayment(c);
+
+        assertFirstIdBySort(from, today, "receiptNumber", "asc", idA);
+        assertFirstIdBySort(from, today, "createdAt", "asc", idA);
+        assertFirstIdBySort(from, today, "jumlahUang", "asc", idB);
+        assertFirstIdBySort(from, today, "beratBerasKg", "asc", idB);
+        assertFirstIdBySort(from, today, "jumlahUangZakatMal", "asc", idA);
+        assertFirstIdBySort(from, today, "jumlahUangInfaqSedekah", "asc", idB);
+        assertFirstIdBySort(from, today, "jumlahUangFidiah", "asc", idC);
+    }
+
+    @Test
+    @WithMockUser(username = "admin", roles = "ADMIN")
+    void get_sortJumlahUangDesc_placesNullAtBottom() throws Exception {
+        LocalDate today = LocalDate.now(JAKARTA);
+        LocalDate from = today.minusDays(7);
+
+        Map<String, Object> withValue = baseCreateBody(today.minusDays(1), 1, "Jl. Nilai", "N", PaymentMethod.CASH, List.of());
+        withValue.put("jumlahUang", 50000);
+        UUID withValueId = createPayment(withValue);
+
+        Map<String, Object> nullValue = baseCreateBody(today, 1, "Jl. Kosong", "K", PaymentMethod.CASH, List.of());
+        nullValue.put("jumlahUangZakatMal", 100000);
+        UUID nullValueId = createPayment(nullValue);
+
+        mockMvc.perform(get("/api/zakat-payments")
+                        .queryParam("from", from.toString())
+                        .queryParam("to", today.toString())
+                        .queryParam("size", "20")
+                        .queryParam("sort", "jumlahUang,desc")
+                        .queryParam("sort", "id,desc"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content", hasSize(2)))
+                .andExpect(jsonPath("$.content[0].id").value(withValueId.toString()))
+                .andExpect(jsonPath("$.content[1].id").value(nullValueId.toString()));
+    }
+
     private ZakatQuality createQualityBeras(String name, String beratPerJiwa) {
         return zakatQualityRepository.save(ZakatQuality.builder()
                 .name(name)
@@ -407,5 +472,17 @@ class ZakatPaymentControllerIntegrationTest {
                 .getContentAsString();
         JsonNode json = objectMapper.readTree(responseJson);
         return UUID.fromString(json.get("id").asText());
+    }
+
+    private void assertFirstIdBySort(LocalDate from, LocalDate to, String sortKey, String direction, UUID expectedId) throws Exception {
+        mockMvc.perform(get("/api/zakat-payments")
+                        .queryParam("from", from.toString())
+                        .queryParam("to", to.toString())
+                        .queryParam("size", "20")
+                        .queryParam("sort", sortKey + "," + direction)
+                        .queryParam("sort", "id,desc"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content", hasSize(3)))
+                .andExpect(jsonPath("$.content[0].id").value(expectedId.toString()));
     }
 }
