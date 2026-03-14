@@ -302,6 +302,17 @@
                 return `${dd}/${mm}/${yyyy}`;
             }
 
+            function formatDateMonthName(iso) {
+                if (!iso) return "-";
+                const d = new Date(iso);
+                if (Number.isNaN(d.getTime())) return iso;
+                return new Intl.DateTimeFormat("id-ID", {
+                    day: "2-digit",
+                    month: "long",
+                    year: "numeric"
+                }).format(d);
+            }
+
             function escapeHtml(str) {
                 return String(str ?? "")
                     .replaceAll("&", "&amp;")
@@ -398,7 +409,7 @@
                     $recentRows.append(`<tr><td colspan="6" class="text-center text-muted">Tidak ada data</td></tr>`);
                 } else {
                     for (const p of recent) {
-                        const tanggal = p.paymentAt ? String(p.paymentAt).slice(0, 10) : "";
+                        const tanggal = formatDateMonthName(p.paymentAt);
                         const label = p.zakatTypeLabel || p.zakatType || "-";
                         let nominalText = "-";
                         let berasText = "-";

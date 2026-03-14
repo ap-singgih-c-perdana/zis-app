@@ -204,7 +204,7 @@
                 if (Number.isNaN(d.getTime())) return iso;
                 return new Intl.DateTimeFormat("id-ID", {
                     day: "2-digit",
-                    month: "2-digit",
+                    month: "long",
                     year: "numeric"
                 }).format(d);
             }

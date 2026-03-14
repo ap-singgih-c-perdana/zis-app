@@ -425,6 +425,43 @@ class ZakatPaymentControllerIntegrationTest {
                 .andExpect(jsonPath("$.content[1].id").value(nullValueId.toString()));
     }
 
+    @Test
+    @WithMockUser(username = "admin", roles = "ADMIN")
+    void get_sortPaymentAtAsc_ordersSameDateByReceiptSequence() throws Exception {
+        LocalDate today = LocalDate.now(JAKARTA);
+
+        Map<String, Object> a = baseCreateBody(today, 1, "Jl. 1", "A", PaymentMethod.CASH, List.of());
+        a.put("jumlahUang", 10000);
+        createPayment(a);
+
+        Map<String, Object> b = baseCreateBody(today, 1, "Jl. 2", "B", PaymentMethod.CASH, List.of());
+        b.put("jumlahUang", 20000);
+        createPayment(b);
+
+        Map<String, Object> c = baseCreateBody(today, 1, "Jl. 3", "C", PaymentMethod.CASH, List.of());
+        c.put("jumlahUang", 30000);
+        createPayment(c);
+
+        String json = mockMvc.perform(get("/api/zakat-payments")
+                        .queryParam("from", today.toString())
+                        .queryParam("to", today.toString())
+                        .queryParam("size", "20")
+                        .queryParam("sort", "paymentAt,asc")
+                        .queryParam("sort", "id,desc"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content", hasSize(3)))
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        JsonNode root = objectMapper.readTree(json);
+        String r1 = root.path("content").get(0).path("receiptNumber").asText();
+        String r2 = root.path("content").get(1).path("receiptNumber").asText();
+        String r3 = root.path("content").get(2).path("receiptNumber").asText();
+        assertThat(r1).isLessThan(r2);
+        assertThat(r2).isLessThan(r3);
+    }
+
     private ZakatQuality createQualityBeras(String name, String beratPerJiwa) {
         return zakatQualityRepository.save(ZakatQuality.builder()
                 .name(name)

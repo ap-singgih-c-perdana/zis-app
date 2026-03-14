@@ -63,7 +63,11 @@ public interface ZakatPaymentRepository extends JpaRepository<ZakatPayment, UUID
                       case when :sortKey = 'jumlahUangInfaqSedekah' and :sortDir = 'desc' then p.jumlahUangInfaqSedekah end desc,
                       case when :sortKey = 'jumlahUangFidiah' and :sortDir = 'asc' then p.jumlahUangFidiah end asc,
                       case when :sortKey = 'jumlahUangFidiah' and :sortDir = 'desc' then p.jumlahUangFidiah end desc,
-                      p.paymentAt desc, p.id desc
+                      case when :sortKey = 'paymentAt' and :sortDir = 'asc' then p.receiptYear end asc,
+                      case when :sortKey = 'paymentAt' and :sortDir = 'asc' then p.receiptSequence end asc,
+                      case when :sortKey = 'paymentAt' and :sortDir = 'desc' then p.receiptYear end desc,
+                      case when :sortKey = 'paymentAt' and :sortDir = 'desc' then p.receiptSequence end desc,
+                      p.paymentAt desc, p.receiptYear desc, p.receiptSequence desc, p.id desc
                     """,
             countQuery = """
                     select count(p.id)

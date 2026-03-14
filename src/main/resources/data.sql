@@ -31,3 +31,5 @@ alter table zakat_payment
 
 alter table zakat_payment
     alter column canceled set default false;
+
+ALTER TABLE zakat_payment RENAME COLUMN created_at TO payment_at;
