@@ -391,7 +391,7 @@ class ZakatPaymentControllerIntegrationTest {
         UUID idC = createPayment(c);
 
         assertFirstIdBySort(from, today, "receiptNumber", "asc", idA);
-        assertFirstIdBySort(from, today, "createdAt", "asc", idA);
+        assertFirstIdBySort(from, today, "paymentAt", "asc", idA);
         assertFirstIdBySort(from, today, "jumlahUang", "asc", idB);
         assertFirstIdBySort(from, today, "beratBerasKg", "asc", idB);
         assertFirstIdBySort(from, today, "jumlahUangZakatMal", "asc", idA);

@@ -49,7 +49,7 @@ public record DashboardSummaryResponse(
     public record RecentPayment(
             UUID id,
             String receiptNumber,
-            Instant createdAt,
+            Instant paymentAt,
             String alamat,
             ZisType zakatType,
             String zakatTypeLabel,

@@ -140,7 +140,7 @@ public class DashboardService {
         return new DashboardSummaryResponse.RecentPayment(
                 p.getId(),
                 p.getReceiptNumber(),
-                p.getCreatedAt(),
+                p.getPaymentAt(),
                 p.getAlamat(),
                 computedType,
                 computedType == null ? null : computedType.getLabel(),

@@ -75,7 +75,7 @@ class ReportControllerIntegrationTest {
         fitrahUang.setAlamat("A");
         fitrahUang.setZakatQuality(qualityUang);
         fitrahUang.setJumlahUang(new BigDecimal("180000"));
-        fitrahUang.setCreatedAt(now);
+        fitrahUang.setPaymentAt(now);
         zakatPaymentRepository.save(fitrahUang);
 
         ZakatPayment fitrahBeras = new ZakatPayment();
@@ -83,21 +83,21 @@ class ReportControllerIntegrationTest {
         fitrahBeras.setAlamat("B");
         fitrahBeras.setZakatQuality(qualityBeras);
         fitrahBeras.setBeratBerasKg(new BigDecimal("149.5"));
-        fitrahBeras.setCreatedAt(now);
+        fitrahBeras.setPaymentAt(now);
         zakatPaymentRepository.save(fitrahBeras);
 
         ZakatPayment mal = new ZakatPayment();
         mal.setJumlahJiwa(1);
         mal.setAlamat("C");
         mal.setJumlahUangZakatMal(new BigDecimal("3512500"));
-        mal.setCreatedAt(now);
+        mal.setPaymentAt(now);
         zakatPaymentRepository.save(mal);
 
         ZakatPayment infaq = new ZakatPayment();
         infaq.setJumlahJiwa(1);
         infaq.setAlamat("D");
         infaq.setJumlahUangInfaqSedekah(new BigDecimal("100000"));
-        infaq.setCreatedAt(now);
+        infaq.setPaymentAt(now);
         zakatPaymentRepository.save(infaq);
 
         LocalDate todayJakarta = LocalDate.ofInstant(now, JAKARTA);

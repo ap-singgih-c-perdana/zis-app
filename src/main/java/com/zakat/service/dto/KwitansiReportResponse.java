@@ -11,7 +11,7 @@ import java.util.UUID;
 public record KwitansiReportResponse(
         UUID paymentId,
         String receiptNumber,
-        Instant createdAt,
+        Instant paymentAt,
         LocalDate tanggal,
         ZisType zakatType,
         String zakatTypeLabel,

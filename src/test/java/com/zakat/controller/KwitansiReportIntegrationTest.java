@@ -74,7 +74,7 @@ class KwitansiReportIntegrationTest {
         payment.setAlamat("Jl. Mawar No. 1");
         payment.setZakatQuality(quality);
         payment.setJumlahUang(new BigDecimal("180000"));
-        payment.setCreatedAt(now);
+        payment.setPaymentAt(now);
         payment.setReceiptYear(today.getYear());
         payment.setReceiptSequence(123L);
         payment.setReceiptNumber(String.format(RECEIPT_NUMBER_FORMAT, today.getYear(), 123));

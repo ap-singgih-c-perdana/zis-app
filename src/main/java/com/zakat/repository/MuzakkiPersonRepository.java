@@ -36,7 +36,7 @@ public interface MuzakkiPersonRepository extends JpaRepository<MuzakkiPerson, UU
     interface MuzakkiReportRow {
         UUID getPaymentId();
 
-        Instant getCreatedAt();
+        Instant getPaymentAt();
 
         String getNama();
 
@@ -51,7 +51,7 @@ public interface MuzakkiPersonRepository extends JpaRepository<MuzakkiPerson, UU
 
     @Query("""
             select p.id as paymentId,
-                   p.createdAt as createdAt,
+                   p.paymentAt as paymentAt,
                    m.nama as nama,
                    (case
                        when p.zakatQuality is not null then p.zakatQuality.zakatType
@@ -64,10 +64,10 @@ public interface MuzakkiPersonRepository extends JpaRepository<MuzakkiPerson, UU
                    p.jumlahJiwa as jumlahJiwa
             from MuzakkiPerson m
             join m.payment p
-            where p.createdAt >= :fromInclusive
-              and p.createdAt < :toExclusive
+            where p.paymentAt >= :fromInclusive
+              and p.paymentAt < :toExclusive
               and p.canceled = false
-            order by p.createdAt asc, coalesce(m.sequenceNo, 2147483647) asc, m.id asc
+            order by p.paymentAt asc, coalesce(m.sequenceNo, 2147483647) asc, m.id asc
             """)
     List<MuzakkiReportRow> findReportRows(
             @Param("fromInclusive") Instant fromInclusive,

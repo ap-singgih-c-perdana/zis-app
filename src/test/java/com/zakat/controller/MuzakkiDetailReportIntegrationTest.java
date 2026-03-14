@@ -78,7 +78,7 @@ class MuzakkiDetailReportIntegrationTest {
         p1.setAlamat("A");
         p1.setZakatQuality(qualityUang);
         p1.setJumlahUang(new BigDecimal("180000"));
-        p1.setCreatedAt(now);
+        p1.setPaymentAt(now);
         p1.setMuzakkiList(List.of(
                 MuzakkiPerson.builder().nama("Eko Yulianto").payment(p1).build()
         ));
@@ -89,7 +89,7 @@ class MuzakkiDetailReportIntegrationTest {
         p2.setAlamat("B");
         p2.setZakatQuality(qualityBeras);
         p2.setBeratBerasKg(new BigDecimal("12.50"));
-        p2.setCreatedAt(now);
+        p2.setPaymentAt(now);
         p2.setMuzakkiList(List.of(
                 MuzakkiPerson.builder().nama("Nur Pujianto").payment(p2).build(),
                 MuzakkiPerson.builder().nama("Haryoko").payment(p2).build()

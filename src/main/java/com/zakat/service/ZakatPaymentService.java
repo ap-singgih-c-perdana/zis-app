@@ -112,7 +112,7 @@ public class ZakatPaymentService {
                     return new ZakatPaymentListItemResponse(
                             payment.getId(),
                             payment.getReceiptNumber(),
-                            payment.getCreatedAt(),
+                            payment.getPaymentAt(),
                             payment.getBeratBerasKg(),
                             payment.getJumlahUang(),
                             payment.getJumlahUangZakatMal(),
@@ -139,7 +139,7 @@ public class ZakatPaymentService {
                 continue;
             }
             if ("receiptNumber".equals(property)
-                    || "createdAt".equals(property)
+                    || "paymentAt".equals(property)
                     || "jumlahUang".equals(property)
                     || "beratBerasKg".equals(property)
                     || "jumlahUangZakatMal".equals(property)
@@ -148,7 +148,7 @@ public class ZakatPaymentService {
                 return property;
             }
         }
-        return "createdAt";
+        return "paymentAt";
     }
 
     private static String normalizeSortDirection(Pageable pageable) {
@@ -188,10 +188,10 @@ public class ZakatPaymentService {
 
         ZakatPayment payment = new ZakatPayment();
         assignReceiptNumber(payment);
-        LocalDate paymentDate = request.paymentDate();
-        validatePaymentDate(paymentDate);
-        if (paymentDate != null) {
-            payment.setCreatedAt(paymentDate.atStartOfDay(DEFAULT_ZONE).toInstant());
+        LocalDate paymentAt = request.paymentDate();
+        validatePaymentAt(paymentAt);
+        if (paymentAt != null) {
+            payment.setPaymentAt(paymentAt.atStartOfDay(DEFAULT_ZONE).toInstant());
         }
         // payer info
         payment.setPayerName(request.payerName());
@@ -278,10 +278,10 @@ public class ZakatPaymentService {
         payment.setJumlahJiwa(jumlahJiwa);
         payment.setAlamat(request.alamat());
         payment.setPaymentMethod(request.paymentMethod());
-        LocalDate paymentDate = request.paymentDate();
-        validatePaymentDate(paymentDate);
-        if (paymentDate != null) {
-            payment.setCreatedAt(paymentDate.atStartOfDay(DEFAULT_ZONE).toInstant());
+        LocalDate paymentAt = request.paymentDate();
+        validatePaymentAt(paymentAt);
+        if (paymentAt != null) {
+            payment.setPaymentAt(paymentAt.atStartOfDay(DEFAULT_ZONE).toInstant());
         }
 
         List<MuzakkiPerson> muzakkiList = buildOrderedMuzakkiList(payment, request.muzakkiNames());
@@ -397,12 +397,12 @@ public class ZakatPaymentService {
         zakatPaymentRepository.save(payment);
     }
 
-    private static void validatePaymentDate(LocalDate paymentDate) {
-        if (paymentDate == null) {
+    private static void validatePaymentAt(LocalDate paymentAt) {
+        if (paymentAt == null) {
             return;
         }
         LocalDate today = LocalDate.now(DEFAULT_ZONE);
-        if (paymentDate.isAfter(today)) {
+        if (paymentAt.isAfter(today)) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Tanggal pembayaran tidak boleh melebihi hari ini");
         }
     }

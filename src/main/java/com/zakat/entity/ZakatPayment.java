@@ -53,18 +53,14 @@ public class ZakatPayment {
 
     private BigDecimal jumlahUang;
 
-    // Optional separate columns for other nominal types
-    @Column(name = "jumlah_uang_zakat_mal")
     private BigDecimal jumlahUangZakatMal;
 
-    @Column(name = "jumlah_uang_infaq_sedekah")
     private BigDecimal jumlahUangInfaqSedekah;
 
-    @Column(name = "jumlah_uang_fidiah")
     private BigDecimal jumlahUangFidiah;
 
     @Column(nullable = false)
-    private Instant createdAt;
+    private Instant paymentAt;
 
     /**
      * Jika payment dibatalkan (void), maka tidak ikut dihitung di report.
@@ -97,9 +93,9 @@ public class ZakatPayment {
     private List<MuzakkiPerson> muzakkiList;
 
     @PrePersist
-    void ensureCreatedAt() {
-        if (createdAt == null) {
-            createdAt = Instant.now();
+    void ensurePaymentAt() {
+        if (paymentAt == null) {
+            paymentAt = Instant.now();
         }
     }
 

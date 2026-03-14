@@ -9,7 +9,7 @@ import java.util.UUID;
 public record ZakatPaymentListItemResponse(
         UUID id,
         String receiptNumber,
-        Instant createdAt,
+        Instant paymentAt,
         BigDecimal beratBerasKg,
         BigDecimal jumlahUang,
         BigDecimal jumlahUangZakatMal,

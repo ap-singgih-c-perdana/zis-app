@@ -12,7 +12,7 @@ public record ZakatPaymentResponse(
         UUID id,
         String receiptNumber,
         boolean canceled,
-        Instant createdAt,
+        Instant paymentAt,
         ZisType zakatType,
         String zakatTypeLabel,
         Integer jumlahJiwa,

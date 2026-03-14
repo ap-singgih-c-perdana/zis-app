@@ -78,7 +78,7 @@ class DashboardControllerIntegrationTest {
         fitrahUang.setZakatQuality(qualityUang);
         fitrahUang.setJumlahUang(new BigDecimal("180000"));
         fitrahUang.setPaymentMethod(PaymentMethod.CASH);
-        fitrahUang.setCreatedAt(now);
+        fitrahUang.setPaymentAt(now);
         zakatPaymentRepository.save(fitrahUang);
 
         ZakatPayment fitrahBeras = new ZakatPayment();
@@ -87,7 +87,7 @@ class DashboardControllerIntegrationTest {
         fitrahBeras.setZakatQuality(qualityBeras);
         fitrahBeras.setBeratBerasKg(new BigDecimal("149.5"));
         fitrahBeras.setPaymentMethod(PaymentMethod.TRANSFER);
-        fitrahBeras.setCreatedAt(now);
+        fitrahBeras.setPaymentAt(now);
         zakatPaymentRepository.save(fitrahBeras);
 
         ZakatPayment mal = new ZakatPayment();
@@ -95,7 +95,7 @@ class DashboardControllerIntegrationTest {
         mal.setAlamat("C");
         mal.setJumlahUangZakatMal(new BigDecimal("3512500"));
         mal.setPaymentMethod(PaymentMethod.TRANSFER);
-        mal.setCreatedAt(now);
+        mal.setPaymentAt(now);
         zakatPaymentRepository.save(mal);
 
         String response = mockMvc.perform(get("/api/dashboard/summary")

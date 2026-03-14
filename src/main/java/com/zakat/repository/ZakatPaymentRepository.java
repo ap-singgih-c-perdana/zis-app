@@ -22,8 +22,8 @@ public interface ZakatPaymentRepository extends JpaRepository<ZakatPayment, UUID
             value = """
                     select p
                     from ZakatPayment p
-                    where p.createdAt >= :fromInclusive
-                      and p.createdAt < :toExclusive
+                    where p.paymentAt >= :fromInclusive
+                      and p.paymentAt < :toExclusive
                       and (:includeCanceled = true or p.canceled = false)
                       and (
                             lower(p.alamat) like :qLike
@@ -41,7 +41,7 @@ public interface ZakatPaymentRepository extends JpaRepository<ZakatPayment, UUID
                     order by
                       case
                         when :sortKey = 'receiptNumber' and p.receiptNumber is null then 1
-                        when :sortKey = 'createdAt' and p.createdAt is null then 1
+                        when :sortKey = 'paymentAt' and p.paymentAt is null then 1
                         when :sortKey = 'jumlahUang' and p.jumlahUang is null then 1
                         when :sortKey = 'beratBerasKg' and p.beratBerasKg is null then 1
                         when :sortKey = 'jumlahUangZakatMal' and p.jumlahUangZakatMal is null then 1
@@ -51,8 +51,8 @@ public interface ZakatPaymentRepository extends JpaRepository<ZakatPayment, UUID
                       end asc,
                       case when :sortKey = 'receiptNumber' and :sortDir = 'asc' then p.receiptNumber end asc,
                       case when :sortKey = 'receiptNumber' and :sortDir = 'desc' then p.receiptNumber end desc,
-                      case when :sortKey = 'createdAt' and :sortDir = 'asc' then p.createdAt end asc,
-                      case when :sortKey = 'createdAt' and :sortDir = 'desc' then p.createdAt end desc,
+                      case when :sortKey = 'paymentAt' and :sortDir = 'asc' then p.paymentAt end asc,
+                      case when :sortKey = 'paymentAt' and :sortDir = 'desc' then p.paymentAt end desc,
                       case when :sortKey = 'jumlahUang' and :sortDir = 'asc' then p.jumlahUang end asc,
                       case when :sortKey = 'jumlahUang' and :sortDir = 'desc' then p.jumlahUang end desc,
                       case when :sortKey = 'beratBerasKg' and :sortDir = 'asc' then p.beratBerasKg end asc,
@@ -63,13 +63,13 @@ public interface ZakatPaymentRepository extends JpaRepository<ZakatPayment, UUID
                       case when :sortKey = 'jumlahUangInfaqSedekah' and :sortDir = 'desc' then p.jumlahUangInfaqSedekah end desc,
                       case when :sortKey = 'jumlahUangFidiah' and :sortDir = 'asc' then p.jumlahUangFidiah end asc,
                       case when :sortKey = 'jumlahUangFidiah' and :sortDir = 'desc' then p.jumlahUangFidiah end desc,
-                      p.createdAt desc, p.id desc
+                      p.paymentAt desc, p.id desc
                     """,
             countQuery = """
                     select count(p.id)
                     from ZakatPayment p
-                    where p.createdAt >= :fromInclusive
-                      and p.createdAt < :toExclusive
+                    where p.paymentAt >= :fromInclusive
+                      and p.paymentAt < :toExclusive
                       and (:includeCanceled = true or p.canceled = false)
                       and (
                             lower(p.alamat) like :qLike
@@ -122,8 +122,8 @@ public interface ZakatPaymentRepository extends JpaRepository<ZakatPayment, UUID
                    coalesce(sum(case when (q.zakatType in :fitrahTypes) then p.jumlahJiwa else 0 end), 0) as totalJiwaFitrah
             from ZakatPayment p
             left join p.zakatQuality q
-            where p.createdAt >= :fromInclusive
-              and p.createdAt < :toExclusive
+            where p.paymentAt >= :fromInclusive
+              and p.paymentAt < :toExclusive
               and p.canceled = false
             """)
     DashboardTotalsRow dashboardTotals(
@@ -159,8 +159,8 @@ public interface ZakatPaymentRepository extends JpaRepository<ZakatPayment, UUID
                    coalesce(sum(case when (p.jumlahUangFidiah is not null and p.jumlahUangFidiah > 0) then p.jumlahUangFidiah else 0 end), 0) as fidiahUang,
                    coalesce(sum(p.beratBerasKg), 0) as totalBerasKg
             from ZakatPayment p
-            where p.createdAt >= :fromInclusive
-              and p.createdAt < :toExclusive
+            where p.paymentAt >= :fromInclusive
+              and p.paymentAt < :toExclusive
               and p.canceled = false
             group by (case
                         when p.zakatQuality is not null then p.zakatQuality.zakatType
@@ -199,8 +199,8 @@ public interface ZakatPaymentRepository extends JpaRepository<ZakatPayment, UUID
                    coalesce(sum(p.jumlahUangZakatMal), 0) as zakatMal,
                    coalesce(sum(p.jumlahUangInfaqSedekah), 0) as infaqSedekah
             from ZakatPayment p
-            where p.createdAt >= :fromInclusive
-              and p.createdAt < :toExclusive
+            where p.paymentAt >= :fromInclusive
+              and p.paymentAt < :toExclusive
               and p.canceled = false
             """)
     DashboardTypeBreakdownRow dashboardTypeBreakdown(
@@ -220,8 +220,8 @@ public interface ZakatPaymentRepository extends JpaRepository<ZakatPayment, UUID
                                   else 0
                                end), 0) as totalUangTransfer
             from ZakatPayment p
-            where p.createdAt >= :fromInclusive
-              and p.createdAt < :toExclusive
+            where p.paymentAt >= :fromInclusive
+              and p.paymentAt < :toExclusive
               and p.canceled = false
             """)
     DashboardPaymentMethodBreakdownRow dashboardPaymentMethodBreakdown(
@@ -250,8 +250,8 @@ public interface ZakatPaymentRepository extends JpaRepository<ZakatPayment, UUID
                    coalesce(sum(p.beratBerasKg), 0) as totalBerasKg,
                    coalesce(sum(p.jumlahJiwa), 0) as totalJiwa
             from ZakatPayment p
-            where p.createdAt >= :fromInclusive
-              and p.createdAt < :toExclusive
+            where p.paymentAt >= :fromInclusive
+              and p.paymentAt < :toExclusive
               and p.canceled = false
             group by (case
                         when p.zakatQuality is not null then p.zakatQuality.zakatType
@@ -268,8 +268,8 @@ public interface ZakatPaymentRepository extends JpaRepository<ZakatPayment, UUID
     @Query("""
             select coalesce(sum(p.jumlahJiwa), 0)
             from ZakatPayment p
-            where p.createdAt >= :fromInclusive
-              and p.createdAt < :toExclusive
+            where p.paymentAt >= :fromInclusive
+              and p.paymentAt < :toExclusive
               and p.zakatQuality is not null
               and p.zakatQuality.zakatType in :fitrahTypes
               and p.canceled = false
@@ -290,10 +290,10 @@ public interface ZakatPaymentRepository extends JpaRepository<ZakatPayment, UUID
     @Query("""
             select p
             from ZakatPayment p
-            where p.createdAt >= :fromInclusive
-              and p.createdAt < :toExclusive
+            where p.paymentAt >= :fromInclusive
+              and p.paymentAt < :toExclusive
               and p.canceled = false
-            order by p.createdAt desc
+            order by p.paymentAt desc
             """)
     List<ZakatPayment> findRecent(
             @Param("fromInclusive") Instant fromInclusive,

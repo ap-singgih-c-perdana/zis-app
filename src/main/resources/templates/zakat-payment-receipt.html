@@ -254,7 +254,7 @@
     </div>
 
     <div class="meta-small">
-        No. Kwitansi: <span id="receiptNumberFull">-</span> • Tanggal Input: <span id="createdAt">-</span>
+        No. Kwitansi: <span id="receiptNumberFull">-</span> • Tanggal Input: <span id="paymentAt">-</span>
     </div>
 </section>
 
@@ -369,7 +369,7 @@
             setText("instansiAlamat", (prof.alamatLengkap || "-") + (prof.kotaKabupaten ? `, ${prof.kotaKabupaten}` : ""));
             setText("receiptNoShort", shortReceiptNumber(receiptNumber));
             setText("receiptNumberFull", receiptNumber);
-            setText("createdAt", fmtDate(kw.createdAt || p.createdAt));
+            setText("paymentAt", fmtDate(kw.paymentAt || p.paymentAt));
 
             setText("payerNameLine", payerName);
             setText("payerPhoneLine", payerPhone);
@@ -390,7 +390,7 @@
             setText("fidiahLine", fmtNum(fidiah));
 
             const place = prof.kotaKabupaten || "Jakarta";
-            const date = kw.tanggal ? String(kw.tanggal) : fmtDateOnly(kw.createdAt || p.createdAt);
+            const date = kw.tanggal ? String(kw.tanggal) : fmtDateOnly(kw.paymentAt || p.paymentAt);
             setText("ttdDatePlace", `${place}, ${date}`);
             setText("ttdPayerName", payerName || "__________________");
 

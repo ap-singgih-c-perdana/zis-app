@@ -447,7 +447,7 @@
                     $payerPhone.val(currentPayment.payerPhone || "");
                     $paymentMethod.val(currentPayment.paymentMethod || "CASH");
 
-                    const existingDate = toIsoDate(currentPayment.createdAt);
+                    const existingDate = toIsoDate(currentPayment.paymentAt);
                     const existingDateDisplay = existingDate
                         ? moment(existingDate, "YYYY-MM-DD", true).format("DD/MM/YYYY")
                         : "";

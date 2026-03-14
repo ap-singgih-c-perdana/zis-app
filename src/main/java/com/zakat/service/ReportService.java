@@ -205,8 +205,8 @@ public class ReportService {
             );
         }
 
-        Instant createdAt = payment.getCreatedAt();
-        LocalDate tanggal = createdAt == null ? null : LocalDate.ofInstant(createdAt, DEFAULT_ZONE);
+        Instant paymentAt = payment.getPaymentAt();
+        LocalDate tanggal = paymentAt == null ? null : LocalDate.ofInstant(paymentAt, DEFAULT_ZONE);
 
         ZisType computedType;
         if (payment.getZakatQuality() != null) {
@@ -218,7 +218,7 @@ public class ReportService {
         return new KwitansiReportResponse(
                 payment.getId(),
                 payment.getReceiptNumber(),
-                createdAt,
+                paymentAt,
                 tanggal,
                 computedType,
                 computedType == null ? null : computedType.getLabel(),
@@ -270,8 +270,8 @@ public class ReportService {
             }
 
             LocalDate tgl = kw.tanggal();
-            if (tgl == null && kw.createdAt() != null) {
-                tgl = LocalDate.ofInstant(kw.createdAt(), DEFAULT_ZONE);
+            if (tgl == null && kw.paymentAt() != null) {
+                tgl = LocalDate.ofInstant(kw.paymentAt(), DEFAULT_ZONE);
             }
 
             // Exact field mapping from template form_zakat.pdf
@@ -364,7 +364,7 @@ public class ReportService {
 
                     return new MuzakkiDetailReportResponse.Row(
                             ++counter[0],
-                            LocalDate.ofInstant(r.getCreatedAt(), DEFAULT_ZONE),
+                            LocalDate.ofInstant(r.getPaymentAt(), DEFAULT_ZONE),
                             r.getNama(),
                             r.getZakatType(),
                             r.getZakatType() == null ? null : r.getZakatType().getLabel(),

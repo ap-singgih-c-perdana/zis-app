@@ -101,8 +101,8 @@
                                 </button>
                             </th>
                             <th>
-                                <button class="btn btn-xs btn-link text-dark p-0 sort-btn" data-sort-key="createdAt" type="button">
-                                    Created <i class="fas fa-sort ml-1"></i>
+                                <button class="btn btn-xs btn-link text-dark p-0 sort-btn" data-sort-key="paymentAt" type="button">
+                                    Tanggal Pembayaran <i class="fas fa-sort ml-1"></i>
                                 </button>
                             </th>
                             <th>
@@ -181,7 +181,7 @@
 
             let page = 0;
             const size = 20;
-            let sortKey = "createdAt";
+            let sortKey = "paymentAt";
             let sortDir = "desc";
 
             function sortIconClass(key) {
@@ -202,7 +202,11 @@
                 if (!iso) return "-";
                 const d = new Date(iso);
                 if (Number.isNaN(d.getTime())) return iso;
-                return new Intl.DateTimeFormat("id-ID", {dateStyle: "medium", timeStyle: "short"}).format(d);
+                return new Intl.DateTimeFormat("id-ID", {
+                    day: "2-digit",
+                    month: "2-digit",
+                    year: "numeric"
+                }).format(d);
             }
 
             function formatNominal(item) {
@@ -264,7 +268,7 @@
                         $rows.append(`
                             <tr class="${item.canceled ? "text-muted" : ""}">
                                 <td>${receipt} ${canceledBadge}</td>
-                                <td>${formatInstant(item.createdAt)}</td>
+                                <td>${formatInstant(item.paymentAt)}</td>
                                 <td>${fmtMoney(item.jumlahUang)}</td>
                                 <td>${fmtKg(item.beratBerasKg)}</td>
                                 <td>${fmtMoney(item.jumlahUangZakatMal)}</td>

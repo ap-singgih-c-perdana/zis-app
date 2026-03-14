@@ -398,7 +398,7 @@
                     $recentRows.append(`<tr><td colspan="6" class="text-center text-muted">Tidak ada data</td></tr>`);
                 } else {
                     for (const p of recent) {
-                        const tanggal = p.createdAt ? String(p.createdAt).slice(0, 10) : "";
+                        const tanggal = p.paymentAt ? String(p.paymentAt).slice(0, 10) : "";
                         const label = p.zakatTypeLabel || p.zakatType || "-";
                         let nominalText = "-";
                         let berasText = "-";
