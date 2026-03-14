@@ -93,7 +93,7 @@ class KwitansiReportIntegrationTest {
 
         JsonNode json = objectMapper.readTree(response);
         assertThat(json.get("paymentId").asText()).isEqualTo(id.toString());
-        assertThat(json.get("receiptNumber").asText()).startsWith("KW/");
+        assertThat(json.get("receiptNumber").asText()).startsWith("MA/");
         assertThat(json.get("receiptNumber").asText()).contains("/" + today.getYear() + "/");
         assertThat(json.get("tanggal").asText()).isEqualTo(today.toString());
         assertThat(json.get("zakatType").asText()).isEqualTo("ZAKAT_FITRAH_UANG");

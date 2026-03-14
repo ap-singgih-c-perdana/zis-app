@@ -32,7 +32,7 @@
             <div class="alert alert-danger d-none" id="alertError"></div>
 
             <div class="card">
-                <div class="card-header bg-gradient-blue">
+                <div class="card-header bg-light">
                     <h3 class="card-title">Info Pembayaran</h3>
                 </div>
                 <div class="card-body">
@@ -84,7 +84,7 @@
             </div>
 
             <div class="card">
-                <div class="card-header bg-gradient-blue">
+                <div class="card-header bg-light">
                     <h3 class="card-title">Zakat Fitrah</h3>
                 </div>
                 <div class="card-body">
@@ -93,13 +93,26 @@
                             <div class="form-group">
                                 <label for="zakatType">Jenis Zakat</label>
                                 <select class="form-control" id="zakatType">
-                                    <option value="" selected disabled>Pilih jenis zakat...</option>
+                                    <option value="" selected>Tanpa Fitrah (opsional)</option>
                                     <option value="ZAKAT_FITRAH_BERAS">Zakat Fitrah (Beras)</option>
                                     <option value="ZAKAT_FITRAH_UANG">Zakat Fitrah (Uang)</option>
 <!--                                    <option value="ZAKAT_MAL">Zakat Mal</option>-->
 <!--                                    <option value="INFAQ_SEDEKAH">Infaq / Sedekah</option>-->
 <!--                                    <option value="FIDIAH">Fidiah</option>-->
                                 </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="jumlahJiwa">Jumlah Jiwa *</label>
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <button class="btn btn-outline-secondary" id="btnJiwaMinus" type="button">-</button>
+                                    </div>
+                                    <input class="form-control text-center" id="jumlahJiwa" min="1" max="10" step="1" type="number" value="1">
+                                    <div class="input-group-append">
+                                        <button class="btn btn-outline-secondary" id="btnJiwaPlus" type="button">+</button>
+                                    </div>
+                                </div>
+                                <small class="text-muted">Field nama muzakki akan mengikuti jumlah jiwa.</small>
                             </div>
                         </div>
                         <div class="col-md-6">
@@ -130,23 +143,8 @@
                         </div>
                     </div>
                     <div class="card">
-                        <div class="card-header bg-gradient-gray-dark">
+                        <div class="card-header bg-light">
                             <h3 class="card-title" >Data Muzakki</h3>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="form-group">
-                                <label for="jumlahJiwa">Jumlah Jiwa *</label>
-                                <div class="input-group">
-                                    <div class="input-group-prepend">
-                                        <button class="btn btn-outline-secondary" id="btnJiwaMinus" type="button">-</button>
-                                    </div>
-                                    <input class="form-control text-center" id="jumlahJiwa" min="1" max="10" step="1" type="number" value="1">
-                                    <div class="input-group-append">
-                                        <button class="btn btn-outline-secondary" id="btnJiwaPlus" type="button">+</button>
-                                    </div>
-                                </div>
-                                <small class="text-muted">Field nama muzakki akan mengikuti jumlah jiwa.</small>
-                            </div>
                         </div>
                         <div class="card-body" id="muzakkiContainer"></div>
                     </div>
@@ -154,7 +152,7 @@
             </div>
 
             <div class="card">
-                <div class="card-header bg-gradient-blue">
+                <div class="card-header bg-light">
                     <h3 class="card-title">Zakat Mal, Infaq/Sedekah dan Fidiah</h3>
                 </div>
                 <div class="card-body">
@@ -167,13 +165,13 @@
                         </div>
                         <div class="col-md-4">
                             <div class="form-group">
-                                <label for="payerName">Infaq/Sedekah</label>
+                                <label for="infaqSedekah">Infaq/Sedekah</label>
                                 <input class="form-control" id="infaqSedekah" type="number" min="0" step="1" placeholder="0 (opsional)">
                             </div>
                         </div>
                         <div class="col-md-4">
                             <div class="form-group">
-                                <label for="payerPhone">Fidiah</label>
+                                <label for="fidiah">Fidiah</label>
                                 <input class="form-control" id="fidiah" type="number" min="0" step="1" placeholder="0 (opsional)">
                             </div>
                         </div>

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.zakat.entity.ZakatQuality;
 import com.zakat.enums.ZisType;
+import com.zakat.repository.ZakatPaymentRepository;
 import com.zakat.repository.ZakatQualityRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -39,8 +40,12 @@ class ZakatQualityControllerIntegrationTest {
     @Autowired
     private ZakatQualityRepository zakatQualityRepository;
 
+    @Autowired
+    private ZakatPaymentRepository zakatPaymentRepository;
+
     @BeforeEach
     void setUp() {
+        zakatPaymentRepository.deleteAll();
         zakatQualityRepository.deleteAll();
     }
 

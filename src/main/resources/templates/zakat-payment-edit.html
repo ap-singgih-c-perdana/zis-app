@@ -33,7 +33,7 @@
             <div class="alert alert-danger d-none" id="alertError"></div>
 
             <div class="card">
-                <div class="card-header">
+                <div class="card-header bg-light">
                     <h3 class="card-title">Info Pembayaran</h3>
                 </div>
                 <div class="card-body">
@@ -90,12 +90,20 @@
             </div>
 
             <div class="card">
-                <div class="card-header">
-                    <h3 class="card-title">Jiwa & Nilai</h3>
+                <div class="card-header bg-light">
+                    <h3 class="card-title">Zakat Fitrah</h3>
                 </div>
                 <div class="card-body">
                     <div class="row">
-                        <div class="col-md-4">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="zakatType">Jenis Zakat</label>
+                                <select class="form-control" id="zakatType">
+                                    <option value="" selected>Tanpa Fitrah (opsional)</option>
+                                    <option value="ZAKAT_FITRAH_BERAS">Zakat Fitrah (Beras)</option>
+                                    <option value="ZAKAT_FITRAH_UANG">Zakat Fitrah (Uang)</option>
+                                </select>
+                            </div>
                             <div class="form-group">
                                 <label for="jumlahJiwa">Jumlah Jiwa</label>
                                 <div class="input-group">
@@ -110,16 +118,7 @@
                                 <small class="text-muted">Edit nama muzakki akan mengikuti jumlah jiwa.</small>
                             </div>
                         </div>
-
-                        <div class="col-md-8">
-                            <div class="form-group">
-                                <label for="zakatType">Jenis Zakat</label>
-                                <select class="form-control" id="zakatType">
-                                    <option value="" selected disabled>Pilih jenis zakat...</option>
-                                    <option value="ZAKAT_FITRAH_BERAS">Zakat Fitrah (Beras)</option>
-                                    <option value="ZAKAT_FITRAH_UANG">Zakat Fitrah (Uang)</option>
-                                </select>
-                            </div>
+                        <div class="col-md-6">
                             <div class="form-group d-none" id="groupQuality">
                                 <label for="zakatQualityId">Zakat Quality</label>
                                 <select class="form-control" id="zakatQualityId" disabled>
@@ -145,18 +144,17 @@
                             </div>
                         </div>
                     </div>
+                    <div class="card">
+                        <div class="card-header bg-light">
+                            <h3 class="card-title">Data Muzakki</h3>
+                        </div>
+                        <div class="card-body" id="muzakkiContainer"></div>
+                    </div>
                 </div>
             </div>
 
             <div class="card">
-                <div class="card-header">
-                    <h3 class="card-title">Data Muzakki</h3>
-                </div>
-                <div class="card-body" id="muzakkiContainer"></div>
-            </div>
-
-            <div class="card">
-                <div class="card-header">
+                <div class="card-header bg-light">
                     <h3 class="card-title">Zakat Mal, Infaq/Sedekah dan Fidiah</h3>
                 </div>
                 <div class="card-body">
@@ -332,7 +330,8 @@
             }
 
             function updatePreview() {
-                if (!currentPayment || !isFitrahType(currentPayment.zakatType)) {
+                const selectedType = $zakatType.val();
+                if (!currentPayment || !isFitrahType(selectedType)) {
                     $previewBox.addClass("d-none");
                     return;
                 }
@@ -343,7 +342,7 @@
                     return;
                 }
                 const jiwa = clampJiwa();
-                if (currentPayment.zakatType === "ZAKAT_FITRAH_BERAS") {
+                if (selectedType === "ZAKAT_FITRAH_BERAS") {
                     const perJiwa = q.beratPerJiwaKg;
                     const total = perJiwa * jiwa;
                     $previewPerJiwa.text(`${formatNumber(perJiwa)} Kg`);

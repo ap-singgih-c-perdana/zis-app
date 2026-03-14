@@ -243,7 +243,10 @@ public class ZakatPaymentService {
         if (payment.getMuzakkiList() == null) {
             payment.setMuzakkiList(muzakkiList);
         } else {
+            // Flush deletion first to avoid unique key conflict on (payment_id, sequence_no)
+            // when replacing muzakki list with new rows using the same sequence numbers.
             payment.getMuzakkiList().clear();
+            zakatPaymentRepository.saveAndFlush(payment);
             payment.getMuzakkiList().addAll(muzakkiList);
         }
 
