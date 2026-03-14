@@ -21,14 +21,3 @@ from (
         ('daace2c4-2a21-4901-8cc6-505f19379f87'::uuid, 'Beras Premium', 'ZAKAT_FITRAH_UANG', null::numeric, 55000::bigint, true)
 ) as v(id, name, zakat_type, berat_per_jiwa_kg, nominal_per_jiwa, active)
 where not exists (select 1 from zakat_quality);
-
-alter table zakat_payment
-    add column if not exists canceled boolean;
-
-update zakat_payment set canceled = false where canceled is null;
-
-alter table zakat_payment
-    alter column canceled set not null;
-
-alter table zakat_payment
-    alter column canceled set default false;
