@@ -1,3 +1,31 @@
+alter table if exists public.zakat_payment
+    add column if not exists created_at timestamp(6) with time zone;
+
+alter table if exists public.zakat_payment
+    add column if not exists created_by varchar(255);
+
+alter table if exists public.zakat_payment
+    add column if not exists updated_at timestamp(6) with time zone;
+
+alter table if exists public.zakat_payment
+    add column if not exists updated_by varchar(255);
+
+update public.zakat_payment
+set created_at = coalesce(created_at, payment_at, now()),
+    created_by = coalesce(created_by, 'system'),
+    updated_at = coalesce(updated_at, created_at, payment_at, now()),
+    updated_by = coalesce(updated_by, created_by, 'system')
+where created_at is null
+   or created_by is null
+   or updated_at is null
+   or updated_by is null;
+
+alter table if exists public.zakat_payment
+    alter column created_at set not null;
+
+alter table if exists public.zakat_payment
+    alter column updated_at set not null;
+
 insert into institution_profile (
     id, nama_instansi, kota_kabupaten, alamat_lengkap, nama_ketua, nama_bendahara
 )

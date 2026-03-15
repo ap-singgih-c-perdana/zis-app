@@ -98,6 +98,10 @@ class ZakatPaymentControllerIntegrationTest {
         assertThat(saved.getBeratBerasKg()).isEqualByComparingTo("7.5");
         assertThat(saved.getZakatQuality()).isNotNull();
         assertThat(saved.getPaymentMethod()).isEqualTo(PaymentMethod.CASH);
+        assertThat(saved.getCreatedAt()).isNotNull();
+        assertThat(saved.getUpdatedAt()).isNotNull();
+        assertThat(saved.getCreatedBy()).isEqualTo("admin");
+        assertThat(saved.getUpdatedBy()).isEqualTo("admin");
     }
 
     @Test
@@ -212,6 +216,12 @@ class ZakatPaymentControllerIntegrationTest {
                 .andExpect(jsonPath("$.paymentMethod").value("TRANSFER"))
                 .andExpect(jsonPath("$.muzakkiNames", hasSize(3)))
                 .andExpect(jsonPath("$.muzakkiNames[0]").value("Lina Update"));
+
+        ZakatPayment updated = zakatPaymentRepository.findById(paymentId).orElseThrow();
+        assertThat(updated.getCreatedBy()).isEqualTo("admin");
+        assertThat(updated.getUpdatedBy()).isEqualTo("admin");
+        assertThat(updated.getUpdatedAt()).isNotNull();
+        assertThat(updated.getUpdatedAt()).isAfterOrEqualTo(updated.getCreatedAt());
 
         Long seqOneCount = entityManager.createQuery(
                         "select count(m) from MuzakkiPerson m where m.payment.id = :paymentId and m.sequenceNo = 1",

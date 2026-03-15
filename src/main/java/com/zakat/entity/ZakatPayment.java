@@ -29,7 +29,7 @@ import java.util.UUID;
 @Getter
 @Setter
 @NoArgsConstructor
-public class ZakatPayment {
+public class ZakatPayment extends AuditableEntity {
 
     @Id
     @GeneratedValue
