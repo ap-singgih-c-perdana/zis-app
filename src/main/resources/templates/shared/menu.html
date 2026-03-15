@@ -20,7 +20,7 @@
                      with font-awesome or any other icon font library -->
 
                 <li class="nav-item">
-                    <a class="nav-link" href="/">
+                    <a class="nav-link" href="/" data-nav-prefix="/">
                         <i class="nav-icon fas fa-th"></i>
                         <p>Dashboard</p>
                     </a>
@@ -36,13 +36,13 @@
                     </a>
                     <ul class="nav nav-treeview">
                         <li class="nav-item" sec:authorize="hasAnyRole('ADMIN','OPERATOR')">
-                            <a class="nav-link" href="/zakat-payments/new">
+                            <a class="nav-link" href="/zakat-payments/new" data-nav-prefix="/zakat-payments/new">
                                 <i class="far fa-circle nav-icon"></i>
                                 <p>Input Payment</p>
                             </a>
                         </li>
                         <li class="nav-item" sec:authorize="hasAnyRole('ADMIN','OPERATOR','VIEWER')">
-                            <a class="nav-link" href="/zakat-payments/list">
+                            <a class="nav-link" href="/zakat-payments/list" data-nav-prefix="/zakat-payments/list,/zakat-payments/" data-nav-exclude="/zakat-payments/new">
                                 <i class="far fa-circle nav-icon"></i>
                                 <p>Riwayat Payment</p>
                             </a>
@@ -60,13 +60,13 @@
                     </a>
                     <ul class="nav nav-treeview">
                         <li class="nav-item">
-                            <a class="nav-link" href="/reports/rekap">
+                            <a class="nav-link" href="/reports/rekap" data-nav-prefix="/reports/rekap">
                                 <i class="far fa-circle nav-icon"></i>
                                 <p>Rekap ZIS</p>
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="/reports/muzakki-detail">
+                            <a class="nav-link" href="/reports/muzakki-detail" data-nav-prefix="/reports/muzakki-detail">
                                 <i class="far fa-circle nav-icon"></i>
                                 <p>Data Muzakki</p>
                             </a>
@@ -86,19 +86,19 @@
                     </a>
                     <ul class="nav nav-treeview">
                         <li class="nav-item">
-                            <a class="nav-link" href="/settings/institution-profile">
+                            <a class="nav-link" href="/settings/institution-profile" data-nav-prefix="/settings/institution-profile">
                                 <i class="far fa-circle nav-icon"></i>
                                 <p>Profile Instansi/Masjid</p>
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="/settings/zakat-qualities">
+                            <a class="nav-link" href="/settings/zakat-qualities" data-nav-prefix="/settings/zakat-qualities">
                                 <i class="far fa-circle nav-icon"></i>
                                 <p>Kelola Zakat Quality</p>
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="/settings/users">
+                            <a class="nav-link" href="/settings/users" data-nav-prefix="/settings/users">
                                 <i class="far fa-circle nav-icon"></i>
                                 <p>Kelola User</p>
                             </a>

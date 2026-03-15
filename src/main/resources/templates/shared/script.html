@@ -28,3 +28,55 @@
 <script src="/webjars/AdminLTE/3.2.0/plugins/overlayScrollbars/js/jquery.overlayScrollbars.min.js"></script>
 <!-- AdminLTE App -->
 <script src="/webjars/AdminLTE/3.2.0/dist/js/adminlte.js"></script>
+<script>
+    (function () {
+        const path = window.location.pathname || "/";
+        const links = Array.from(document.querySelectorAll(".nav-sidebar a.nav-link[href]"));
+
+        function isMatch(link) {
+            const rawPrefixes = link.dataset.navPrefix || link.getAttribute("href") || "";
+            const prefixes = rawPrefixes.split(",").map(v => v.trim()).filter(Boolean);
+            const rawExcludes = link.dataset.navExclude || "";
+            const excludes = rawExcludes.split(",").map(v => v.trim()).filter(Boolean);
+
+            if (excludes.some(prefix => path.startsWith(prefix))) {
+                return false;
+            }
+            return prefixes.some(prefix => prefix === "/" ? path === "/" : path.startsWith(prefix));
+        }
+
+        let activeLink = null;
+        let bestScore = -1;
+        links.forEach(link => {
+            if (!isMatch(link)) {
+                return;
+            }
+            const rawPrefixes = (link.dataset.navPrefix || link.getAttribute("href") || "")
+                .split(",")
+                .map(v => v.trim())
+                .filter(Boolean);
+            const score = Math.max(...rawPrefixes.map(prefix => prefix.length), 0);
+            if (score > bestScore) {
+                bestScore = score;
+                activeLink = link;
+            }
+        });
+
+        if (!activeLink) {
+            return;
+        }
+
+        activeLink.classList.add("active");
+        let parent = activeLink.closest(".nav-item");
+        while (parent) {
+            const parentLink = parent.querySelector(":scope > .nav-link");
+            if (parentLink) {
+                parentLink.classList.add("active");
+            }
+            if (parent.classList.contains("has-treeview")) {
+                parent.classList.add("menu-open");
+            }
+            parent = parent.parentElement ? parent.parentElement.closest(".nav-item") : null;
+        }
+    })();
+</script>
