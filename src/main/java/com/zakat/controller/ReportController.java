@@ -114,7 +114,7 @@ public class ReportController {
 
     @GetMapping(value = "/kwitansi/{paymentId}/template/print", produces = "text/html;charset=UTF-8")
     public ResponseEntity<String> kwitansiTemplatePrint(@PathVariable UUID paymentId) {
-        String src = "/api/reports/kwitansi/" + paymentId + "/template.pdf?debugSave=true";
+        String src = "/api/reports/kwitansi/" + paymentId + "/template.pdf";
         String htmlTemplate = """
                 <!DOCTYPE html>
                 <html lang="id">
