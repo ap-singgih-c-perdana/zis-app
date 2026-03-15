@@ -47,6 +47,7 @@ public class ReportService {
 
     private static final ZoneId DEFAULT_ZONE = ZoneId.of("Asia/Jakarta");
     private static final float TEMPLATE_FONT_SIZE = 11f;
+    private static final float RECEIPT_NUMBER_FONT_SIZE = 9f;
     private static final String[] TIMES_NEW_ROMAN_CLASSPATHS = new String[]{
             "static/fonts/Times New Roman.ttf"
     };
@@ -277,7 +278,7 @@ public class ReportService {
             // Exact field mapping from template form_zakat.pdf
             setField(fields, "nama", safe(payment.getPayerName()), textFont);
             setField(fields, "noTelp", safe(payment.getPayerPhone()), textFont);
-            setField(fields, "noKwitansi", safe(kw.receiptNumber()), textFont);
+            setField(fields, "noKwitansi", safe(kw.receiptNumber()), textFont, RECEIPT_NUMBER_FONT_SIZE);
             setField(fields, "alamat", safe(payment.getAlamat()), textFont);
             setField(fields, "jumlahBeras", formatNumber(payment.getBeratBerasKg()), textFont);
             setField(fields, "jumlahUang", formatCurrency(perJiwa), textFont);
@@ -390,12 +391,16 @@ public class ReportService {
     }
 
     private static void setField(Map<String, PdfFormField> fields, String fieldName, String value, PdfFont font) {
+        setField(fields, fieldName, value, font, TEMPLATE_FONT_SIZE);
+    }
+
+    private static void setField(Map<String, PdfFormField> fields, String fieldName, String value, PdfFont font, float fontSize) {
         PdfFormField field = fields.get(fieldName);
         if (field == null) return;
         String safeValue = value == null ? "" : value;
         try {
             if (font != null) {
-                field.setFontAndSize(font, TEMPLATE_FONT_SIZE);
+                field.setFontAndSize(font, fontSize);
             }
             field.setValue(safeValue);
         } catch (Exception ignored) {
