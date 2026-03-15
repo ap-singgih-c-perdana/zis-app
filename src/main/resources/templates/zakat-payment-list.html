@@ -224,10 +224,18 @@
                     .replaceAll("'", "&#039;");
             }
 
+            function toLocalIsoDate(d = new Date()) {
+                const x = new Date(d);
+                const y = x.getFullYear();
+                const m = String(x.getMonth() + 1).padStart(2, "0");
+                const day = String(x.getDate()).padStart(2, "0");
+                return `${y}-${m}-${day}`;
+            }
+
             function startOfMonthIso(d = new Date()) {
                 const x = new Date(d);
                 x.setDate(1);
-                return x.toISOString().slice(0, 10);
+                return toLocalIsoDate(x);
             }
 
             function render(data) {
@@ -376,7 +384,7 @@
 
             $btnReset.on("click", function () {
                 const today = new Date();
-                const iso = today.toISOString().slice(0, 10);
+                const iso = toLocalIsoDate(today);
                 $filterFrom.val(startOfMonthIso(today));
                 $filterTo.val(iso);
                 $filterQ.val("");
@@ -409,7 +417,7 @@
 
             // init default period: start of current month -> today
             const today = new Date();
-            const iso = today.toISOString().slice(0, 10);
+            const iso = toLocalIsoDate(today);
             $filterFrom.val(startOfMonthIso(today));
             $filterTo.val(iso);
             $filterPayerName.val("");

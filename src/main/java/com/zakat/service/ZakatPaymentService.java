@@ -319,16 +319,10 @@ public class ZakatPaymentService {
                 payment.setJumlahUang(BigDecimal.valueOf(quality.getNominalPerJiwa()).multiply(BigDecimal.valueOf(jumlahJiwa)));
                 payment.setBeratBerasKg(null);
             }
-            // If client provided optional nominal fields in request, persist them. Otherwise leave existing values.
-            if (request.jumlahUangZakatMal() != null) {
-                payment.setJumlahUangZakatMal(request.jumlahUangZakatMal());
-            }
-            if (request.jumlahUangInfaqSedekah() != null) {
-                payment.setJumlahUangInfaqSedekah(request.jumlahUangInfaqSedekah());
-            }
-            if (request.jumlahUangFidiah() != null) {
-                payment.setJumlahUangFidiah(request.jumlahUangFidiah());
-            }
+            // On edit, optional non-fitrah amounts must be overwriteable, including clearing them.
+            payment.setJumlahUangZakatMal(request.jumlahUangZakatMal());
+            payment.setJumlahUangInfaqSedekah(request.jumlahUangInfaqSedekah());
+            payment.setJumlahUangFidiah(request.jumlahUangFidiah());
         } else {
             // non-fitrah update: clear any attached quality and accept any provided amounts
             payment.setZakatQuality(null);

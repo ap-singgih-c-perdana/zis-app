@@ -329,6 +329,18 @@
                 return m.format("YYYY-MM-DD");
             }
 
+            function parseOptionalPositiveAmount(rawValue, fieldLabel) {
+                const trimmed = String(rawValue ?? "").trim();
+                if (!trimmed) {
+                    return null;
+                }
+                const amount = Number(trimmed);
+                if (Number.isNaN(amount) || amount <= 0) {
+                    throw new Error(`${fieldLabel} harus lebih dari 0`);
+                }
+                return amount;
+            }
+
             function updatePreview() {
                 const selectedType = $zakatType.val();
                 if (!currentPayment || !isFitrahType(selectedType)) {
@@ -492,10 +504,19 @@
                 const paymentDate = parseDisplayDateToIso(paymentDateDisplay);
                 const selectedType = $zakatType.val();
                 const fitrahSelected = isFitrahType(selectedType);
-                const nominal = Number($jumlahUang.val());
-                const malAmt = Number($("#zakatMal").val());
-                const infaqAmt = Number($("#infaqSedekah").val());
-                const fidiahAmt = Number($("#fidiah").val());
+                let nominal;
+                let malAmt;
+                let infaqAmt;
+                let fidiahAmt;
+
+                try {
+                    nominal = parseOptionalPositiveAmount($jumlahUang.val(), "Nominal uang");
+                    malAmt = parseOptionalPositiveAmount($("#zakatMal").val(), "Zakat Mal");
+                    infaqAmt = parseOptionalPositiveAmount($("#infaqSedekah").val(), "Infaq/Sedekah");
+                    fidiahAmt = parseOptionalPositiveAmount($("#fidiah").val(), "Fidiah");
+                } catch (e) {
+                    return showError(String(e.message || e));
+                }
 
                 if (!currentPayment) return;
                 if (!alamat) return showError("Alamat wajib diisi");
@@ -523,18 +544,16 @@
                     if (!qualityId) return showError("Zakat quality wajib dipilih");
                     payload.zakatQualityId = qualityId;
                 } else {
-                    const hasAny = (!Number.isNaN(nominal) && nominal > 0)
-                        || (!Number.isNaN(malAmt) && malAmt > 0)
-                        || (!Number.isNaN(infaqAmt) && infaqAmt > 0)
-                        || (!Number.isNaN(fidiahAmt) && fidiahAmt > 0);
+                    const hasAny = nominal != null
+                        || malAmt != null
+                        || infaqAmt != null
+                        || fidiahAmt != null;
                     if (!hasAny) return showError("Isi minimal salah satu: Fitrah, Zakat Mal, Infaq/Sedekah, atau Fidiah");
-                    if (!Number.isNaN(nominal) && nominal > 0) payload.jumlahUang = nominal;
                 }
-
-                // include optional separate nominals if provided (>0)
-                if (!Number.isNaN(malAmt) && malAmt > 0) payload.jumlahUangZakatMal = malAmt;
-                if (!Number.isNaN(infaqAmt) && infaqAmt > 0) payload.jumlahUangInfaqSedekah = infaqAmt;
-                if (!Number.isNaN(fidiahAmt) && fidiahAmt > 0) payload.jumlahUangFidiah = fidiahAmt;
+                payload.jumlahUang = nominal;
+                payload.jumlahUangZakatMal = malAmt;
+                payload.jumlahUangInfaqSedekah = infaqAmt;
+                payload.jumlahUangFidiah = fidiahAmt;
 
                 $btnSave.prop("disabled", true);
                 try {

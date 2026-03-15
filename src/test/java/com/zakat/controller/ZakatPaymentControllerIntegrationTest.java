@@ -224,6 +224,49 @@ class ZakatPaymentControllerIntegrationTest {
 
     @Test
     @WithMockUser(username = "admin", roles = "ADMIN")
+    void put_updatesAndClearsOptionalMalAmount_onFitrahEdit() throws Exception {
+        ZakatQuality qualityUang = createQualityUang("Uang", 50000L);
+        LocalDate today = LocalDate.now(JAKARTA);
+
+        Map<String, Object> createBody = baseCreateBody(today, 2, "Jl. Melur", "Salsa", PaymentMethod.CASH, List.of("Salsa", "Bimo"));
+        createBody.put("zakatQualityId", qualityUang.getId().toString());
+        createBody.put("jumlahUangZakatMal", 5000000);
+        UUID paymentId = createPayment(createBody);
+
+        Map<String, Object> firstUpdate = new LinkedHashMap<>();
+        firstUpdate.put("paymentDate", today.toString());
+        firstUpdate.put("alamat", "Jl. Melur");
+        firstUpdate.put("payerName", "Salsa");
+        firstUpdate.put("payerPhone", "08123");
+        firstUpdate.put("paymentMethod", "CASH");
+        firstUpdate.put("zakatQualityId", qualityUang.getId().toString());
+        firstUpdate.put("muzakkiNames", List.of("Salsa", "Bimo"));
+        firstUpdate.put("jumlahUangZakatMal", 4500000);
+
+        mockMvc.perform(put("/api/zakat-payments/{id}", paymentId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsBytes(firstUpdate)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.jumlahUangZakatMal").value(4500000));
+
+        Map<String, Object> secondUpdate = new LinkedHashMap<>();
+        secondUpdate.put("paymentDate", today.toString());
+        secondUpdate.put("alamat", "Jl. Melur");
+        secondUpdate.put("payerName", "Salsa");
+        secondUpdate.put("payerPhone", "08123");
+        secondUpdate.put("paymentMethod", "CASH");
+        secondUpdate.put("zakatQualityId", qualityUang.getId().toString());
+        secondUpdate.put("muzakkiNames", List.of("Salsa", "Bimo"));
+
+        mockMvc.perform(put("/api/zakat-payments/{id}", paymentId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsBytes(secondUpdate)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.jumlahUangZakatMal").value(nullValue()));
+    }
+
+    @Test
+    @WithMockUser(username = "admin", roles = "ADMIN")
     void put_updatesToNonFitrah_withMinimalInfaqOnly() throws Exception {
         ZakatQuality quality = createQualityUang("Fitrah Uang", 45000L);
         LocalDate today = LocalDate.now(JAKARTA);

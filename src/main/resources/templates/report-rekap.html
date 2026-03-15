@@ -325,14 +325,22 @@
                 }).format(n)} Kg`;
             }
 
+            function toLocalIsoDate(d = new Date()) {
+                const x = new Date(d);
+                const y = x.getFullYear();
+                const m = String(x.getMonth() + 1).padStart(2, "0");
+                const day = String(x.getDate()).padStart(2, "0");
+                return `${y}-${m}-${day}`;
+            }
+
             function todayIso() {
-                return new Date().toISOString().slice(0, 10);
+                return toLocalIsoDate(new Date());
             }
 
             function startOfMonthIso(d = new Date()) {
                 const x = new Date(d);
                 x.setDate(1);
-                return x.toISOString().slice(0, 10);
+                return toLocalIsoDate(x);
             }
 
             function formatIsoDateDisplay(iso) {
