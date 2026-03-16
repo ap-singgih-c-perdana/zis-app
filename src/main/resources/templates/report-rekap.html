@@ -6,6 +6,25 @@
     <meta charset="UTF-8">
     <title>Rekap ZIS</title>
     <style>
+        .report-filter-actions {
+            display: flex;
+            align-items: flex-end;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            height: 100%;
+            padding-bottom: 1rem;
+        }
+
+        .report-filter-actions .btn {
+            margin-right: 0 !important;
+        }
+
+        @media (max-width: 767.98px) {
+            .report-filter-actions {
+                padding-bottom: 0;
+            }
+        }
+
         @media print {
             html, body {
                 font-family: "Times New Roman", Times, serif;
@@ -64,12 +83,14 @@
                                 <input class="form-control" id="filterTo" type="date">
                             </div>
                         </div>
-                        <div class="col-md-6 d-flex align-items-end">
-                            <button class="btn btn-primary mr-2" id="btnApply" type="button">Tampilkan</button>
-                            <button class="btn btn-default mr-2" id="btnReset" type="button">Reset</button>
-                            <button class="btn btn-success" id="btnPrint" type="button">
-                                <i class="fas fa-print"></i> Print
-                            </button>
+                        <div class="col-md-6 mt-3 mt-md-0">
+                            <div class="report-filter-actions">
+                                <button class="btn btn-primary" id="btnApply" type="button">Tampilkan</button>
+                                <button class="btn btn-default" id="btnReset" type="button">Reset</button>
+                                <button class="btn btn-success" id="btnPrint" type="button">
+                                    <i class="fas fa-print"></i> Print
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -89,9 +110,8 @@
                                     <div class="instansi-address" id="instansiAlamat">-</div>
                                     <div class="instansi-contact" id="instansiKontak">-</div>
                                 </div>
-                            </div>
+                            <div class="line-double"></div>
                         </div>
-                        <div class="line-double"></div>
                     </div>
 
                     <div class="text-center mb-3 report-section-title">
