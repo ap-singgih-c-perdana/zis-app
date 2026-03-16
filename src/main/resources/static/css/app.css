@@ -89,6 +89,8 @@
 }
 
 .report-letterhead .line-double {
+  grid-column: 1 / -1;
+  width: 100%;
   border-top: 2px solid #10a64a;
   border-bottom: 1px solid #7fd29f;
   height: 4px;
