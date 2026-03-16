@@ -50,23 +50,21 @@
 }
 
 .report-letterhead .letterhead-brand {
-  display: grid;
-  grid-template-columns: 180px minmax(0, 1fr) 180px;
-  align-items: center;
-  column-gap: 16px;
+    position: relative;
 }
 
 .report-letterhead .letterhead-logo {
-  position: static;
-  width: 160px;
-  max-width: 100%;
-  object-fit: contain;
-  justify-self: start;
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 160px;
+    object-fit: contain;
 }
 
 .report-letterhead .letterhead-text {
-  grid-column: 2;
-  text-align: center;
+    width: 100%;
+    text-align: center;
 }
 
 .report-letterhead .instansi-name {
@@ -89,8 +87,6 @@
 }
 
 .report-letterhead .line-double {
-  grid-column: 1 / -1;
-  width: 100%;
   border-top: 2px solid #10a64a;
   border-bottom: 1px solid #7fd29f;
   height: 4px;
@@ -152,20 +148,6 @@
 }
 
 @media (max-width: 576px) {
-  .report-letterhead .letterhead-brand {
-    grid-template-columns: 1fr;
-    row-gap: 12px;
-  }
-
-  .report-letterhead .letterhead-logo {
-    justify-self: center;
-    width: 120px;
-  }
-
-  .report-letterhead .letterhead-text {
-    grid-column: 1;
-  }
-
   .report-letterhead .instansi-name {
     font-size: 24px;
   }
