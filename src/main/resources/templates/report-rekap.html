@@ -6,97 +6,6 @@
     <meta charset="UTF-8">
     <title>Rekap ZIS</title>
     <style>
-        .report-letterhead {
-            font-family: "Times New Roman", Times, serif;
-        }
-        .report-letterhead .letterhead-brand {
-            position: relative;
-            /*min-height: 128px;*/
-        }
-        .report-letterhead .letterhead-logo {
-            position: absolute;
-            left: 0;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 160px;
-            object-fit: contain;
-        }
-        .report-letterhead .letterhead-text {
-            width: 100%;
-            text-align: center;
-        }
-        .report-letterhead .instansi-name {
-            color: #10a64a;
-            letter-spacing: 1px;
-            font-size: 24px;
-            font-weight: 700;
-            text-transform: uppercase;
-            margin-bottom: 4px;
-        }
-        .report-letterhead .instansi-address {
-            font-size: 16px;
-            margin-bottom: 6px;
-        }
-        .report-letterhead .instansi-contact {
-            font-size: 14px;
-            margin-bottom: 6px;
-        }
-        .report-letterhead .line-double {
-            border-top: 2px solid #10a64a;
-            border-bottom: 1px solid #7fd29f;
-            height: 4px;
-            margin: 8px 0 18px;
-        }
-        .report-title {
-            font-family: "Times New Roman", Times, serif;
-            text-transform: uppercase;
-            font-weight: 700;
-            font-size: 18px;
-            letter-spacing: 0.5px;
-            margin-bottom: 4px;
-        }
-        .report-title-underline {
-            display: inline-block;
-            border-bottom: 2px solid #444;
-            padding-bottom: 2px;
-        }
-        .report-section-title {
-            margin-top: 18px;
-        }
-        .report-meta,
-        .report-summary,
-        #ttdBox {
-            font-family: "Times New Roman", Times, serif;
-        }
-        #ttdBox .row {
-            margin-left: -20px;
-            margin-right: -20px;
-        }
-        #ttdBox [class*="col-"] {
-            padding-left: 20px;
-            padding-right: 20px;
-        }
-        .signature-spacer {
-            height: 90px;
-        }
-        .signature-name {
-            display: inline-block;
-            min-width: 210px;
-            text-align: center;
-            white-space: nowrap;
-        }
-        .signature-name::before {
-            content: "(___________________________)";
-            display: block;
-            font-weight: 400;
-            line-height: 1;
-            margin-bottom: 4px;
-        }
-        @media (max-width: 576px) {
-            .report-letterhead .instansi-name {
-                font-size: 24px;
-            }
-        }
         @media print {
             html, body {
                 font-family: "Times New Roman", Times, serif;
@@ -111,39 +20,6 @@
             .card { box-shadow: none !important; border: none !important; }
             .card-body {
                 padding: 0 !important;
-            }
-            .report-letterhead .letterhead-brand {
-                /*min-height: 128px;*/
-            }
-            .report-title {
-                font-size: 14pt;
-                letter-spacing: 0.3px;
-            }
-            .report-meta,
-            table {
-                font-size: 10.5pt;
-            }
-            th, td {
-                padding: 4px 6px !important;
-                vertical-align: top !important;
-            }
-            .report-summary,
-            #ttdBox {
-                font-size: 11pt;
-            }
-            #ttdBox .row {
-                margin-left: -28px;
-                margin-right: -28px;
-            }
-            #ttdBox [class*="col-"] {
-                padding-left: 28px;
-                padding-right: 28px;
-            }
-            .signature-spacer {
-                height: 110px;
-            }
-            .signature-name {
-                min-width: 225px;
             }
         }
     </style>
@@ -211,7 +87,8 @@
                                 <div class="letterhead-text">
                                     <div class="instansi-name" id="instansiNama">-</div>
                                     <div class="instansi-address" id="instansiAlamat">-</div>
-                                <div class="instansi-contact" id="instansiKontak">-</div>
+                                    <div class="instansi-contact" id="instansiKontak">-</div>
+                                </div>
                             </div>
                         </div>
                         <div class="line-double"></div>
