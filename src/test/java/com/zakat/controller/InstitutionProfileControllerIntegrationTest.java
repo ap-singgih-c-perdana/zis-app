@@ -54,6 +54,8 @@ class InstitutionProfileControllerIntegrationTest {
                 "namaInstansi", "Masjid An Nur",
                 "kotaKabupaten", "Lubuklinggau",
                 "alamatLengkap", "Jl. Sungkai Rt.01 Ds. Marga Sakti Kec. Muara Kelingi",
+                "nomorTelepon", "081234567890",
+                "email", "info@masjid.example",
                 "namaKetua", "H. Nur Pujianto, S.Kom",
                 "namaBendahara", "Ust. Abu Hanifah"
         );
@@ -64,15 +66,18 @@ class InstitutionProfileControllerIntegrationTest {
                 .andExpect(status().isOk())
 //                .andExpect(jsonPath("$.id").value(InstitutionProfileService.SINGLETON_ID.toString()))
                 .andExpect(jsonPath("$.namaInstansi").value("Masjid An Nur"))
-                .andExpect(jsonPath("$.kotaKabupaten").value("Lubuklinggau"));
+                .andExpect(jsonPath("$.kotaKabupaten").value("Lubuklinggau"))
+                .andExpect(jsonPath("$.nomorTelepon").value("081234567890"))
+                .andExpect(jsonPath("$.email").value("info@masjid.example"));
 
         mockMvc.perform(get("/api/institution-profile"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(InstitutionProfileService.SINGLETON_ID.toString()))
-                .andExpect(jsonPath("$.namaKetua").value("H. Nur Pujianto, S.Kom"));
+                .andExpect(jsonPath("$.namaKetua").value("H. Nur Pujianto, S.Kom"))
+                .andExpect(jsonPath("$.email").value("info@masjid.example"));
 
         InstitutionProfile saved = institutionProfileRepository.findById(InstitutionProfileService.SINGLETON_ID).orElseThrow();
         org.assertj.core.api.Assertions.assertThat(saved.getNamaInstansi()).isEqualTo("Masjid An Nur");
+        org.assertj.core.api.Assertions.assertThat(saved.getNomorTelepon()).isEqualTo("081234567890");
     }
 }
-

@@ -50,6 +50,14 @@
                         <textarea class="form-control" id="alamatLengkap" rows="3" placeholder="Alamat lengkap"></textarea>
                     </div>
                     <div class="form-group">
+                        <label for="nomorTelepon">Nomor Telepon</label>
+                        <input class="form-control" id="nomorTelepon" type="text" placeholder="Nomor telepon instansi">
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Email</label>
+                        <input class="form-control" id="email" type="email" placeholder="Email instansi">
+                    </div>
+                    <div class="form-group">
                         <label for="namaKetua">Nama Ketua</label>
                         <input class="form-control" id="namaKetua" type="text" placeholder="Nama ketua">
                     </div>
@@ -76,6 +84,8 @@
             const $namaInstansi = $("#namaInstansi");
             const $kotaKabupaten = $("#kotaKabupaten");
             const $alamatLengkap = $("#alamatLengkap");
+            const $nomorTelepon = $("#nomorTelepon");
+            const $email = $("#email");
             const $namaKetua = $("#namaKetua");
             const $namaBendahara = $("#namaBendahara");
             const $btnSave = $("#btnSave");
@@ -91,6 +101,8 @@
                     namaInstansi: ($namaInstansi.val() || '').trim(),
                     kotaKabupaten: ($kotaKabupaten.val() || '').trim(),
                     alamatLengkap: ($alamatLengkap.val() || '').trim(),
+                    nomorTelepon: ($nomorTelepon.val() || '').trim(),
+                    email: ($email.val() || '').trim(),
                     namaKetua: ($namaKetua.val() || '').trim(),
                     namaBendahara: ($namaBendahara.val() || '').trim()
                 };
@@ -102,6 +114,8 @@
                 return cur.namaInstansi !== (originalData.namaInstansi || '')
                     || cur.kotaKabupaten !== (originalData.kotaKabupaten || '')
                     || cur.alamatLengkap !== (originalData.alamatLengkap || '')
+                    || cur.nomorTelepon !== (originalData.nomorTelepon || '')
+                    || cur.email !== (originalData.email || '')
                     || cur.namaKetua !== (originalData.namaKetua || '')
                     || cur.namaBendahara !== (originalData.namaBendahara || '');
             }
@@ -137,12 +151,16 @@
                         $namaInstansi.val('');
                         $kotaKabupaten.val('');
                         $alamatLengkap.val('');
+                        $nomorTelepon.val('');
+                        $email.val('');
                         $namaKetua.val('');
                         $namaBendahara.val('');
                         originalData = {
                             namaInstansi: '',
                             kotaKabupaten: '',
                             alamatLengkap: '',
+                            nomorTelepon: '',
+                            email: '',
                             namaKetua: '',
                             namaBendahara: ''
                         };
@@ -154,6 +172,8 @@
                     $namaInstansi.val(data.namaInstansi || '');
                     $kotaKabupaten.val(data.kotaKabupaten || '');
                     $alamatLengkap.val(data.alamatLengkap || '');
+                    $nomorTelepon.val(data.nomorTelepon || '');
+                    $email.val(data.email || '');
                     $namaKetua.val(data.namaKetua || '');
                     $namaBendahara.val(data.namaBendahara || '');
                     // store a snapshot of server data to detect unsaved changes
@@ -161,6 +181,8 @@
                         namaInstansi: (data.namaInstansi || '').trim(),
                         kotaKabupaten: (data.kotaKabupaten || '').trim(),
                         alamatLengkap: (data.alamatLengkap || '').trim(),
+                        nomorTelepon: (data.nomorTelepon || '').trim(),
+                        email: (data.email || '').trim(),
                         namaKetua: (data.namaKetua || '').trim(),
                         namaBendahara: (data.namaBendahara || '').trim()
                     };
@@ -182,10 +204,14 @@
             async function save() {
                 const err = validate();
                 if (err) return showError(err);
+                const nomorTelepon = ($nomorTelepon.val() || '').trim();
+                const email = ($email.val() || '').trim();
                 const payload = {
                     namaInstansi: ($namaInstansi.val() || '').trim(),
                     kotaKabupaten: ($kotaKabupaten.val() || '').trim(),
                     alamatLengkap: ($alamatLengkap.val() || '').trim(),
+                    nomorTelepon: nomorTelepon || null,
+                    email: email || null,
                     namaKetua: ($namaKetua.val() || '').trim(),
                     namaBendahara: ($namaBendahara.val() || '').trim()
                 };
@@ -220,7 +246,7 @@
             $btnReset.prop('disabled', true);
 
             // wire up inputs to toggle Reset button when the form is changed
-            [$namaInstansi, $kotaKabupaten, $alamatLengkap, $namaKetua, $namaBendahara].forEach($el => {
+            [$namaInstansi, $kotaKabupaten, $alamatLengkap, $nomorTelepon, $email, $namaKetua, $namaBendahara].forEach($el => {
                 $el.on('input', function () {
                     if (isLoading) return; // ignore events while loading initial values
                     updateDirtyState();

@@ -9,80 +9,27 @@
         .report-letterhead {
             font-family: "Times New Roman", Times, serif;
         }
-        .report-letterhead .letterhead-top {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            gap: 16px;
-        }
-        .report-letterhead .org-box {
-            flex: 1;
-        }
         .report-letterhead .instansi-name {
-            color: #145a32;
-            letter-spacing: 0.5px;
-            font-size: 40px;
+            color: #10a64a;
+            letter-spacing: 1px;
+            font-size: 24px;
             font-weight: 700;
             text-transform: uppercase;
-            margin-bottom: 2px;
-            line-height: 1.1;
-        }
-        .report-letterhead .instansi-subtitle {
-            font-size: 14px;
-            margin-bottom: 2px;
+            margin-bottom: 4px;
         }
         .report-letterhead .instansi-address {
-            font-size: 13px;
-            line-height: 1.3;
-            margin-bottom: 0;
+            font-size: 16px;
+            margin-bottom: 6px;
         }
-        .report-letterhead .doc-number-box {
-            min-width: 96px;
-            text-align: center;
-            padding-top: 18px;
-        }
-        .report-letterhead .doc-number {
-            font-size: 44px;
-            font-weight: 700;
-            letter-spacing: 2px;
-            line-height: 1;
-        }
-        .report-letterhead .letterhead-bottom {
-            display: flex;
-            align-items: flex-end;
-            gap: 16px;
-            margin-top: 6px;
-        }
-        .report-letterhead .logo-box {
-            width: 90px;
-            min-width: 90px;
-            text-align: center;
-        }
-        .report-letterhead .logo-box img {
-            max-width: 84px;
-            max-height: 84px;
-            object-fit: contain;
-            filter: saturate(1.1);
-        }
-        .report-letterhead .doc-title-box {
-            flex: 1;
-            border-top: 1px solid #2f6f44;
-            padding-top: 6px;
-            padding-bottom: 4px;
-        }
-        .report-letterhead .doc-title {
-            color: #1e3e2d;
-            font-size: 38px;
-            font-weight: 700;
-            text-transform: uppercase;
-            line-height: 1.05;
-            letter-spacing: 0.4px;
+        .report-letterhead .instansi-contact {
+            font-size: 14px;
+            margin-bottom: 6px;
         }
         .report-letterhead .line-double {
-            border-top: 3px solid #2f6f44;
-            border-bottom: 1px solid #5f8a6d;
-            height: 5px;
-            margin: 2px 0 18px;
+            border-top: 2px solid #10a64a;
+            border-bottom: 1px solid #7fd29f;
+            height: 4px;
+            margin: 8px 0 18px;
         }
         .report-title {
             font-family: "Times New Roman", Times, serif;
@@ -98,28 +45,97 @@
             padding-bottom: 2px;
         }
         .report-section-title {
-            margin-top: 40px;
+            margin-top: 18px;
+        }
+        .report-meta,
+        .report-summary,
+        #ttdBox {
+            font-family: "Times New Roman", Times, serif;
+        }
+        #ttdBox .row {
+            margin-left: -20px;
+            margin-right: -20px;
+        }
+        #ttdBox [class*="col-"] {
+            padding-left: 20px;
+            padding-right: 20px;
+        }
+        .signature-spacer {
+            height: 90px;
+        }
+        .signature-name {
+            display: inline-block;
+            min-width: 210px;
+            text-align: center;
+            white-space: nowrap;
+        }
+        .signature-name::before {
+            content: "(___________________________)";
+            display: block;
+            font-weight: 400;
+            line-height: 1;
+            margin-bottom: 4px;
         }
         @media (max-width: 576px) {
             .report-letterhead .instansi-name {
                 font-size: 24px;
             }
-            .report-letterhead .doc-number {
-                font-size: 28px;
-            }
-            .report-letterhead .doc-title {
-                font-size: 22px;
-            }
-            .report-letterhead .letterhead-bottom {
-                gap: 10px;
-            }
         }
         @media print {
+            html, body {
+                font-family: "Times New Roman", Times, serif;
+                font-size: 11pt;
+                line-height: 1.3;
+                color: #000;
+            }
             .no-print { display: none !important; }
             .main-header, .main-sidebar, .main-footer, .control-sidebar { display: none !important; }
             .content-wrapper { background: #fff !important; }
             .content-wrapper { margin-left: 0 !important; }
             .card { box-shadow: none !important; border: none !important; }
+            .card-body {
+                padding: 0 !important;
+            }
+            .report-letterhead .instansi-name {
+                font-size: 18pt;
+                letter-spacing: 0.8px;
+            }
+            .report-letterhead .instansi-address {
+                font-size: 12pt;
+            }
+            .report-letterhead .instansi-contact {
+                font-size: 10.5pt;
+            }
+            .report-title {
+                font-size: 14pt;
+                letter-spacing: 0.3px;
+            }
+            .report-meta,
+            table {
+                font-size: 10.5pt;
+            }
+            th, td {
+                padding: 4px 6px !important;
+                vertical-align: top !important;
+            }
+            .report-summary,
+            #ttdBox {
+                font-size: 11pt;
+            }
+            #ttdBox .row {
+                margin-left: -28px;
+                margin-right: -28px;
+            }
+            #ttdBox [class*="col-"] {
+                padding-left: 28px;
+                padding-right: 28px;
+            }
+            .signature-spacer {
+                height: 110px;
+            }
+            .signature-name {
+                min-width: 225px;
+            }
         }
     </style>
 </head>
@@ -177,23 +193,10 @@
             <div class="card">
                 <div class="card-body">
                     <div id="instansiHeader" class="d-none report-letterhead">
-                        <div class="letterhead-top">
-                            <div class="org-box">
-                                <div class="instansi-name" id="instansiNama">-</div>
-                                <div class="instansi-subtitle" id="instansiSekretariat">Sekretariat</div>
-                                <div class="instansi-address" id="instansiAlamat">-</div>
-                            </div>
-                            <div class="doc-number-box">
-                                <div class="doc-number" id="docNo">0209</div>
-                            </div>
-                        </div>
-                        <div class="letterhead-bottom">
-                            <div class="logo-box">
-                                <img id="instansiLogo" src="/img/logo-masjid.png" alt="Logo Masjid" onerror="this.onerror=null;this.src='/img/dashboard.png'" />
-                            </div>
-                            <div class="doc-title-box">
-                                <div class="doc-title">Tanda Penyerahan / Penerimaan Zakat</div>
-                            </div>
+                        <div class="text-center">
+                            <div class="instansi-name" id="instansiNama">-</div>
+                            <div class="instansi-address" id="instansiAlamat">-</div>
+                            <div class="instansi-contact" id="instansiKontak">-</div>
                         </div>
                         <div class="line-double"></div>
                     </div>
@@ -202,7 +205,7 @@
                         <h4 class="mb-0 report-title">
                             <span class="report-title-underline">REKAPITULASI PENERIMAAN ZIS</span>
                         </h4>
-                        <div class="text-muted" id="periodeLabel">Periode: -</div>
+                        <div class="text-muted report-meta" id="periodeLabel">Periode: -</div>
                     </div>
 
                     <table class="table table-bordered">
@@ -248,7 +251,7 @@
                         </tbody>
                     </table>
 
-                    <div class="mt-3">
+                    <div class="mt-3 report-summary">
                         <div><strong>Total Muzakki (Fitrah):</strong> <span id="valTotalJiwa">-</span> Jiwa</div>
                     </div>
 
@@ -262,14 +265,14 @@
                                     <div class="col-6 text-center">
                                         <div>Mengetahui,</div>
                                         <div>Ketua Panitia</div>
-                                        <div style="height: 60px"></div>
-                                        <div><strong id="namaKetua">-</strong></div>
+                                        <div class="signature-spacer"></div>
+                                        <div class="signature-name"><strong id="namaKetua">-</strong></div>
                                     </div>
                                     <div class="col-6 text-center">
                                         <div>&nbsp;</div>
                                         <div>Bendahara</div>
-                                        <div style="height: 60px"></div>
-                                        <div><strong id="namaBendahara">-</strong></div>
+                                        <div class="signature-spacer"></div>
+                                        <div class="signature-name"><strong id="namaBendahara">-</strong></div>
                                     </div>
                                 </div>
                             </div>
@@ -305,9 +308,8 @@
             const $instansiHeader = $("#instansiHeader");
             const $ttdBox = $("#ttdBox");
             const $instansiNama = $("#instansiNama");
-            const $instansiSekretariat = $("#instansiSekretariat");
             const $instansiAlamat = $("#instansiAlamat");
-            const $docNo = $("#docNo");
+            const $instansiKontak = $("#instansiKontak");
             const $tanggalTtd = $("#tanggalTtd");
             const $namaKetua = $("#namaKetua");
             const $namaBendahara = $("#namaBendahara");
@@ -351,6 +353,15 @@
                 return `${dd}/${mm}/${yyyy}`;
             }
 
+            function formatKontak(prof) {
+                const telp = (prof?.nomorTelepon || "").trim();
+                const email = (prof?.email || "").trim();
+                if (!telp && !email) return "-";
+                if (telp && email) return `Telp: ${telp}, Email: ${email}`;
+                if (telp) return `Telp: ${telp}`;
+                return `Email: ${email}`;
+            }
+
             async function load() {
                 const from = $from.val();
                 const to = $to.val();
@@ -367,9 +378,6 @@
                     return;
                 }
                 const data = await res.json();
-                const toDate = new Date(`${to}T00:00:00`);
-                const docNo = String(toDate.getMonth() + 1).padStart(2, "0")
-                    + String(toDate.getFullYear()).slice(-2);
                 const fitrahUang = Number(data.zakatFitrahUang ?? 0);
                 const fitrahBeras = Number(data.zakatFitrahBerasKg ?? 0);
                 const fidiah = Number(data.fidiah ?? 0);
@@ -392,12 +400,14 @@
                 if (prof) {
                     $instansiHeader.removeClass("d-none");
                     $ttdBox.removeClass("d-none");
-                    $docNo.text(docNo);
-                    $instansiNama.text(prof.namaInstansi || "-");
-                    $instansiSekretariat.text("Sekretariat");
+                    const namaInstansi = (prof.namaInstansi || "").trim();
+                    $instansiNama.text(namaInstansi
+                        ? `PANITIA AMIL ZAKAT, INFAQ, DAN SHODAQOH ${namaInstansi}`
+                        : "PANITIA AMIL ZAKAT, INFAQ, DAN SHODAQOH");
                     const alamat = prof.alamatLengkap || "-";
                     const kota = prof.kotaKabupaten ? `, ${prof.kotaKabupaten}` : "";
                     $instansiAlamat.text(`${alamat}${kota}`);
+                    $instansiKontak.text(formatKontak(prof));
 
                     const ttd = new Intl.DateTimeFormat("id-ID", {dateStyle: "long"}).format(new Date());
                     $tanggalTtd.text(`${prof.kotaKabupaten || "-"}, ${ttd}`);
@@ -406,6 +416,7 @@
                 } else {
                     $instansiHeader.addClass("d-none");
                     $ttdBox.addClass("d-none");
+                    $instansiKontak.text("-");
                 }
             }
 

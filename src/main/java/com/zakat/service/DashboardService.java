@@ -183,6 +183,8 @@ public class DashboardService {
                 profile.getNamaInstansi(),
                 profile.getKotaKabupaten(),
                 profile.getAlamatLengkap(),
+                profile.getNomorTelepon(),
+                profile.getEmail(),
                 profile.getNamaKetua(),
                 profile.getNamaBendahara()
         );

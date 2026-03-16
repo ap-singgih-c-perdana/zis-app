@@ -29,6 +29,10 @@ public class InstitutionProfile {
     @Column(nullable = false)
     private String alamatLengkap;
 
+    private String nomorTelepon;
+
+    private String email;
+
     private String namaKetua;
 
     private String namaBendahara;
