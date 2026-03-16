@@ -9,6 +9,22 @@
         .report-letterhead {
             font-family: "Times New Roman", Times, serif;
         }
+        .report-letterhead .letterhead-brand {
+            position: relative;
+            /*min-height: 128px;*/
+        }
+        .report-letterhead .letterhead-logo {
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 160px;
+            object-fit: contain;
+        }
+        .report-letterhead .letterhead-text {
+            width: 100%;
+            text-align: center;
+        }
         .report-letterhead .instansi-name {
             color: #10a64a;
             letter-spacing: 1px;
@@ -90,16 +106,9 @@
             .card-body {
                 padding: 0 !important;
             }
-            .report-letterhead .instansi-name {
-                font-size: 18pt;
-                letter-spacing: 0.8px;
-            }
-            .report-letterhead .instansi-address {
-                font-size: 12pt;
-            }
-            .report-letterhead .instansi-contact {
-                font-size: 10.5pt;
-            }
+            /*.report-letterhead .letterhead-brand {*/
+            /*    min-height: 128px;*/
+            /*}*/
             .report-title {
                 font-size: 14pt;
                 letter-spacing: 0.3px;
@@ -192,10 +201,17 @@
             <div class="card">
                 <div class="card-body">
                     <div id="instansiHeader" class="d-none report-letterhead">
-                        <div class="text-center">
-                            <div class="instansi-name" id="instansiNama">-</div>
-                            <div class="instansi-address" id="instansiAlamat">-</div>
-                            <div class="instansi-contact" id="instansiKontak">-</div>
+                        <div class="letterhead-brand">
+                            <img
+                                class="letterhead-logo"
+                                alt="Logo"
+                                src="data:image/jpeg;base64,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"
+                                />
+                                <div class="letterhead-text">
+                                    <div class="instansi-name" id="instansiNama">-</div>
+                                    <div class="instansi-address" id="instansiAlamat">-</div>
+                                    <div class="instansi-contact" id="instansiKontak">-</div>
+                            </div>
                         </div>
                         <div class="line-double"></div>
                     </div>
