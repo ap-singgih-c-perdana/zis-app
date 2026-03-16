@@ -36,10 +36,11 @@ public class InstitutionProfileService {
         profile.setNamaInstansi(request.namaInstansi());
         profile.setKotaKabupaten(request.kotaKabupaten());
         profile.setAlamatLengkap(request.alamatLengkap());
+        profile.setNomorTelepon(request.nomorTelepon());
+        profile.setEmail(request.email());
         profile.setNamaKetua(request.namaKetua());
         profile.setNamaBendahara(request.namaBendahara());
 
         return institutionProfileRepository.save(profile);
     }
 }
-

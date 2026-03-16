@@ -36,9 +36,9 @@ select
     'Jl. Adhyaksa',
     'H. Nur Pujianto, S.Kom',
     'Ust. Abu Hanifah'
-where not exists (select 1 from institution_profile);
+where exists (select 1 from information_schema.tables where table_schema = 'public' and table_name = 'institution_profile')
+  and not exists (select 1 from institution_profile);
 
--- Seed default zakat_quality hanya jika tabel masih kosong
 insert into zakat_quality (id, name, zakat_type, berat_per_jiwa_kg, nominal_per_jiwa, active)
 select v.id, v.name, v.zakat_type, v.berat_per_jiwa_kg, v.nominal_per_jiwa, v.active
 from (
@@ -48,4 +48,5 @@ from (
         ('8d3dd908-a6a2-400c-bdf5-820cd0fa3815'::uuid, 'SK Bupati (Standar)', 'ZAKAT_FITRAH_UANG', null::numeric, 45000::bigint, true),
         ('daace2c4-2a21-4901-8cc6-505f19379f87'::uuid, 'Beras Premium', 'ZAKAT_FITRAH_UANG', null::numeric, 55000::bigint, true)
 ) as v(id, name, zakat_type, berat_per_jiwa_kg, nominal_per_jiwa, active)
-where not exists (select 1 from zakat_quality);
+where exists (select 1 from information_schema.tables where table_schema = 'public' and table_name = 'zakat_quality')
+  and not exists (select 1 from zakat_quality);

@@ -20,4 +20,9 @@ public class WebPageController {
         return "register";
     }
 
+    @GetMapping("/public/dashboard")
+    public String publicDashboard() {
+        return "public-dashboard";
+    }
+
 }

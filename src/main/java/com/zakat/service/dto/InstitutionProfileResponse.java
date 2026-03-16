@@ -7,8 +7,9 @@ public record InstitutionProfileResponse(
         String namaInstansi,
         String kotaKabupaten,
         String alamatLengkap,
+        String nomorTelepon,
+        String email,
         String namaKetua,
         String namaBendahara
 ) {
 }
-

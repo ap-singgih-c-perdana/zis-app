@@ -109,6 +109,13 @@ public interface ZakatPaymentRepository extends JpaRepository<ZakatPayment, UUID
             """)
     long maxReceiptSequenceForYear(@Param("year") Integer year);
 
+    @Query("""
+            select min(p.paymentAt)
+            from ZakatPayment p
+            where p.canceled = false
+            """)
+    Instant minPaymentAt();
+
     interface DashboardTotalsRow {
         long getTotalTransaksi();
 

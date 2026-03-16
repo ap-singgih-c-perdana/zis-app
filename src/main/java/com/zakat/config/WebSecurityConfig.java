@@ -25,6 +25,8 @@ public class WebSecurityConfig {
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(authorize -> authorize
+                        .requestMatchers("/public/dashboard").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/public/dashboard/**").permitAll()
                         // Pages
                         .requestMatchers("/user/**", "/admin/**").hasRole("ADMIN")
                         .requestMatchers("/zakat-payments/new", "/zakat-payments/*/edit").hasAnyRole("ADMIN", "OPERATOR")
