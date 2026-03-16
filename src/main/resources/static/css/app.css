@@ -50,20 +50,22 @@
 }
 
 .report-letterhead .letterhead-brand {
-  position: relative;
+  display: grid;
+  grid-template-columns: 180px minmax(0, 1fr) 180px;
+  align-items: center;
+  column-gap: 16px;
 }
 
 .report-letterhead .letterhead-logo {
-  position: absolute;
-  left: 0;
-  top: 50%;
-  transform: translateY(-50%);
+  position: static;
   width: 160px;
+  max-width: 100%;
   object-fit: contain;
+  justify-self: start;
 }
 
 .report-letterhead .letterhead-text {
-  width: 100%;
+  grid-column: 2;
   text-align: center;
 }
 
@@ -148,6 +150,20 @@
 }
 
 @media (max-width: 576px) {
+  .report-letterhead .letterhead-brand {
+    grid-template-columns: 1fr;
+    row-gap: 12px;
+  }
+
+  .report-letterhead .letterhead-logo {
+    justify-self: center;
+    width: 120px;
+  }
+
+  .report-letterhead .letterhead-text {
+    grid-column: 1;
+  }
+
   .report-letterhead .instansi-name {
     font-size: 24px;
   }
