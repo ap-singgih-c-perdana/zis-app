@@ -6,6 +6,28 @@
 <head>
     <meta charset="UTF-8">
     <title>Dashboard</title>
+    <style>
+        .dashboard-filter-actions {
+            display: flex;
+            align-items: flex-end;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            height: 100%;
+            padding-bottom: 1rem;
+        }
+
+        .dashboard-filter-actions .btn,
+        .dashboard-filter-actions .btn-group {
+            margin-right: 0 !important;
+            margin-bottom: 0 !important;
+        }
+
+        @media (max-width: 767.98px) {
+            .dashboard-filter-actions {
+                padding-bottom: 0;
+            }
+        }
+    </style>
 </head>
 <body>
 
@@ -52,14 +74,16 @@
                                 <input class="form-control" id="filterTo" type="date">
                             </div>
                         </div>
-                        <div class="col-md-6 d-flex align-items-end flex-wrap">
-                            <button class="btn btn-primary mr-2 mb-2" id="btnApply" type="button">Tampilkan</button>
-                            <button class="btn btn-default mr-2 mb-2" id="btnReset" type="button">Reset</button>
+                        <div class="col-md-6 mt-3 mt-md-0">
+                            <div class="dashboard-filter-actions">
+                                <button class="btn btn-primary" id="btnApply" type="button">Tampilkan</button>
+                                <button class="btn btn-default" id="btnReset" type="button">Reset</button>
 
-                            <div class="btn-group mr-2 mb-2" role="group" aria-label="Periode cepat">
-                                <button class="btn btn-outline-secondary" id="btnToday" type="button">Hari ini</button>
-                                <button class="btn btn-outline-secondary" id="btnThisWeek" type="button">Minggu ini</button>
-                                <button class="btn btn-outline-secondary" id="btnThisMonth" type="button">Bulan ini</button>
+                                <div class="btn-group" role="group" aria-label="Periode cepat">
+                                    <button class="btn btn-outline-secondary" id="btnToday" type="button">Hari ini</button>
+                                    <button class="btn btn-outline-secondary" id="btnThisWeek" type="button">Minggu ini</button>
+                                    <button class="btn btn-outline-secondary" id="btnThisMonth" type="button">Bulan ini</button>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -347,10 +371,35 @@
                 return toLocalIsoDate(x);
             }
 
+            function syncQuickRangeButtons() {
+                const from = ($from.val() || "").trim();
+                const to = ($to.val() || "").trim();
+                const today = todayIso();
+                const weekStart = startOfWeekIso(new Date());
+                const monthStart = startOfMonthIso(new Date());
+
+                $btnToday.removeClass("active");
+                $btnThisWeek.removeClass("active");
+                $btnThisMonth.removeClass("active");
+
+                if (from === today && to === today) {
+                    $btnToday.addClass("active");
+                    return;
+                }
+                if (from === weekStart && to === today) {
+                    $btnThisWeek.addClass("active");
+                    return;
+                }
+                if (from === monthStart && to === today) {
+                    $btnThisMonth.addClass("active");
+                }
+            }
+
             async function load() {
                 const from = $from.val();
                 const to = $to.val();
                 if (!from || !to) return;
+                syncQuickRangeButtons();
 
                 $byTypeRows.empty().append(`<tr><td colspan="2" class="text-center text-muted">Memuat...</td></tr>`);
                 $recentRows.empty().append(`<tr><td colspan="6" class="text-center text-muted">Memuat...</td></tr>`);
@@ -508,10 +557,13 @@
                 $to.val(end);
                 load();
             });
+            $from.on("change", syncQuickRangeButtons);
+            $to.on("change", syncQuickRangeButtons);
 
             const iso = todayIso();
             $from.val(startOfMonthIso(new Date()));
             $to.val(iso);
+            syncQuickRangeButtons();
             load();
         })();
     </script>
