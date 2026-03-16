@@ -54,12 +54,13 @@
 }
 
 .report-letterhead .letterhead-logo {
-    position: absolute;
-    left: 0;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 160px;
-    object-fit: contain;
+    display: none !important;
+    /*position: absolute;*/
+    /*left: 0;*/
+    /*top: 50%;*/
+    /*transform: translateY(-50%);*/
+    /*width: 160px;*/
+    /*object-fit: contain;*/
 }
 
 .report-letterhead .letterhead-text {
