@@ -40,6 +40,9 @@
             .card-body {
                 padding: 0 !important;
             }
+            .report-rekap-page {
+                --rekap-print-font-size: 14pt;
+            }
             .report-rekap-page,
             .report-rekap-page * {
                 font-family: "Times New Roman", Times, serif !important;
@@ -54,15 +57,16 @@
             .report-rekap-page #rekapSummary,
             .report-rekap-page #rekapSummary *,
             .report-rekap-page #ttdBox,
-            .report-rekap-page #ttdBox * {
-                font-size: 14pt !important;
+            .report-rekap-page #ttdBox *,
+            .report-rekap-page #ttdBox .signature-name::before {
+                font-size: var(--rekap-print-font-size) !important;
                 line-height: 1.35 !important;
             }
             .report-rekap-page #rekapTable,
             .report-rekap-page #rekapTable *,
             .report-rekap-page #rekapTable th,
             .report-rekap-page #rekapTable td {
-                font-size: 14pt !important;
+                font-size: var(--rekap-print-font-size) !important;
                 line-height: 1.35 !important;
             }
             .report-rekap-page #rekapTable th,
