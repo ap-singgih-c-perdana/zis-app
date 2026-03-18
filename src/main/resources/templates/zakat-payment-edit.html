@@ -59,6 +59,13 @@
                         </div>
                         <div class="col-md-4">
                             <div class="form-group">
+                                <label for="receivedByName">Diterima Oleh</label>
+                                <input class="form-control" id="receivedByName" type="text" placeholder="Nama petugas/amil">
+                                <small class="text-muted">Nama petugas yang menerima pembayaran dari muzakki.</small>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
                                 <label for="payerName">Nama Pembayar</label>
                                 <input class="form-control" id="payerName" type="text">
                             </div>
@@ -221,6 +228,7 @@
             const $alamat = $("#alamat");
             const $payerName = $("#payerName");
             const $payerPhone = $("#payerPhone");
+            const $receivedByName = $("#receivedByName");
             const $paymentMethod = $("#paymentMethod");
             const $btnSave = $("#btnSave");
 
@@ -457,6 +465,7 @@
                     $alamat.val(currentPayment.alamat || "");
                     $payerName.val(currentPayment.payerName || "");
                     $payerPhone.val(currentPayment.payerPhone || "");
+                    $receivedByName.val(currentPayment.receivedByName || "");
                     $paymentMethod.val(currentPayment.paymentMethod || "CASH");
 
                     const existingDate = toIsoDate(currentPayment.paymentAt);
@@ -537,6 +546,7 @@
                 // include payer info in update
                 payload.payerName = $payerName.val()?.trim() || null;
                 payload.payerPhone = $payerPhone.val()?.trim() || null;
+                payload.receivedByName = $receivedByName.val()?.trim() || null;
                 payload.paymentMethod = paymentMethod;
 
                 if (fitrahSelected) {

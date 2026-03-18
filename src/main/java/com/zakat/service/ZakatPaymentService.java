@@ -123,6 +123,7 @@ public class ZakatPaymentService {
                             payment.getAlamat(),
                             payment.getPayerName(),
                             payment.getPayerPhone(),
+                            payment.getReceivedByName(),
                             payment.getPaymentMethod(),
                             payment.isCanceled()
                     );
@@ -196,6 +197,7 @@ public class ZakatPaymentService {
         // payer info
         payment.setPayerName(request.payerName());
         payment.setPayerPhone(request.payerPhone());
+        payment.setReceivedByName(normalizeOptionalText(request.receivedByName()));
         payment.setPaymentMethod(request.paymentMethod());
         payment.setJumlahJiwa(request.jumlahJiwa());
         payment.setAlamat(request.alamat());
@@ -347,8 +349,17 @@ public class ZakatPaymentService {
         // update payer info when editing
         payment.setPayerName(request.payerName());
         payment.setPayerPhone(request.payerPhone());
+        payment.setReceivedByName(normalizeOptionalText(request.receivedByName()));
 
         return zakatPaymentRepository.save(payment);
+    }
+
+    private static String normalizeOptionalText(String value) {
+        if (value == null) {
+            return null;
+        }
+        String trimmed = value.trim();
+        return trimmed.isEmpty() ? null : trimmed;
     }
 
     private static List<MuzakkiPerson> buildOrderedMuzakkiList(ZakatPayment payment, List<String> names) {

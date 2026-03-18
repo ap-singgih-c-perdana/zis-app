@@ -19,6 +19,7 @@ public record CreateZakatPaymentRequest(
         @NotBlank String alamat,
         @NotBlank String payerName,
         String payerPhone,
+        String receivedByName,
         @NotNull PaymentMethod paymentMethod,
         UUID zakatQualityId,
         @Positive BigDecimal beratBerasKg,

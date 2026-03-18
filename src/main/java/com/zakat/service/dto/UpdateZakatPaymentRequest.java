@@ -17,6 +17,7 @@ public record UpdateZakatPaymentRequest(
         @NotBlank String alamat,
         String payerName,
         String payerPhone,
+        String receivedByName,
         @NotNull PaymentMethod paymentMethod,
         UUID zakatQualityId,
         @Positive BigDecimal jumlahUang,

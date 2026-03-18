@@ -241,7 +241,7 @@
         <div class="block">
             Penerima Zakat
             <div class="space"></div>
-            __________________
+            <span id="ttdReceiverName">__________________</span>
         </div>
         <div class="block" style="text-align:center;" id="ttdDatePlace">
             Jakarta, dd/MM/yyyy
@@ -359,6 +359,7 @@
             const receiptNumber = kw.receiptNumber || p.receiptNumber || "-";
 
             const payerName = p.payerName || ((kw.muzakkiNames && kw.muzakkiNames[0]) || "-");
+            const receivedByName = kw.receivedByName || p.receivedByName || "";
             const payerPhone = p.payerPhone || "-";
             const alamat = p.alamat || kw.alamat || "-";
             const jiwa = Number(p.jumlahJiwa ?? kw.jumlahJiwa ?? (kw.muzakkiNames ? kw.muzakkiNames.length : 0) ?? 0);
@@ -398,6 +399,7 @@
             const place = prof.kotaKabupaten || "Jakarta";
             const date = kw.tanggal ? String(kw.tanggal) : fmtDateOnly(kw.paymentAt || p.paymentAt);
             setText("ttdDatePlace", `${place}, ${date}`);
+            setText("ttdReceiverName", receivedByName || "__________________");
             setText("ttdPayerName", payerName || "__________________");
 
             setTimeout(() => {

@@ -19,6 +19,7 @@ public record ZakatPaymentResponse(
         String alamat,
         String payerName,
         String payerPhone,
+        String receivedByName,
         PaymentMethod paymentMethod,
         BigDecimal beratBerasKg,
         BigDecimal jumlahUang,

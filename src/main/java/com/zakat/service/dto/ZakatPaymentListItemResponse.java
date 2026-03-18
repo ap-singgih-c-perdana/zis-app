@@ -20,6 +20,7 @@ public record ZakatPaymentListItemResponse(
         String alamat,
         String payerName,
         String payerPhone,
+        String receivedByName,
         PaymentMethod paymentMethod,
         boolean canceled
 ) {
