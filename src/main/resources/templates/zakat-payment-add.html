@@ -52,6 +52,13 @@
                         </div>
                         <div class="col-md-4">
                             <div class="form-group">
+                                <label for="receivedByName">Diterima Oleh</label>
+                                <input class="form-control" id="receivedByName" type="text" placeholder="Nama petugas/amil">
+                                <small class="text-muted">Nama petugas yang menerima pembayaran dari muzakki.</small>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
                                 <label for="payerName">Nama Pembayar *</label>
                                 <input class="form-control" id="payerName" type="text" placeholder="Nama pembayar">
                             </div>
@@ -219,6 +226,7 @@
             const $alamat = $("#alamat");
             const $payerName = $("#payerName");
             const $payerPhone = $("#payerPhone");
+            const $receivedByName = $("#receivedByName");
             const $paymentMethod = $("#paymentMethod");
             const $btnSave = $("#btnSave");
             const $btnReset = $("#btnReset");
@@ -481,6 +489,7 @@
                     alamat: alamat,
                     payerName: payerName,
                     payerPhone: $payerPhone.val()?.trim() || null,
+                    receivedByName: $receivedByName.val()?.trim() || null,
                     paymentMethod: paymentMethod,
                     zakatType: zakatType,
                     muzakkiNames: names
@@ -537,6 +546,7 @@
                     $payerName.val("");
                     renderMuzakkiInputs([""]);
                     $alamat.val("");
+                    $receivedByName.val("");
                     $jumlahUang.val("");
                     $("#zakatMal").val("");
                     $("#infaqSedekah").val("");
@@ -564,6 +574,7 @@
                 $payerName.val("");
                 renderMuzakkiInputs([""]);
                 $alamat.val("");
+                $receivedByName.val("");
                 $jumlahUang.val("");
                 const today = todayIsoDate();
                 $paymentDate.val(moment(today, "YYYY-MM-DD").format("DD/MM/YYYY"));
@@ -586,6 +597,7 @@
             renderMuzakkiInputs([""]);
             $payerName.val("");
             $payerPhone.val("");
+            $receivedByName.val("");
             $paymentMethod.val("");
 
             $btnJiwaMinus.on("click", function () {

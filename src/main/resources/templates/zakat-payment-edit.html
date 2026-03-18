@@ -59,6 +59,13 @@
                         </div>
                         <div class="col-md-4">
                             <div class="form-group">
+                                <label for="receivedByName">Diterima Oleh</label>
+                                <input class="form-control" id="receivedByName" type="text" placeholder="Nama petugas/amil">
+                                <small class="text-muted">Nama petugas yang menerima pembayaran dari muzakki.</small>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
                                 <label for="payerName">Nama Pembayar</label>
                                 <input class="form-control" id="payerName" type="text">
                             </div>
@@ -221,6 +228,7 @@
             const $alamat = $("#alamat");
             const $payerName = $("#payerName");
             const $payerPhone = $("#payerPhone");
+            const $receivedByName = $("#receivedByName");
             const $paymentMethod = $("#paymentMethod");
             const $btnSave = $("#btnSave");
 
@@ -400,11 +408,15 @@
                 }
             }
 
-            function updateTypeUI(selectedQualityId) {
+            function updateTypeUI(selectedQualityId, preferredNames) {
                 $alertError.addClass("d-none").text("");
                 $alertSuccess.addClass("d-none").text("");
 
                 const val = $zakatType.val();
+                const existingNames = $(".muzakki-name").toArray().map(el => (el.value || "").trim());
+                const namesToRender = Array.isArray(preferredNames) && preferredNames.length
+                    ? preferredNames
+                    : existingNames;
                 if (isFitrahType(val)) {
                     $groupNominal.addClass("d-none");
                     $jumlahUang.val("");
@@ -432,7 +444,9 @@
                     $groupNominal.removeClass("d-none");
                     $muzakkiContainer.closest('.card').show();
                     const cnt = clampJiwa();
-                    renderMuzakkiInputs(new Array(cnt).fill(""));
+                    const adjustedNames = namesToRender.slice(0, cnt);
+                    while (adjustedNames.length < cnt) adjustedNames.push("");
+                    renderMuzakkiInputs(adjustedNames);
                 } else {
                     $groupQuality.addClass("d-none");
                     $groupNominal.addClass("d-none");
@@ -457,6 +471,7 @@
                     $alamat.val(currentPayment.alamat || "");
                     $payerName.val(currentPayment.payerName || "");
                     $payerPhone.val(currentPayment.payerPhone || "");
+                    $receivedByName.val(currentPayment.receivedByName || "");
                     $paymentMethod.val(currentPayment.paymentMethod || "CASH");
 
                     const existingDate = toIsoDate(currentPayment.paymentAt);
@@ -489,7 +504,7 @@
                     $("#infaqSedekah").val(currentPayment.jumlahUangInfaqSedekah || "");
                     $("#fidiah").val(currentPayment.jumlahUangFidiah || "");
                     // update UI based on current zakatType and preselect quality if present
-                    updateTypeUI(selectedId);
+                    updateTypeUI(selectedId, names);
                  } catch (e) {
                      showError(String(e.message || e));
                  }
@@ -537,6 +552,7 @@
                 // include payer info in update
                 payload.payerName = $payerName.val()?.trim() || null;
                 payload.payerPhone = $payerPhone.val()?.trim() || null;
+                payload.receivedByName = $receivedByName.val()?.trim() || null;
                 payload.paymentMethod = paymentMethod;
 
                 if (fitrahSelected) {

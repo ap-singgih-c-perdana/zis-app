@@ -17,6 +17,7 @@ public record KwitansiReportResponse(
         String zakatTypeLabel,
         Integer jumlahJiwa,
         String alamat,
+        String receivedByName,
         BigDecimal nominalRp,
         BigDecimal berasKg,
         ZakatQualitySummary zakatQuality,

@@ -72,6 +72,7 @@ class KwitansiReportIntegrationTest {
         ZakatPayment payment = new ZakatPayment();
         payment.setJumlahJiwa(4);
         payment.setAlamat("Jl. Mawar No. 1");
+        payment.setReceivedByName("Amil Kwitansi");
         payment.setZakatQuality(quality);
         payment.setJumlahUang(new BigDecimal("180000"));
         payment.setPaymentAt(now);
@@ -97,6 +98,7 @@ class KwitansiReportIntegrationTest {
         assertThat(json.get("receiptNumber").asText()).contains("/" + today.getYear() + "/");
         assertThat(json.get("tanggal").asText()).isEqualTo(today.toString());
         assertThat(json.get("zakatType").asText()).isEqualTo("ZAKAT_FITRAH_UANG");
+        assertThat(json.get("receivedByName").asText()).isEqualTo("Amil Kwitansi");
         assertThat(json.get("nominalRp").decimalValue()).isEqualByComparingTo("180000");
         assertThat(json.get("muzakkiCount").asInt()).isEqualTo(2);
         assertThat(json.get("muzakkiNames").size()).isEqualTo(2);

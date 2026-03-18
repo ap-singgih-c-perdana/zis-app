@@ -231,6 +231,7 @@ public class ReportService {
                 computedType == null ? null : computedType.getLabel(),
                 payment.getJumlahJiwa(),
                 payment.getAlamat(),
+                payment.getReceivedByName(),
                 payment.getJumlahUang(),
                 payment.getBeratBerasKg(),
                 qualitySummary,

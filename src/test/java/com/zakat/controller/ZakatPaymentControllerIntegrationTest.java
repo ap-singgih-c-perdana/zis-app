@@ -82,6 +82,7 @@ class ZakatPaymentControllerIntegrationTest {
                 .andExpect(jsonPath("$.jumlahJiwa").value(3))
                 .andExpect(jsonPath("$.alamat").value("Jl. Mawar No. 1"))
                 .andExpect(jsonPath("$.payerName").value("Doni"))
+                .andExpect(jsonPath("$.receivedByName").value("Amil 1"))
                 .andExpect(jsonPath("$.paymentMethod").value("CASH"))
                 .andExpect(jsonPath("$.jumlahUang").value(nullValue()))
                 .andExpect(jsonPath("$.beratBerasKg").value(7.5))
@@ -98,6 +99,7 @@ class ZakatPaymentControllerIntegrationTest {
         assertThat(saved.getBeratBerasKg()).isEqualByComparingTo("7.5");
         assertThat(saved.getZakatQuality()).isNotNull();
         assertThat(saved.getPaymentMethod()).isEqualTo(PaymentMethod.CASH);
+        assertThat(saved.getReceivedByName()).isEqualTo("Amil 1");
         assertThat(saved.getCreatedAt()).isNotNull();
         assertThat(saved.getUpdatedAt()).isNotNull();
         assertThat(saved.getCreatedBy()).isEqualTo("admin");
@@ -202,6 +204,7 @@ class ZakatPaymentControllerIntegrationTest {
         updateBody.put("alamat", "Jl. Asoka Blok B");
         updateBody.put("payerName", "Lina Update");
         updateBody.put("payerPhone", "08123");
+        updateBody.put("receivedByName", "Kasir Shift 2");
         updateBody.put("paymentMethod", "TRANSFER");
         updateBody.put("zakatQualityId", qualityUang.getId().toString());
         updateBody.put("muzakkiNames", List.of("Lina Update", "Bayu", "Rani"));
@@ -214,6 +217,7 @@ class ZakatPaymentControllerIntegrationTest {
                 .andExpect(jsonPath("$.jumlahUang").value(150000))
                 .andExpect(jsonPath("$.beratBerasKg").value(nullValue()))
                 .andExpect(jsonPath("$.paymentMethod").value("TRANSFER"))
+                .andExpect(jsonPath("$.receivedByName").value("Kasir Shift 2"))
                 .andExpect(jsonPath("$.muzakkiNames", hasSize(3)))
                 .andExpect(jsonPath("$.muzakkiNames[0]").value("Lina Update"));
 
@@ -547,6 +551,7 @@ class ZakatPaymentControllerIntegrationTest {
         body.put("alamat", alamat);
         body.put("payerName", payerName);
         body.put("payerPhone", "08123456789");
+        body.put("receivedByName", "Amil 1");
         body.put("paymentMethod", paymentMethod.name());
         body.put("muzakkiNames", new ArrayList<>(muzakkiNames));
         return body;

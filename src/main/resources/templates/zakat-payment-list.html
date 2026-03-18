@@ -132,6 +132,7 @@
                             </th>
                             <th>Metode</th>
                             <th>Pembayar</th>
+                            <th>Diterima Oleh</th>
                             <th>No. HP</th>
                             <th>Alamat</th>
                             <th>Nominal</th>
@@ -142,7 +143,7 @@
                         </thead>
                         <tbody id="paymentRows">
                         <tr>
-                            <td colspan="15" class="text-center text-muted">Memuat...</td>
+                            <td colspan="16" class="text-center text-muted">Memuat...</td>
                         </tr>
                         </tbody>
                     </table>
@@ -242,13 +243,14 @@
                 const content = data && data.content ? data.content : [];
                 $rows.empty();
                 if (!content.length) {
-                    $rows.append(`<tr><td colspan="15" class="text-center text-muted">Tidak ada data</td></tr>`);
+                    $rows.append(`<tr><td colspan="16" class="text-center text-muted">Tidak ada data</td></tr>`);
                 } else {
                     for (const item of content) {
                         const canceledBadge = item.canceled ? `<span class="badge badge-secondary">BATAL</span>` : ``;
                         const receipt = item.receiptNumber ? `<code>${escapeHtml(item.receiptNumber)}</code>` : "-";
                         const alamat = item.alamat ? escapeHtml(item.alamat) : "-";
                         const payer = item.payerName ? escapeHtml(item.payerName) : "-";
+                        const receivedBy = item.receivedByName ? escapeHtml(item.receivedByName) : "-";
                         const payerPhone = item.payerPhone ? escapeHtml(item.payerPhone) : "-";
                         const paymentMethod = item.paymentMethod === "TRANSFER" ? "Transfer" : (item.paymentMethod === "CASH" ? "Cash" : "-");
                         const printHtml = `
@@ -284,6 +286,7 @@
                                 <td>${fmtMoney(item.jumlahUangFidiah)}</td>
                                 <td>${escapeHtml(paymentMethod)}</td>
                                 <td>${payer}</td>
+                                <td>${receivedBy}</td>
                                 <td>${payerPhone}</td>
                                 <td>${alamat}</td>
                                 <td>${nominalDisplay}</td>

@@ -45,6 +45,8 @@ public class ZakatPayment extends AuditableEntity {
 
     private String payerPhone;
 
+    private String receivedByName;
+
     @Enumerated(EnumType.STRING)
     @Column
     private PaymentMethod paymentMethod;
