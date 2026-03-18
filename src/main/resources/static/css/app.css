@@ -148,6 +148,63 @@
   margin-bottom: 4px;
 }
 
+.suggestion-field {
+  position: relative;
+}
+
+.suggestion-field .form-control {
+  padding-right: 2.4rem;
+}
+
+.suggestion-clear {
+  position: absolute;
+  top: 50%;
+  right: 0.45rem;
+  transform: translateY(-50%);
+  z-index: 3;
+  border: 0;
+  background: transparent;
+  color: #6c757d;
+  padding: 0.125rem;
+  line-height: 1;
+}
+
+.suggestion-clear:hover,
+.suggestion-clear:focus {
+  color: #343a40;
+  outline: none;
+}
+
+.suggestion-menu {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  z-index: 1050;
+  background: #fff;
+  border: 1px solid #ced4da;
+  border-radius: 0.25rem;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+  max-height: 220px;
+  overflow-y: auto;
+}
+
+.suggestion-menu-item {
+  display: block;
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  border: 0;
+  background: transparent;
+  text-align: left;
+  color: #212529;
+}
+
+.suggestion-menu-item:hover,
+.suggestion-menu-item:focus {
+  background: #f4f6f9;
+  outline: none;
+}
+
 @media (max-width: 576px) {
   .report-letterhead .instansi-name {
     font-size: 24px;

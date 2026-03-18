@@ -71,6 +71,11 @@ public class ZakatPaymentController {
         return toResponse(zakatPaymentService.getById(id));
     }
 
+    @GetMapping("/received-by-suggestions")
+    public List<String> receivedBySuggestions() {
+        return zakatPaymentService.getReceivedByNameSuggestions();
+    }
+
     @GetMapping
     public Page<ZakatPaymentListItemResponse> getAll(
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,

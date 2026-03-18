@@ -60,7 +60,13 @@
                         <div class="col-md-4">
                             <div class="form-group">
                                 <label for="receivedByName">Diterima Oleh</label>
-                                <input class="form-control" id="receivedByName" type="text" placeholder="Nama petugas/amil">
+                                <div class="suggestion-field">
+                                    <input autocomplete="off" class="form-control" id="receivedByName" type="text" placeholder="Nama petugas/amil">
+                                    <button aria-label="Kosongkan field diterima oleh" class="suggestion-clear d-none" id="receivedByNameClear" type="button">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                    <div class="suggestion-menu d-none" id="receivedByNameSuggestions"></div>
+                                </div>
                                 <small class="text-muted">Nama petugas yang menerima pembayaran dari muzakki.</small>
                             </div>
                         </div>
@@ -231,9 +237,66 @@
             const $receivedByName = $("#receivedByName");
             const $paymentMethod = $("#paymentMethod");
             const $btnSave = $("#btnSave");
+            const $receivedBySuggestions = $("#receivedByNameSuggestions");
+            const $receivedByNameClear = $("#receivedByNameClear");
 
             let currentPayment = null;
             let currentQualities = [];
+            let receivedBySuggestionNames = [];
+
+            async function loadReceivedBySuggestions() {
+                try {
+                    const res = await fetch("/api/zakat-payments/received-by-suggestions", {
+                        headers: {"Accept": "application/json"}
+                    });
+                    if (!res.ok) {
+                        throw new Error(`Gagal load petugas (${res.status})`);
+                    }
+                    const names = await res.json();
+                    receivedBySuggestionNames = (Array.isArray(names) ? names : []).filter(Boolean);
+                    renderReceivedBySuggestions($receivedByName.val() || "");
+                    updateReceivedByClearButton();
+                } catch (_e) {
+                    // Suggestions are optional; keep form usable even when request fails.
+                    receivedBySuggestionNames = [];
+                    hideReceivedBySuggestions();
+                    updateReceivedByClearButton();
+                }
+            }
+
+            function hideReceivedBySuggestions() {
+                $receivedBySuggestions.addClass("d-none").empty();
+            }
+
+            function updateReceivedByClearButton() {
+                const hasValue = String($receivedByName.val() || "").trim().length > 0;
+                $receivedByNameClear.toggleClass("d-none", !hasValue);
+            }
+
+            function renderReceivedBySuggestions(query) {
+                const trimmedQuery = String(query || "").trim().toLowerCase();
+                const matches = receivedBySuggestionNames.filter(name => !trimmedQuery || name.toLowerCase().includes(trimmedQuery));
+                if (!matches.length) {
+                    hideReceivedBySuggestions();
+                    return;
+                }
+                $receivedBySuggestions.empty();
+                for (const name of matches.slice(0, 8)) {
+                    const $item = $("<button>")
+                        .attr("type", "button")
+                        .addClass("suggestion-menu-item")
+                        .text(name)
+                        .on("mousedown", function (event) {
+                            event.preventDefault();
+                            $receivedByName.val(name);
+                            hideReceivedBySuggestions();
+                            updateReceivedByClearButton();
+                            $receivedByName.trigger("change");
+                        });
+                    $receivedBySuggestions.append($item);
+                }
+                $receivedBySuggestions.removeClass("d-none");
+            }
 
             function showError(message) {
                 $alertSuccess.addClass("d-none").text("");
@@ -472,6 +535,7 @@
                     $payerName.val(currentPayment.payerName || "");
                     $payerPhone.val(currentPayment.payerPhone || "");
                     $receivedByName.val(currentPayment.receivedByName || "");
+                    updateReceivedByClearButton();
                     $paymentMethod.val(currentPayment.paymentMethod || "CASH");
 
                     const existingDate = toIsoDate(currentPayment.paymentAt);
@@ -628,6 +692,19 @@
                 updateTypeUI();
                 updatePreview();
             });
+            $receivedByName.on("focus input", function () {
+                renderReceivedBySuggestions($receivedByName.val());
+                updateReceivedByClearButton();
+            });
+            $receivedByName.on("blur", function () {
+                window.setTimeout(hideReceivedBySuggestions, 150);
+            });
+            $receivedByNameClear.on("click", function () {
+                $receivedByName.val("");
+                hideReceivedBySuggestions();
+                updateReceivedByClearButton();
+                $receivedByName.trigger("focus");
+            });
             $btnSave.on("click", submit);
             $btnPaymentDatePicker.on("click", function () {
                 if ($paymentDate.data("daterangepicker")) {
@@ -636,6 +713,7 @@
             });
 
             initPaymentDatePicker(todayIsoDate());
+            loadReceivedBySuggestions();
             loadPayment();
         })();
     </script>
