@@ -519,6 +519,38 @@ class ZakatPaymentControllerIntegrationTest {
         assertThat(r2).isLessThan(r3);
     }
 
+    @Test
+    @WithMockUser(username = "admin", roles = "ADMIN")
+    void get_receivedBySuggestions_returnsDistinctTrimmedNames() throws Exception {
+        LocalDate today = LocalDate.now(JAKARTA);
+
+        Map<String, Object> body1 = baseCreateBody(today, 1, "Jl. Melati", "Ayu", PaymentMethod.CASH, List.of());
+        body1.put("jumlahUangZakatMal", 100000);
+        body1.put("receivedByName", " Amil 1 ");
+        createPayment(body1);
+
+        Map<String, Object> body2 = baseCreateBody(today, 1, "Jl. Kenanga", "Beni", PaymentMethod.TRANSFER, List.of());
+        body2.put("jumlahUangInfaqSedekah", 50000);
+        body2.put("receivedByName", "Amil 2");
+        createPayment(body2);
+
+        Map<String, Object> body3 = baseCreateBody(today, 1, "Jl. Mawar", "Cici", PaymentMethod.CASH, List.of());
+        body3.put("jumlahUangFidiah", 25000);
+        body3.put("receivedByName", "Amil 1");
+        createPayment(body3);
+
+        Map<String, Object> body4 = baseCreateBody(today, 1, "Jl. Dahlia", "Dodi", PaymentMethod.CASH, List.of());
+        body4.put("jumlahUang", 30000);
+        body4.put("receivedByName", "   ");
+        createPayment(body4);
+
+        mockMvc.perform(get("/api/zakat-payments/received-by-suggestions"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(2)))
+                .andExpect(jsonPath("$[0]").value("Amil 1"))
+                .andExpect(jsonPath("$[1]").value("Amil 2"));
+    }
+
     private ZakatQuality createQualityBeras(String name, String beratPerJiwa) {
         return zakatQualityRepository.save(ZakatQuality.builder()
                 .name(name)

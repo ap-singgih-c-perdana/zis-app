@@ -18,6 +18,15 @@ import java.util.UUID;
 
 public interface ZakatPaymentRepository extends JpaRepository<ZakatPayment, UUID> {
 
+    @Query("""
+            select distinct trim(p.receivedByName)
+            from ZakatPayment p
+            where p.receivedByName is not null
+              and trim(p.receivedByName) <> ''
+            order by trim(p.receivedByName) asc
+            """)
+    List<String> findDistinctReceivedByNames();
+
     @Query(
             value = """
                     select p

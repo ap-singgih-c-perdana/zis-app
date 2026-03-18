@@ -133,6 +133,11 @@ public class ZakatPaymentService {
         return new PageImpl<>(content, effectivePageable, page.getTotalElements());
     }
 
+    @Transactional(readOnly = true)
+    public List<String> getReceivedByNameSuggestions() {
+        return zakatPaymentRepository.findDistinctReceivedByNames();
+    }
+
     private static String normalizeSortKey(Pageable pageable) {
         for (Sort.Order order : pageable.getSort()) {
             String property = order.getProperty();
