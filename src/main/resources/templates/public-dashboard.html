@@ -439,11 +439,30 @@
         }
 
         .chart-meta-value {
+            display: inline-grid;
+            grid-template-columns: auto auto;
+            align-items: baseline;
+            column-gap: 10px;
+            min-width: 0;
             font-size: 16px;
             font-weight: 700;
             color: var(--ink);
             text-align: right;
             white-space: nowrap;
+            font-variant-numeric: tabular-nums;
+            justify-self: end;
+        }
+
+        .currency-main {
+            display: inline-block;
+            min-width: 13ch;
+            text-align: right;
+        }
+
+        .currency-percent {
+            display: inline-block;
+            min-width: 4ch;
+            text-align: right;
         }
 
         .chart-empty {
@@ -802,6 +821,12 @@
             return "Rp " + new Intl.NumberFormat("id-ID").format(number);
         }
 
+        function formatCurrencyValue(value, suffix) {
+            const amount = new Intl.NumberFormat("id-ID").format(Number(value || 0));
+            const percent = suffix || "";
+            return `<span class="currency-main">Rp ${amount}</span><span class="currency-percent">${percent}</span>`;
+        }
+
         function formatRice(value) {
             const number = Number(value || 0);
             return new Intl.NumberFormat("id-ID", {maximumFractionDigits: 2}).format(number) + " Kg";
@@ -903,8 +928,6 @@
             const numericTotal = Number(total || 0);
             if (numericValue <= 0 || numericTotal <= 0) return "0%";
             const percentage = (numericValue / numericTotal) * 100;
-            if (percentage > 0 && percentage < 1) return "<1%";
-            if (percentage < 10) return `${percentage.toFixed(1)}%`;
             return `${Math.round(percentage)}%`;
         }
 
@@ -1057,12 +1080,12 @@
                 document.getElementById("moneyByTypeMeta").innerHTML = moneyByTypeItems.length ? moneyByTypeItems.map((item, index) => `
                     <div class="chart-meta-row">
                         <span class="chart-meta-name"><span class="chart-dot" style="background:${moneyByTypeColors[index % moneyByTypeColors.length]}"></span>${item.zakatTypeLabel || "-"}</span>
-                        <span class="chart-meta-value">${formatCurrency(item.totalUang)} (${formatPercentage(item.totalUang, moneyByTypeTotal)})</span>
+                        <span class="chart-meta-value">${formatCurrencyValue(item.totalUang, `(${formatPercentage(item.totalUang, moneyByTypeTotal)})`)}</span>
                     </div>
                 `).join("") : `
                     <div class="chart-meta-row">
                         <span class="chart-meta-name"><span class="chart-dot" style="background:#94a3b8"></span>Belum ada data</span>
-                        <span class="chart-meta-value">Rp 0</span>
+                        <span class="chart-meta-value">${formatCurrencyValue(0)}</span>
                     </div>
                 `;
             } catch (error) {
