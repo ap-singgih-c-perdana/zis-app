@@ -249,6 +249,29 @@ public interface ZakatPaymentRepository extends JpaRepository<ZakatPayment, UUID
             @Param("toExclusive") Instant toExclusive
     );
 
+    interface FitrahJiwaBreakdownRow {
+        ZisType getZakatType();
+
+        Long getTotalJiwa();
+    }
+
+    @Query("""
+            select p.zakatQuality.zakatType as zakatType,
+                   coalesce(sum(p.jumlahJiwa), 0) as totalJiwa
+            from ZakatPayment p
+            where p.paymentAt >= :fromInclusive
+              and p.paymentAt < :toExclusive
+              and p.canceled = false
+              and p.zakatQuality is not null
+              and p.zakatQuality.zakatType in :fitrahTypes
+            group by p.zakatQuality.zakatType
+            """)
+    List<FitrahJiwaBreakdownRow> fitrahJiwaBreakdown(
+            @Param("fromInclusive") Instant fromInclusive,
+            @Param("toExclusive") Instant toExclusive,
+            @Param("fitrahTypes") List<ZisType> fitrahTypes
+    );
+
     interface RekapRow {
         ZisType getZakatType();
 

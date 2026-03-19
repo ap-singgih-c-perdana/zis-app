@@ -126,4 +126,58 @@ class DashboardControllerIntegrationTest {
         assertThat(json.get("recentPayments").isArray()).isTrue();
         assertThat(json.get("recentPayments").size()).isEqualTo(3);
     }
+
+    @Test
+    @WithMockUser(username = "admin", roles = "ADMIN")
+    void publicSummary_returnsFitrahJiwaBreakdown() throws Exception {
+        Instant now = Instant.now();
+        LocalDate today = LocalDate.ofInstant(now, JAKARTA);
+
+        ZakatQuality qualityUang = zakatQualityRepository.save(ZakatQuality.builder()
+                .name("Fitrah Uang")
+                .zakatType(ZisType.ZAKAT_FITRAH_UANG)
+                .nominalPerJiwa(45000L)
+                .active(true)
+                .build());
+
+        ZakatQuality qualityBeras = zakatQualityRepository.save(ZakatQuality.builder()
+                .name("Fitrah Beras")
+                .zakatType(ZisType.ZAKAT_FITRAH_BERAS)
+                .beratPerJiwaKg(new BigDecimal("2.5"))
+                .active(true)
+                .build());
+
+        ZakatPayment fitrahUang = new ZakatPayment();
+        fitrahUang.setJumlahJiwa(3);
+        fitrahUang.setAlamat("A");
+        fitrahUang.setZakatQuality(qualityUang);
+        fitrahUang.setJumlahUang(new BigDecimal("135000"));
+        fitrahUang.setPaymentMethod(PaymentMethod.CASH);
+        fitrahUang.setPaymentAt(now);
+        zakatPaymentRepository.save(fitrahUang);
+
+        ZakatPayment fitrahBeras = new ZakatPayment();
+        fitrahBeras.setJumlahJiwa(5);
+        fitrahBeras.setAlamat("B");
+        fitrahBeras.setZakatQuality(qualityBeras);
+        fitrahBeras.setBeratBerasKg(new BigDecimal("12.5"));
+        fitrahBeras.setPaymentMethod(PaymentMethod.TRANSFER);
+        fitrahBeras.setPaymentAt(now);
+        zakatPaymentRepository.save(fitrahBeras);
+
+        String response = mockMvc.perform(get("/api/public/dashboard/summary")
+                        .queryParam("from", today.toString())
+                        .queryParam("to", today.toString())
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        JsonNode json = objectMapper.readTree(response);
+        assertThat(json.get("totalJiwaFitrahBeras").asLong()).isEqualTo(5L);
+        assertThat(json.get("totalJiwaFitrahUang").asLong()).isEqualTo(3L);
+        assertThat(json.get("totalUangCash").decimalValue()).isEqualByComparingTo("135000");
+        assertThat(json.get("totalUangTransfer").decimalValue()).isEqualByComparingTo("0");
+    }
 }

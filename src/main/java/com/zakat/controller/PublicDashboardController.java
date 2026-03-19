@@ -16,6 +16,9 @@ import org.springframework.web.server.ResponseStatusException;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/public/dashboard")
@@ -47,6 +50,18 @@ public class PublicDashboardController {
 
         try {
             DashboardSummaryResponse summary = dashboardService.summary(fromDate, toDate);
+            Instant fromInclusive = fromDate.atStartOfDay(DEFAULT_ZONE).toInstant();
+            Instant toExclusive = toDate.plusDays(1).atStartOfDay(DEFAULT_ZONE).toInstant();
+            Map<com.zakat.enums.ZisType, Long> fitrahJiwaByType = zakatPaymentRepository.fitrahJiwaBreakdown(
+                            fromInclusive,
+                            toExclusive,
+                            java.util.List.of(com.zakat.enums.ZisType.ZAKAT_FITRAH_BERAS, com.zakat.enums.ZisType.ZAKAT_FITRAH_UANG)
+                    ).stream()
+                    .collect(Collectors.toMap(
+                            ZakatPaymentRepository.FitrahJiwaBreakdownRow::getZakatType,
+                            row -> row.getTotalJiwa() == null ? 0L : row.getTotalJiwa(),
+                            Long::sum
+                    ));
             return new PublicDashboardResponse(
                     summary.fromDate(),
                     summary.toDate(),
@@ -56,6 +71,8 @@ public class PublicDashboardController {
                     summary.totalUangTransfer(),
                     summary.totalBerasKg(),
                     summary.totalJiwaFitrah(),
+                    fitrahJiwaByType.getOrDefault(com.zakat.enums.ZisType.ZAKAT_FITRAH_BERAS, 0L),
+                    fitrahJiwaByType.getOrDefault(com.zakat.enums.ZisType.ZAKAT_FITRAH_UANG, 0L),
                     summary.byType().stream()
                             .map(item -> new PublicDashboardResponse.ByType(
                                     item.zakatType(),
