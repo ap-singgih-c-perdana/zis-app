@@ -931,6 +931,27 @@
             return `${Math.round(percentage)}%`;
         }
 
+        function computeRoundedPercentages(values) {
+            const numbers = values.map(value => Math.max(Number(value || 0), 0));
+            const total = numbers.reduce((sum, value) => sum + value, 0);
+            if (total <= 0) return numbers.map(() => 0);
+
+            const raw = numbers.map(value => (value / total) * 100);
+            const floors = raw.map(value => Math.floor(value));
+            let remaining = 100 - floors.reduce((sum, value) => sum + value, 0);
+
+            const rankedFractions = raw
+                .map((value, index) => ({index, fraction: value - Math.floor(value), value: numbers[index]}))
+                .filter(item => item.value > 0)
+                .sort((a, b) => b.fraction - a.fraction);
+
+            for (let i = 0; i < remaining && i < rankedFractions.length; i += 1) {
+                floors[rankedFractions[i].index] += 1;
+            }
+
+            return floors;
+        }
+
         function destroyChart(key) {
             if (chartInstances[key]) {
                 chartInstances[key].destroy();
@@ -956,7 +977,8 @@
                 meta.data.forEach((arc, index) => {
                     const value = Number(dataset.data[index] || 0);
                     if (value <= 0) return;
-                    const percentageLabel = formatPercentage(value, total);
+                    const roundedPercentages = dataset.roundedPercentages || [];
+                    const percentageLabel = `${Number(roundedPercentages[index] || 0)}%`;
                     if (percentageLabel === "0%") return;
 
                     const model = arc._model || arc;
@@ -1007,6 +1029,7 @@
                     labels,
                     datasets: [{
                         data: values,
+                        roundedPercentages: computeRoundedPercentages(values),
                         backgroundColor: colors,
                         borderColor: "#ffffff",
                         borderWidth: 3
@@ -1023,11 +1046,11 @@
                             callbacks: {
                                 label: function (context) {
                                     const value = Number(context.raw || 0);
-                                    const sum = context.dataset.data.reduce((acc, item) => acc + Number(item || 0), 0);
                                     const formattedValue = typeof tooltipValueFormatter === "function"
                                         ? tooltipValueFormatter(value)
                                         : new Intl.NumberFormat("id-ID").format(value);
-                                    return `${context.label}: ${formattedValue} (${formatPercentage(value, sum)})`;
+                                    const roundedPercentages = context.dataset.roundedPercentages || [];
+                                    return `${context.label}: ${formattedValue} (${Number(roundedPercentages[context.dataIndex] || 0)}%)`;
                                 }
                             }
                         }
@@ -1067,6 +1090,7 @@
                 .sort((a, b) => Number(b.totalUang || 0) - Number(a.totalUang || 0));
             const moneyByTypeColors = ["#1f5c8a", "#0f766e", "#c58a1d", "#a63f34", "#6b7280", "#7c3aed", "#c2410c"];
             const moneyByTypeTotal = moneyByTypeItems.reduce((sum, item) => sum + Number(item.totalUang || 0), 0);
+            const moneyByTypeRoundedPercentages = computeRoundedPercentages(moneyByTypeItems.map(item => Number(item.totalUang || 0)));
             try {
                 renderPieChart(
                     "moneyByTypeChart",
@@ -1080,7 +1104,7 @@
                 document.getElementById("moneyByTypeMeta").innerHTML = moneyByTypeItems.length ? moneyByTypeItems.map((item, index) => `
                     <div class="chart-meta-row">
                         <span class="chart-meta-name"><span class="chart-dot" style="background:${moneyByTypeColors[index % moneyByTypeColors.length]}"></span>${item.zakatTypeLabel || "-"}</span>
-                        <span class="chart-meta-value">${formatCurrencyValue(item.totalUang, `(${formatPercentage(item.totalUang, moneyByTypeTotal)})`)}</span>
+                        <span class="chart-meta-value">${formatCurrencyValue(item.totalUang, `(${moneyByTypeRoundedPercentages[index]}%)`)}</span>
                     </div>
                 `).join("") : `
                     <div class="chart-meta-row">
