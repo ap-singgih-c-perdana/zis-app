@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta content="width=device-width, initial-scale=1" name="viewport">
     <title>Dashboard Publik ZIS</title>
+    <link href="/webjars/AdminLTE/3.2.0/plugins/fontawesome-free/css/all.min.css" rel="stylesheet">
     <script src="/webjars/AdminLTE/3.2.0/plugins/jquery/jquery.min.js"></script>
     <script src="/webjars/AdminLTE/3.2.0/plugins/chart.js/Chart.min.js"></script>
     <style>
@@ -228,16 +229,6 @@
             overflow: hidden;
         }
 
-        .stat-card::after {
-            content: "";
-            position: absolute;
-            inset: auto -22px -22px auto;
-            width: 88px;
-            height: 88px;
-            border-radius: 50%;
-            background: rgba(255,255,255,0.35);
-        }
-
         .stat-label {
             font-size: 12px;
             color: rgba(255,255,255,0.88);
@@ -254,6 +245,17 @@
             line-height: 1;
             position: relative;
             z-index: 1;
+        }
+
+        .stat-icon {
+            position: absolute;
+            right: 18px;
+            top: 14px;
+            font-size: clamp(28px, 2.4vw, 42px);
+            color: rgba(255, 255, 255, 0.22);
+            line-height: 1;
+            z-index: 2;
+            pointer-events: none;
         }
 
         .stat-money { background: linear-gradient(135deg, #0f766e, #14967f); }
@@ -359,13 +361,6 @@
             text-transform: uppercase;
             letter-spacing: 0.08em;
             font-family: "Trebuchet MS", sans-serif;
-        }
-
-        .summary-big {
-            margin-top: 6px;
-            font-size: clamp(22px, 2.4vw, 32px);
-            font-weight: 700;
-            line-height: 1.05;
         }
 
         .chart-box {
@@ -538,11 +533,6 @@
                 padding: 10px 12px;
             }
 
-            .summary-big {
-                margin-top: 4px;
-                font-size: clamp(19px, 1.9vw, 28px);
-            }
-
             .chart-canvas-wrap {
                 height: 170px;
             }
@@ -662,18 +652,22 @@
         <article class="panel stat-card stat-money">
             <div class="stat-label">Total Uang</div>
             <div class="stat-value" id="totalMoney">-</div>
+            <div class="stat-icon"><i class="fas fa-money-bill-wave"></i></div>
         </article>
         <article class="panel stat-card stat-rice">
             <div class="stat-label">Total Beras</div>
             <div class="stat-value" id="totalRice">-</div>
+            <div class="stat-icon"><i class="fas fa-seedling"></i></div>
         </article>
         <article class="panel stat-card stat-tx">
             <div class="stat-label">Transaksi</div>
             <div class="stat-value" id="totalTransactions">-</div>
+            <div class="stat-icon"><i class="fas fa-receipt"></i></div>
         </article>
         <article class="panel stat-card stat-jiwa">
             <div class="stat-label">Jiwa Fitrah</div>
             <div class="stat-value" id="totalJiwa">-</div>
+            <div class="stat-icon"><i class="fas fa-users"></i></div>
         </article>
     </section>
 
@@ -682,7 +676,7 @@
             <span class="toolbar-label">Filter Periode</span>
             <button class="quick-toggle" id="btnToggleFilters" type="button">Tampilkan Filter</button>
         </div>
-        <div class="filter-panel-body" id="filterPanelBody">
+        <div class="filter-panel-body is-collapsed" id="filterPanelBody">
             <div class="toolbar">
                 <div>
                     <span class="toolbar-label">Periode Cepat</span>
