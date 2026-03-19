@@ -211,6 +211,11 @@
             border-color: var(--green);
         }
 
+        .quick-toggle:disabled {
+            opacity: 0.45;
+            cursor: not-allowed;
+        }
+
         .date-input {
             width: 100%;
             min-width: 0;
@@ -290,11 +295,19 @@
         }
 
         .filter-panel-body {
-            display: block;
+            max-height: 240px;
+            opacity: 1;
+            overflow: hidden;
+            transform: translateY(0);
+            transition: max-height 0.35s ease, opacity 0.25s ease, transform 0.25s ease, margin-top 0.25s ease;
         }
 
         .filter-panel-body.is-collapsed {
-            display: none;
+            max-height: 0;
+            opacity: 0;
+            transform: translateY(-8px);
+            margin-top: -4px;
+            pointer-events: none;
         }
 
         .panel-title {
@@ -689,15 +702,15 @@
                 </div>
                 <div>
                     <span class="toolbar-label">Tanggal Mulai</span>
-                    <input class="date-input" id="filterFrom" type="date">
+                    <input class="date-input" id="filterFrom" type="date" disabled>
                 </div>
                 <div>
                     <span class="toolbar-label">Tanggal Selesai</span>
-                    <input class="date-input" id="filterTo" type="date">
+                    <input class="date-input" id="filterTo" type="date" disabled>
                 </div>
                 <div>
                     <span class="toolbar-label">Terapkan</span>
-                    <button class="quick-toggle" id="btnApplyRange" type="button">Tampilkan</button>
+                    <button class="quick-toggle" id="btnApplyRange" type="button" disabled>Tampilkan</button>
                 </div>
             </div>
         </div>
@@ -774,6 +787,7 @@
     <script>
         (function () {
             const REFRESH_MS = 60000;
+            const FILTER_AUTO_HIDE_MS = 10000;
             const rangeButtons = Array.from(document.querySelectorAll("[data-range]"));
             const fromInput = document.getElementById("filterFrom");
             const toInput = document.getElementById("filterTo");
@@ -783,6 +797,7 @@
             let currentMode = "month";
             let filtersCollapsed = true;
             const chartInstances = {};
+            let filterAutoHideTimer = null;
 
             function formatCurrency(value) {
             const number = Number(value || 0);
@@ -833,6 +848,14 @@
                 rangeButtons.forEach(button => {
                     button.classList.toggle("active", button.dataset.range === mode);
                 });
+                syncApplyButtonState();
+            }
+
+            function syncApplyButtonState() {
+                const isCustomMode = currentMode === "custom";
+                applyButton.disabled = !isCustomMode;
+                fromInput.disabled = !isCustomMode;
+                toInput.disabled = !isCustomMode;
             }
 
             function syncInputsForMode(mode) {
@@ -1003,6 +1026,22 @@
             toggleFiltersButton.textContent = filtersCollapsed ? "Tampilkan Filter" : "Sembunyikan Filter";
         }
 
+        function clearFilterAutoHideTimer() {
+            if (filterAutoHideTimer) {
+                window.clearTimeout(filterAutoHideTimer);
+                filterAutoHideTimer = null;
+            }
+        }
+
+        function scheduleFilterAutoHide() {
+            clearFilterAutoHideTimer();
+            if (filtersCollapsed) return;
+            filterAutoHideTimer = window.setTimeout(function () {
+                filtersCollapsed = true;
+                syncFilterVisibility();
+            }, FILTER_AUTO_HIDE_MS);
+        }
+
         async function loadSummary() {
             const response = await fetch(`/api/public/dashboard/summary${currentQuery()}`, {
                 headers: {"Accept": "application/json"}
@@ -1070,6 +1109,7 @@
         updateClock();
         setInterval(updateClock, 1000);
         syncInputsForMode(currentMode);
+        syncApplyButtonState();
         syncFilterVisibility();
         rangeButtons.forEach(button => {
             button.addEventListener("click", function () {
@@ -1095,6 +1135,12 @@
         toggleFiltersButton.addEventListener("click", function () {
             filtersCollapsed = !filtersCollapsed;
             syncFilterVisibility();
+            scheduleFilterAutoHide();
+        });
+        ["click", "input", "change"].forEach(eventName => {
+            filterPanelBody.addEventListener(eventName, function () {
+                scheduleFilterAutoHide();
+            });
         });
         refresh();
         setInterval(refresh, REFRESH_MS);
