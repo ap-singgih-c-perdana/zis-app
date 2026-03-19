@@ -254,7 +254,11 @@
                     }
                     const names = await res.json();
                     receivedBySuggestionNames = (Array.isArray(names) ? names : []).filter(Boolean);
-                    renderReceivedBySuggestions($receivedByName.val() || "");
+                    if (document.activeElement === $receivedByName.get(0)) {
+                        renderReceivedBySuggestions($receivedByName.val() || "");
+                    } else {
+                        hideReceivedBySuggestions();
+                    }
                     updateReceivedByClearButton();
                 } catch (_e) {
                     // Suggestions are optional; keep form usable even when request fails.
@@ -703,7 +707,7 @@
                 $receivedByName.val("");
                 hideReceivedBySuggestions();
                 updateReceivedByClearButton();
-                $receivedByName.trigger("focus");
+                //$receivedByName.trigger("focus");
             });
             $btnSave.on("click", submit);
             $btnPaymentDatePicker.on("click", function () {
