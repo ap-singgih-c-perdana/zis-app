@@ -274,7 +274,7 @@
             display: grid;
             grid-template-columns: 2fr 1fr 1fr;
             gap: 10px;
-            align-items: start;
+            align-items: stretch;
             min-height: 0;
             overflow: hidden;
         }
@@ -282,6 +282,8 @@
         .panel {
             padding: 14px 16px;
             overflow: hidden;
+            display: flex;
+            flex-direction: column;
         }
 
         .panel-head {
@@ -330,7 +332,7 @@
 
         .type-list {
             display: grid;
-            gap: 8px;
+            gap: 10px;
         }
 
         .type-row {
@@ -338,27 +340,20 @@
             grid-template-columns: 1fr auto;
             gap: 12px;
             align-items: center;
-            padding: 10px 12px;
+            padding: 14px 16px;
             border-radius: 14px;
             background: rgba(255,255,255,0.68);
             border: 1px solid rgba(35, 40, 45, 0.08);
         }
 
         .type-name {
-            font-size: 16px;
+            font-size: 18px;
             font-weight: 700;
-        }
-
-        .type-meta {
-            margin-top: 2px;
-            color: var(--muted);
-            font-size: 12px;
-            font-family: "Trebuchet MS", sans-serif;
         }
 
         .type-value {
             text-align: right;
-            font-size: 17px;
+            font-size: 19px;
             font-weight: 700;
             color: var(--blue);
         }
@@ -499,7 +494,6 @@
             .toolbar-label,
             .summary-label,
             .panel-title small,
-            .type-meta,
             .summary-sub,
             .footer-note {
                 font-size: 10px;
@@ -896,16 +890,13 @@
             container.innerHTML = items.map(item => {
                 const uang = Number(item.totalUang || 0);
                 const beras = Number(item.totalBerasKg || 0);
-                const meta = [];
-                if (uang > 0) meta.push(formatCurrency(uang));
-                if (beras > 0) meta.push(formatRice(beras));
+                const value = uang > 0 ? formatCurrency(uang) : (beras > 0 ? formatRice(beras) : "-");
                 return `
                     <div class="type-row">
                         <div>
                             <div class="type-name">${item.zakatTypeLabel || "-"}</div>
-                            <div class="type-meta">${meta.join(" • ") || "Belum ada nilai"}</div>
                         </div>
-                        <div class="type-value">${uang > 0 ? formatCurrency(uang) : formatRice(beras)}</div>
+                        <div class="type-value">${value}</div>
                     </div>
                 `;
             }).join("");
