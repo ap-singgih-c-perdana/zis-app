@@ -37,11 +37,11 @@
         }
 
         .screen {
-            min-height: 100vh;
-            padding: 14px;
+            height: 100vh;
+            padding: 12px;
             display: grid;
-            grid-template-rows: auto auto 1fr auto;
-            gap: 10px;
+            grid-template-rows: auto auto minmax(0, 1fr) auto;
+            gap: 8px;
             overflow: hidden;
         }
 
@@ -54,7 +54,7 @@
         }
 
         .hero {
-            padding: 16px 20px;
+            padding: 14px 18px;
             display: flex;
             justify-content: space-between;
             align-items: end;
@@ -65,7 +65,7 @@
             display: flex;
             align-items: center;
             gap: 14px;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
         }
 
         .zis-mark {
@@ -139,12 +139,14 @@
         .hero-subtitle {
             margin-top: 6px;
             color: var(--muted);
-            font-size: clamp(13px, 1.4vw, 17px);
+            font-size: 12px;
         }
 
         .hero-side {
             text-align: right;
             min-width: 260px;
+            display: grid;
+            justify-items: end;
         }
 
         .clock {
@@ -154,11 +156,22 @@
             line-height: 1;
         }
 
-        .date-label, .refresh-label {
+        .date-label {
             color: var(--muted);
             margin-top: 4px;
-            font-size: 13px;
+            font-size: 14px;
             font-family: "Trebuchet MS", sans-serif;
+        }
+
+        .generated-at-label {
+            color: rgba(95, 108, 123, 0.88);
+            margin-top: 2px;
+            font-size: 12px;
+            font-family: "Trebuchet MS", sans-serif;
+        }
+
+        .hero-filter {
+            margin-top: 12px;
         }
 
         .stats {
@@ -231,22 +244,22 @@
         }
 
         .stat-card {
-            padding: 16px 18px 14px;
+            padding: 14px 16px 12px;
             position: relative;
             overflow: hidden;
         }
 
         .stat-label {
-            font-size: 12px;
+            font-size: 15px;
             color: rgba(255,255,255,0.88);
             text-transform: uppercase;
-            letter-spacing: 0.08em;
+            letter-spacing: 0.1em;
             font-family: "Trebuchet MS", sans-serif;
         }
 
         .stat-value {
-            margin-top: 8px;
-            font-size: clamp(24px, 2.8vw, 42px);
+            margin-top: 6px;
+            font-size: clamp(22px, 2.5vw, 38px);
             color: #fff;
             font-weight: 700;
             line-height: 1;
@@ -272,16 +285,18 @@
 
         .content-grid {
             display: grid;
-            grid-template-columns: 2fr 1fr 1fr;
+            grid-template-columns: 1fr 1fr;
             gap: 10px;
-            align-items: start;
+            align-items: stretch;
             min-height: 0;
             overflow: hidden;
         }
 
         .panel {
-            padding: 14px 16px;
+            padding: 12px 14px;
             overflow: hidden;
+            display: flex;
+            flex-direction: column;
         }
 
         .panel-head {
@@ -296,108 +311,113 @@
             margin-bottom: 0;
         }
 
-        .filter-panel-body {
-            max-height: 240px;
-            opacity: 1;
-            overflow: hidden;
-            transform: translateY(0);
-            transition: max-height 0.35s ease, opacity 0.25s ease, transform 0.25s ease, margin-top 0.25s ease;
+        .filter-summary {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
         }
 
-        .filter-panel-body.is-collapsed {
-            max-height: 0;
-            opacity: 0;
-            transform: translateY(-8px);
-            margin-top: -4px;
-            pointer-events: none;
+        .filter-modal {
+            position: fixed;
+            inset: 0;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+            background: rgba(19, 27, 34, 0.38);
+            backdrop-filter: blur(8px);
+            z-index: 30;
+        }
+
+        .filter-modal.is-open {
+            display: flex;
+        }
+
+        .filter-modal-card {
+            width: min(920px, 100%);
+            background: rgba(255, 255, 255, 0.95);
+            border: 1px solid rgba(35, 40, 45, 0.08);
+            border-radius: 22px;
+            box-shadow: 0 22px 48px rgba(31, 41, 51, 0.18);
+            padding: 18px 20px;
+        }
+
+        .filter-modal-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 14px;
+        }
+
+        .filter-modal-title {
+            margin: 0;
+            font-size: 22px;
+        }
+
+        .filter-modal-subtitle {
+            color: var(--muted);
+            font-size: 12px;
+            font-family: "Trebuchet MS", sans-serif;
+        }
+
+        .filter-modal .toolbar {
+            gap: 10px 12px;
         }
 
         .panel-title {
             margin: 0 0 10px;
-            font-size: 18px;
+            font-size: 20px;
             display: flex;
             justify-content: space-between;
             align-items: baseline;
             gap: 10px;
         }
 
-        .panel-title small {
+        .panel-subtitle {
             color: var(--muted);
-            font-size: 11px;
+            font-size: 14px;
             font-family: "Trebuchet MS", sans-serif;
             font-weight: 400;
         }
 
-        .type-list {
-            display: grid;
-            gap: 8px;
-        }
-
-        .type-row {
-            display: grid;
-            grid-template-columns: 1fr auto;
-            gap: 12px;
-            align-items: center;
-            padding: 10px 12px;
-            border-radius: 14px;
-            background: rgba(255,255,255,0.68);
-            border: 1px solid rgba(35, 40, 45, 0.08);
-        }
-
-        .type-name {
-            font-size: 16px;
-            font-weight: 700;
-        }
-
-        .type-meta {
-            margin-top: 2px;
-            color: var(--muted);
-            font-size: 12px;
-            font-family: "Trebuchet MS", sans-serif;
-        }
-
-        .type-value {
-            text-align: right;
-            font-size: 17px;
-            font-weight: 700;
-            color: var(--blue);
-        }
-
         .summary-box {
-            padding: 12px 14px;
+            padding: 10px 12px;
             border-radius: 16px;
             background: rgba(255,255,255,0.72);
             border: 1px solid rgba(35, 40, 45, 0.08);
         }
 
-        .summary-label {
-            color: var(--muted);
-            font-size: 11px;
-            text-transform: uppercase;
-            letter-spacing: 0.08em;
-            font-family: "Trebuchet MS", sans-serif;
-        }
-
         .chart-box {
             display: grid;
-            gap: 12px;
+            gap: 10px;
         }
 
         .chart-canvas-wrap {
             position: relative;
-            height: 210px;
+            height: 228px;
+        }
+
+        .money-type-chart-wrap {
+            height: 248px;
         }
 
         .chart-meta {
             display: grid;
-            gap: 8px;
+            gap: 6px;
+            width: fit-content;
+            max-width: 100%;
+            align-self: center;
+            margin-left: auto;
+            margin-right: auto;
         }
 
         .chart-meta-row {
-            display: flex;
-            justify-content: space-between;
+            display: grid;
+            grid-template-columns: max-content auto;
             align-items: center;
-            gap: 12px;
+            column-gap: 14px;
             font-family: "Trebuchet MS", sans-serif;
         }
 
@@ -406,7 +426,7 @@
             align-items: center;
             gap: 8px;
             color: var(--muted);
-            font-size: 12px;
+            font-size: 13px;
             text-transform: uppercase;
             letter-spacing: 0.08em;
         }
@@ -422,6 +442,8 @@
             font-size: 16px;
             font-weight: 700;
             color: var(--ink);
+            text-align: right;
+            white-space: nowrap;
         }
 
         .chart-empty {
@@ -440,14 +462,7 @@
         }
 
         .footer-note {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 12px;
-            color: var(--muted);
-            font-size: 12px;
-            font-family: "Trebuchet MS", sans-serif;
-            padding: 0 4px;
+            display: none;
         }
 
         .empty {
@@ -489,20 +504,23 @@
 
             .zis-subtitle,
             .hero-subtitle,
-            .date-label,
-            .refresh-label {
-                font-size: 12px;
+            .date-label {
+                font-size: 13px;
+            }
+
+            .generated-at-label {
+                font-size: 11px;
             }
 
             .eyebrow,
-            .stat-label,
             .toolbar-label,
-            .summary-label,
-            .panel-title small,
-            .type-meta,
             .summary-sub,
             .footer-note {
-                font-size: 10px;
+                font-size: 11px;
+            }
+
+            .stat-label {
+                font-size: 15px;
             }
 
             .hero h1 {
@@ -528,20 +546,11 @@
 
             .panel-title {
                 margin-bottom: 8px;
-                font-size: 16px;
+                font-size: 18px;
             }
 
-            .type-list {
-                gap: 6px;
-            }
-
-            .type-row {
-                padding: 8px 10px;
-            }
-
-            .type-name,
-            .type-value {
-                font-size: 15px;
+            .panel-subtitle {
+                font-size: 13px;
             }
 
             .summary-box {
@@ -549,15 +558,19 @@
             }
 
             .chart-canvas-wrap {
-                height: 170px;
+                height: 208px;
+            }
+
+            .money-type-chart-wrap {
+                height: 224px;
             }
 
             .chart-meta-name {
-                font-size: 11px;
+                font-size: 12px;
             }
 
             .chart-meta-value {
-                font-size: 14px;
+                font-size: 15px;
             }
 
             .quick-toggle,
@@ -648,18 +661,20 @@
                 <div class="zis-mark">ZIS</div>
                 <div class="zis-copy">
                     <div class="zis-kicker">Dashboard Publik</div>
-                    <div class="zis-title">Zakat, Infaq, Sedekah</div>
-                    <div class="zis-subtitle">Laporan agregat terbuka untuk jamaah, panitia, dan publik.</div>
+                    <div class="zis-title">Penghimpunan Zakat, Infaq, Sedekah</div>
+                    <div class="zis-subtitle">Laporan agregat penghimpunan ZIS untuk jamaah, panitia, dan publik.</div>
                 </div>
             </div>
-            <div class="eyebrow">Layar Informasi ZIS</div>
             <h1 id="institutionName">Dashboard Publik Zakat, Infaq, Sedekah</h1>
             <div class="hero-subtitle" id="institutionAddress">Memuat informasi masjid...</div>
         </div>
         <div class="hero-side">
             <div class="clock" id="liveClock">--:--:--</div>
             <div class="date-label" id="periodLabel">Periode hari ini</div>
-            <div class="refresh-label" id="refreshLabel">Memuat data...</div>
+            <div class="generated-at-label" id="generatedAtLabel">Pembaruan data: -</div>
+            <div class="hero-filter">
+                <button class="quick-toggle" id="btnToggleFilters" type="button">Ubah Periode</button>
+            </div>
         </div>
     </section>
 
@@ -686,56 +701,33 @@
         </article>
     </section>
 
-    <section class="panel">
-        <div class="panel-head">
-            <span class="toolbar-label">Filter Periode</span>
-            <button class="quick-toggle" id="btnToggleFilters" type="button">Tampilkan Filter</button>
-        </div>
-        <div class="filter-panel-body is-collapsed" id="filterPanelBody">
-            <div class="toolbar">
-                <div>
-                    <span class="toolbar-label">Periode Cepat</span>
-                    <div class="toolbar-group">
-                        <button class="quick-toggle" data-range="today" type="button">Hari Ini</button>
-                        <button class="quick-toggle active" data-range="month" type="button">Bulan Berjalan</button>
-                        <button class="quick-toggle" data-range="all" type="button">Semua</button>
-                        <button class="quick-toggle" data-range="custom" type="button">Custom Tanggal</button>
-                    </div>
-                </div>
-                <div>
-                    <span class="toolbar-label">Tanggal Mulai</span>
-                    <input class="date-input" id="filterFrom" type="date" disabled>
-                </div>
-                <div>
-                    <span class="toolbar-label">Tanggal Selesai</span>
-                    <input class="date-input" id="filterTo" type="date" disabled>
-                </div>
-                <div>
-                    <span class="toolbar-label">Terapkan</span>
-                    <button class="quick-toggle" id="btnApplyRange" type="button" disabled>Tampilkan</button>
-                </div>
-            </div>
-        </div>
-    </section>
-
     <section class="content-grid">
         <section class="panel">
             <h2 class="panel-title">
-                <span>Perolehan per Jenis</span>
-                <small id="typeSummaryHint">Akumulasi periode terpilih</small>
+                <span>Perolehan Uang</span>
+                <span class="panel-subtitle">Komposisi per jenis</span>
             </h2>
-            <div class="type-list" id="typeList">
-                <div class="empty">Memuat data ringkasan...</div>
+            <div class="summary-box">
+                <div class="chart-box">
+                    <div class="chart-canvas-wrap money-type-chart-wrap">
+                        <canvas id="moneyByTypeChart"></canvas>
+                    </div>
+                    <div class="chart-meta" id="moneyByTypeMeta">
+                        <div class="chart-meta-row">
+                            <span class="chart-meta-name"><span class="chart-dot" style="background:#1f5c8a"></span>Memuat</span>
+                            <span class="chart-meta-value">Rp 0</span>
+                        </div>
+                    </div>
+                </div>
             </div>
         </section>
 
         <section class="panel">
             <h2 class="panel-title">
                 <span>Zakat Fitrah</span>
-                <small>Perbandingan beras dan uang</small>
+                <span class="panel-subtitle">Perbandingan beras dan uang</span>
             </h2>
             <div class="summary-box">
-                <div class="summary-label">Zakat Fitrah: Beras vs Uang</div>
                 <div class="chart-box">
                     <div class="chart-canvas-wrap">
                         <canvas id="fitrahModeChart"></canvas>
@@ -754,52 +746,56 @@
             </div>
         </section>
 
-        <section class="panel">
-            <h2 class="panel-title">
-                <span>Pembayaran Uang</span>
-                <small>Cash vs transfer</small>
-            </h2>
-            <div class="summary-box">
-                <div class="summary-label">Pembayaran Uang: Cash vs Transfer</div>
-                <div class="chart-box">
-                    <div class="chart-canvas-wrap">
-                        <canvas id="moneyMethodChart"></canvas>
-                    </div>
-                    <div class="chart-meta" id="moneyMethodMeta">
-                        <div class="chart-meta-row">
-                            <span class="chart-meta-name"><span class="chart-dot" style="background:#0f766e"></span>Cash</span>
-                            <span class="chart-meta-value">Rp 0</span>
-                        </div>
-                        <div class="chart-meta-row">
-                            <span class="chart-meta-name"><span class="chart-dot" style="background:#a63f34"></span>Transfer</span>
-                            <span class="chart-meta-value">Rp 0</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
     </section>
 
-    <div class="footer-note">
-        <div>Monitor publik ZIS untuk jamaah dan panitia.</div>
-        <div id="generatedAtLabel">Pembaruan data: -</div>
+</div>
+
+<div class="filter-modal" id="filterModal">
+    <div class="filter-modal-card">
+        <div class="filter-modal-head">
+            <div>
+                <h2 class="filter-modal-title">Filter Periode</h2>
+                <div class="filter-modal-subtitle">Atur tampilan data publik berdasarkan rentang waktu yang dipilih.</div>
+            </div>
+            <button class="quick-toggle" id="btnCloseFilterModal" type="button">Tutup</button>
+        </div>
+        <div class="toolbar">
+            <div>
+                <span class="toolbar-label">Periode Cepat</span>
+                <div class="toolbar-group">
+                    <button class="quick-toggle" data-range="today" type="button">Hari Ini</button>
+                    <button class="quick-toggle active" data-range="month" type="button">Bulan Berjalan</button>
+                    <button class="quick-toggle" data-range="all" type="button">Semua</button>
+                    <button class="quick-toggle" data-range="custom" type="button">Custom Tanggal</button>
+                </div>
+            </div>
+            <div>
+                <span class="toolbar-label">Tanggal Mulai</span>
+                <input class="date-input" id="filterFrom" type="date" disabled>
+            </div>
+            <div>
+                <span class="toolbar-label">Tanggal Selesai</span>
+                <input class="date-input" id="filterTo" type="date" disabled>
+            </div>
+            <div>
+                <span class="toolbar-label">Terapkan</span>
+                <button class="quick-toggle" id="btnApplyRange" type="button" disabled>Tampilkan</button>
+            </div>
+        </div>
     </div>
 </div>
 
     <script>
         (function () {
-            const REFRESH_MS = 60000;
-            const FILTER_AUTO_HIDE_MS = 10000;
             const rangeButtons = Array.from(document.querySelectorAll("[data-range]"));
             const fromInput = document.getElementById("filterFrom");
             const toInput = document.getElementById("filterTo");
             const applyButton = document.getElementById("btnApplyRange");
             const toggleFiltersButton = document.getElementById("btnToggleFilters");
-            const filterPanelBody = document.getElementById("filterPanelBody");
+            const closeFilterModalButton = document.getElementById("btnCloseFilterModal");
+            const filterModal = document.getElementById("filterModal");
             let currentMode = "month";
-            let filtersCollapsed = true;
             const chartInstances = {};
-            let filterAutoHideTimer = null;
 
             function formatCurrency(value) {
             const number = Number(value || 0);
@@ -828,6 +824,13 @@
                 hour: "2-digit",
                 minute: "2-digit"
             }).format(new Date(dateString));
+        }
+
+        function formatTime(date) {
+            return new Intl.DateTimeFormat("id-ID", {
+                hour: "2-digit",
+                minute: "2-digit"
+            }).format(date);
         }
 
             function todayIsoDate() {
@@ -887,36 +890,22 @@
                 return params.toString() ? `?${params.toString()}` : "";
             }
 
-        function renderTypeList(items) {
-            const container = document.getElementById("typeList");
-            if (!Array.isArray(items) || !items.length) {
-                container.innerHTML = '<div class="empty">Belum ada data pada periode ini.</div>';
-                return;
-            }
-            container.innerHTML = items.map(item => {
-                const uang = Number(item.totalUang || 0);
-                const beras = Number(item.totalBerasKg || 0);
-                const meta = [];
-                if (uang > 0) meta.push(formatCurrency(uang));
-                if (beras > 0) meta.push(formatRice(beras));
-                return `
-                    <div class="type-row">
-                        <div>
-                            <div class="type-name">${item.zakatTypeLabel || "-"}</div>
-                            <div class="type-meta">${meta.join(" • ") || "Belum ada nilai"}</div>
-                        </div>
-                        <div class="type-value">${uang > 0 ? formatCurrency(uang) : formatRice(beras)}</div>
-                    </div>
-                `;
-            }).join("");
-        }
-
         function updateClock() {
             document.getElementById("liveClock").textContent = new Intl.DateTimeFormat("id-ID", {
                 hour: "2-digit",
                 minute: "2-digit",
                 second: "2-digit"
             }).format(new Date());
+        }
+
+        function formatPercentage(value, total) {
+            const numericValue = Number(value || 0);
+            const numericTotal = Number(total || 0);
+            if (numericValue <= 0 || numericTotal <= 0) return "0%";
+            const percentage = (numericValue / numericTotal) * 100;
+            if (percentage > 0 && percentage < 1) return "<1%";
+            if (percentage < 10) return `${percentage.toFixed(1)}%`;
+            return `${Math.round(percentage)}%`;
         }
 
         function destroyChart(key) {
@@ -944,8 +933,8 @@
                 meta.data.forEach((arc, index) => {
                     const value = Number(dataset.data[index] || 0);
                     if (value <= 0) return;
-                    const percentage = Math.round((value / total) * 100);
-                    if (percentage <= 0) return;
+                    const percentageLabel = formatPercentage(value, total);
+                    if (percentageLabel === "0%") return;
 
                     const model = arc._model || arc;
                     const startAngle = model.startAngle;
@@ -966,15 +955,15 @@
                     ctx.fillStyle = "#ffffff";
                     ctx.strokeStyle = "rgba(31, 41, 51, 0.18)";
                     ctx.lineWidth = 3;
-                    ctx.strokeText(`${percentage}%`, x, y);
-                    ctx.fillText(`${percentage}%`, x, y);
+                    ctx.strokeText(percentageLabel, x, y);
+                    ctx.fillText(percentageLabel, x, y);
                 });
 
                 ctx.restore();
             }
         };
 
-        function renderPieChart(key, canvasId, labels, values, colors) {
+        function renderPieChart(key, canvasId, labels, values, colors, tooltipValueFormatter, showLegend) {
             destroyChart(key);
             const canvas = document.getElementById(canvasId);
             if (!canvas) return;
@@ -1003,17 +992,19 @@
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
+                    legend: {
+                        display: showLegend === true
+                    },
                     plugins: {
-                        legend: {
-                            display: false
-                        },
                         tooltip: {
                             callbacks: {
                                 label: function (context) {
                                     const value = Number(context.raw || 0);
                                     const sum = context.dataset.data.reduce((acc, item) => acc + Number(item || 0), 0);
-                                    const pct = sum > 0 ? Math.round((value / sum) * 100) : 0;
-                                    return `${context.label}: ${new Intl.NumberFormat("id-ID").format(value)} (${pct}%)`;
+                                    const formattedValue = typeof tooltipValueFormatter === "function"
+                                        ? tooltipValueFormatter(value)
+                                        : new Intl.NumberFormat("id-ID").format(value);
+                                    return `${context.label}: ${formattedValue} (${formatPercentage(value, sum)})`;
                                 }
                             }
                         }
@@ -1023,25 +1014,12 @@
             });
         }
 
-        function syncFilterVisibility() {
-            filterPanelBody.classList.toggle("is-collapsed", filtersCollapsed);
-            toggleFiltersButton.textContent = filtersCollapsed ? "Tampilkan Filter" : "Sembunyikan Filter";
+        function openFilterModal() {
+            filterModal.classList.add("is-open");
         }
 
-        function clearFilterAutoHideTimer() {
-            if (filterAutoHideTimer) {
-                window.clearTimeout(filterAutoHideTimer);
-                filterAutoHideTimer = null;
-            }
-        }
-
-        function scheduleFilterAutoHide() {
-            clearFilterAutoHideTimer();
-            if (filtersCollapsed) return;
-            filterAutoHideTimer = window.setTimeout(function () {
-                filtersCollapsed = true;
-                syncFilterVisibility();
-            }, FILTER_AUTO_HIDE_MS);
+        function closeFilterModal() {
+            filterModal.classList.remove("is-open");
         }
 
         async function loadSummary() {
@@ -1061,72 +1039,128 @@
             document.getElementById("totalRice").textContent = formatRice(data.totalBerasKg);
             document.getElementById("totalTransactions").textContent = formatNumber(data.totalTransaksi);
             document.getElementById("totalJiwa").textContent = formatNumber(data.totalJiwaFitrah);
-            renderPieChart(
-                "fitrahModeChart",
-                "fitrahModeChart",
-                ["Fitrah Beras", "Fitrah Uang"],
-                [Number(data.totalJiwaFitrahBeras || 0), Number(data.totalJiwaFitrahUang || 0)],
-                ["#c58a1d", "#1f5c8a"]
-            );
-            renderPieChart(
-                "moneyMethodChart",
-                "moneyMethodChart",
-                ["Cash", "Transfer"],
-                [Number(data.totalUangCash || 0), Number(data.totalUangTransfer || 0)],
-                ["#0f766e", "#a63f34"]
-            );
-            document.getElementById("fitrahModeMeta").innerHTML = `
-                <div class="chart-meta-row">
-                    <span class="chart-meta-name"><span class="chart-dot" style="background:#c58a1d"></span>Beras</span>
-                    <span class="chart-meta-value">${formatNumber(data.totalJiwaFitrahBeras)} jiwa</span>
-                </div>
-                <div class="chart-meta-row">
-                    <span class="chart-meta-name"><span class="chart-dot" style="background:#1f5c8a"></span>Uang</span>
-                    <span class="chart-meta-value">${formatNumber(data.totalJiwaFitrahUang)} jiwa</span>
-                </div>
-            `;
-            document.getElementById("moneyMethodMeta").innerHTML = `
-                <div class="chart-meta-row">
-                    <span class="chart-meta-name"><span class="chart-dot" style="background:#0f766e"></span>Cash</span>
-                    <span class="chart-meta-value">${formatCurrency(data.totalUangCash)}</span>
-                </div>
-                <div class="chart-meta-row">
-                    <span class="chart-meta-name"><span class="chart-dot" style="background:#a63f34"></span>Transfer</span>
-                    <span class="chart-meta-value">${formatCurrency(data.totalUangTransfer)}</span>
-                </div>
-            `;
-            document.getElementById("generatedAtLabel").textContent = `Pembaruan data: ${formatDateTime(data.generatedAt)}`;
-            document.getElementById("refreshLabel").textContent = "Refresh otomatis setiap 60 detik";
-            renderTypeList(data.byType || []);
+            const moneyByTypeItems = (data.byType || [])
+                .filter(item => Number(item.totalUang || 0) > 0)
+                .sort((a, b) => Number(b.totalUang || 0) - Number(a.totalUang || 0));
+            const moneyByTypeColors = ["#1f5c8a", "#0f766e", "#c58a1d", "#a63f34", "#6b7280", "#7c3aed", "#c2410c"];
+            const moneyByTypeTotal = moneyByTypeItems.reduce((sum, item) => sum + Number(item.totalUang || 0), 0);
+            try {
+                renderPieChart(
+                    "moneyByTypeChart",
+                    "moneyByTypeChart",
+                    moneyByTypeItems.map(item => item.zakatTypeLabel || "-"),
+                    moneyByTypeItems.map(item => Number(item.totalUang || 0)),
+                    moneyByTypeColors,
+                    formatCurrency,
+                    false
+                );
+                document.getElementById("moneyByTypeMeta").innerHTML = moneyByTypeItems.length ? moneyByTypeItems.map((item, index) => `
+                    <div class="chart-meta-row">
+                        <span class="chart-meta-name"><span class="chart-dot" style="background:${moneyByTypeColors[index % moneyByTypeColors.length]}"></span>${item.zakatTypeLabel || "-"}</span>
+                        <span class="chart-meta-value">${formatCurrency(item.totalUang)} (${formatPercentage(item.totalUang, moneyByTypeTotal)})</span>
+                    </div>
+                `).join("") : `
+                    <div class="chart-meta-row">
+                        <span class="chart-meta-name"><span class="chart-dot" style="background:#94a3b8"></span>Belum ada data</span>
+                        <span class="chart-meta-value">Rp 0</span>
+                    </div>
+                `;
+            } catch (error) {
+                document.getElementById("moneyByTypeMeta").innerHTML = `
+                    <div class="chart-meta-row">
+                        <span class="chart-meta-name"><span class="chart-dot" style="background:#94a3b8"></span>Gagal render chart</span>
+                        <span class="chart-meta-value">Coba refresh</span>
+                    </div>
+                `;
+            }
+            try {
+                renderPieChart(
+                    "fitrahModeChart",
+                    "fitrahModeChart",
+                    ["Fitrah Beras", "Fitrah Uang"],
+                    [Number(data.totalJiwaFitrahBeras || 0), Number(data.totalJiwaFitrahUang || 0)],
+                    ["#c58a1d", "#1f5c8a"],
+                    null,
+                    false
+                );
+                document.getElementById("fitrahModeMeta").innerHTML = `
+                    <div class="chart-meta-row">
+                        <span class="chart-meta-name"><span class="chart-dot" style="background:#c58a1d"></span>Beras</span>
+                        <span class="chart-meta-value">${formatNumber(data.totalJiwaFitrahBeras)} jiwa</span>
+                    </div>
+                    <div class="chart-meta-row">
+                        <span class="chart-meta-name"><span class="chart-dot" style="background:#1f5c8a"></span>Uang</span>
+                        <span class="chart-meta-value">${formatNumber(data.totalJiwaFitrahUang)} jiwa</span>
+                    </div>
+                `;
+            } catch (error) {
+                document.getElementById("fitrahModeMeta").innerHTML = `
+                    <div class="chart-meta-row">
+                        <span class="chart-meta-name"><span class="chart-dot" style="background:#94a3b8"></span>Gagal render chart</span>
+                        <span class="chart-meta-value">Coba refresh</span>
+                    </div>
+                `;
+            }
+            document.getElementById("generatedAtLabel").textContent = `Diperbarui ${formatDateTime(data.generatedAt)}, berikutnya ${formatTime(nextHalfHourDate())}`;
         }
 
         async function refresh() {
             try {
                 await loadSummary();
             } catch (error) {
-                document.getElementById("refreshLabel").textContent = error.message || "Gagal memuat data";
+                document.getElementById("generatedAtLabel").textContent = error.message || "Gagal memuat data";
             }
+        }
+
+        function nextHalfHourDate() {
+            const now = new Date();
+            const next = new Date(now);
+            next.setSeconds(0, 0);
+            if (now.getMinutes() < 30) {
+                next.setMinutes(30);
+            } else {
+                next.setHours(now.getHours() + 1);
+                next.setMinutes(0);
+            }
+            return next;
+        }
+
+        function msUntilNextHalfHour() {
+            const now = new Date();
+            const next = nextHalfHourDate();
+            return Math.max(next.getTime() - now.getTime(), 1000);
+        }
+
+        function scheduleAlignedRefresh() {
+            window.setTimeout(function () {
+                refresh();
+                scheduleAlignedRefresh();
+            }, msUntilNextHalfHour());
         }
 
         updateClock();
         setInterval(updateClock, 1000);
         syncInputsForMode(currentMode);
         syncApplyButtonState();
-        syncFilterVisibility();
         rangeButtons.forEach(button => {
             button.addEventListener("click", function () {
                 setActiveMode(button.dataset.range);
                 syncInputsForMode(currentMode);
+                if (currentMode === "custom") {
+                    return;
+                }
                 refresh();
+                closeFilterModal();
             });
         });
         applyButton.addEventListener("click", function () {
             setActiveMode("custom");
             if (fromInput.value && toInput.value && fromInput.value > toInput.value) {
-                document.getElementById("refreshLabel").textContent = "Tanggal mulai tidak boleh melebihi tanggal selesai";
+                document.getElementById("generatedAtLabel").textContent = "Tanggal mulai tidak boleh melebihi tanggal selesai";
                 return;
             }
             refresh();
+            closeFilterModal();
         });
         fromInput.addEventListener("change", function () {
             setActiveMode("custom");
@@ -1135,17 +1169,18 @@
             setActiveMode("custom");
         });
         toggleFiltersButton.addEventListener("click", function () {
-            filtersCollapsed = !filtersCollapsed;
-            syncFilterVisibility();
-            scheduleFilterAutoHide();
+            openFilterModal();
         });
-        ["click", "input", "change"].forEach(eventName => {
-            filterPanelBody.addEventListener(eventName, function () {
-                scheduleFilterAutoHide();
-            });
+        closeFilterModalButton.addEventListener("click", function () {
+            closeFilterModal();
+        });
+        filterModal.addEventListener("click", function (event) {
+            if (event.target === filterModal) {
+                closeFilterModal();
+            }
         });
         refresh();
-        setInterval(refresh, REFRESH_MS);
+        scheduleAlignedRefresh();
     })();
 </script>
 </body>
