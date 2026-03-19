@@ -423,6 +423,33 @@
             filter: saturate(1.04);
         }
 
+        .login-secondary-link {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+            margin-top: 14px;
+            padding: 12px 16px;
+            border-radius: 16px;
+            border: 1px solid rgba(36, 49, 63, 0.1);
+            background: rgba(255, 255, 255, 0.88);
+            color: var(--zis-ink);
+            font-size: 0.98rem;
+            font-weight: 600;
+            text-decoration: none;
+            transition: background-color 0.18s ease, border-color 0.18s ease, transform 0.18s ease;
+        }
+
+        .login-secondary-link:hover,
+        .login-secondary-link:focus {
+            color: var(--zis-ink);
+            text-decoration: none;
+            background: #fff;
+            border-color: rgba(0, 123, 255, 0.18);
+            transform: translateY(-1px);
+        }
+
         .login-footer-note {
             display: none;
         }
@@ -535,6 +562,11 @@
 
                 <button class="btn btn-block btn-login" type="submit">Masuk Sekarang</button>
             </form>
+
+            <a class="login-secondary-link" href="/public/dashboard" target="_blank" rel="noopener">
+                <i class="fas fa-tv"></i>
+                <span>Lihat Dashboard Publik</span>
+            </a>
         </div>
     </section>
 </div>
