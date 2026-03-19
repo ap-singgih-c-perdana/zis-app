@@ -16,6 +16,8 @@ public record PublicDashboardResponse(
         BigDecimal totalUangTransfer,
         BigDecimal totalBerasKg,
         long totalJiwaFitrah,
+        long totalJiwaFitrahBeras,
+        long totalJiwaFitrahUang,
         List<ByType> byType,
         InstitutionProfileResponse institutionProfile,
         Instant generatedAt
